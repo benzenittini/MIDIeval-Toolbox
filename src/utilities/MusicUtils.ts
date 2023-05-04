@@ -89,41 +89,19 @@ export function getChordNotes(chord: Chord): Note[] {
     // Start with the base notes
     switch (chord.quality) {
         // -- Triads --
-        case TriadQuality.DIMINISHED:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 3), stepUpNote(chord.root, 6), ];
-            break;
-        case TriadQuality.MINOR:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 3), stepUpNote(chord.root, 7), ];
-            break;
-        case TriadQuality.MAJOR:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 4), stepUpNote(chord.root, 7), ];
-            break;
-        case TriadQuality.AUGMENTED:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 4), stepUpNote(chord.root, 8), ];
-            break;
+        case TriadQuality.DIMINISHED: notes = getSpacedNotes(chord.root, 3, 6); break;
+        case TriadQuality.MINOR:      notes = getSpacedNotes(chord.root, 3, 7); break;
+        case TriadQuality.MAJOR:      notes = getSpacedNotes(chord.root, 4, 7); break;
+        case TriadQuality.AUGMENTED:  notes = getSpacedNotes(chord.root, 4, 8); break;
 
         // -- Sevenths --
-        case SeventhQuality.FULLY_DIM_7:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 3), stepUpNote(chord.root, 6), stepUpNote(chord.root, 9), ];
-            break;
-        case SeventhQuality.HALF_DIM_7:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 3), stepUpNote(chord.root, 6), stepUpNote(chord.root, 10), ];
-            break;
-        case SeventhQuality.MINOR_7:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 3), stepUpNote(chord.root, 7), stepUpNote(chord.root, 10), ];
-            break;
-        case SeventhQuality.MINOR_MAJOR_7:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 3), stepUpNote(chord.root, 7), stepUpNote(chord.root, 11), ];
-            break;
-        case SeventhQuality.DOMINANT_7:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 4), stepUpNote(chord.root, 7), stepUpNote(chord.root, 10), ];
-            break;
-        case SeventhQuality.MAJOR_7:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 4), stepUpNote(chord.root, 7), stepUpNote(chord.root, 11), ];
-            break;
-        case SeventhQuality.AUG_MAJOR_7:
-            notes = [ {...chord.root}, stepUpNote(chord.root, 4), stepUpNote(chord.root, 8), stepUpNote(chord.root, 11), ];
-            break;
+        case SeventhQuality.FULLY_DIM_7:   notes = getSpacedNotes(chord.root, 3, 6, 9);  break;
+        case SeventhQuality.HALF_DIM_7:    notes = getSpacedNotes(chord.root, 3, 6, 10); break;
+        case SeventhQuality.MINOR_7:       notes = getSpacedNotes(chord.root, 3, 7, 10); break;
+        case SeventhQuality.MINOR_MAJOR_7: notes = getSpacedNotes(chord.root, 3, 7, 11); break;
+        case SeventhQuality.DOMINANT_7:    notes = getSpacedNotes(chord.root, 4, 7, 10); break;
+        case SeventhQuality.MAJOR_7:       notes = getSpacedNotes(chord.root, 4, 7, 11); break;
+        case SeventhQuality.AUG_MAJOR_7:   notes = getSpacedNotes(chord.root, 4, 8, 11); break;
     }
 
     // Now adjust based on the inversion
@@ -138,4 +116,8 @@ export function getChordNotes(chord: Chord): Note[] {
     }
 
     return notes;
+}
+
+export function getSpacedNotes(root: Note, ...halfSteps: number[]): Note[] {
+    return [{...root}, ...halfSteps.map(steps => stepUpNote(root, steps))];
 }

@@ -1,24 +1,32 @@
 
 :root {
   --blue-light: #4666B9;
-  --blue: #303950;
-  --blue-dark: #22252C;
-  --blue-vdark: #121317;
+  --blue: #324167;
+  --blue-dark: #303950;
 
   --gray-vlight: #E2E4E9;
   --gray-light: #B8BCC7;
   --gray: #9BA1B0;
   --gray-vdark: #2D3039;
+  --gray-vvdark: #22252C;
+  --gray-vvvdark: #121317;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* IE10+/Edge */
+  user-select: none; /* Standard */
+}
 
 body {
-  background: var(--blue-dark);
+  background: var(--gray-vvdark);
   color: var(--gray-vlight);
   font-family: Helvetica, Arial, sans-serif;
 
-  height: 100vh;
+  min-height: 100vh;
   margin: 0;
 
   display: flex;
@@ -30,4 +38,79 @@ body {
 #root {
   max-width: 1280px;
   text-align: center;
+}
+
+
+/* =============== */
+/* Form Components */
+/* --------------- */
+
+.labelBefore {
+  margin-right: 20px;
+  font-weight: bold;
+}
+.formLine {
+  margin: 20px 0;
+  text-align: left;
+}
+
+select {
+  background: var(--blue-dark);
+  color: var(--gray-vlight);
+  font-size: 16px;
+
+  border: none;
+  outline: none;
+  border-radius: 8px;
+
+  padding: 10px;
+  /* This adds "padding" to the right of the default arrow */
+  border-right: 10px solid transparent;
+}
+option,optgroup {
+  background-color: var(--gray-vvdark);
+}
+
+input[type=checkbox] {
+  /* visibility: hidden; */
+  position: relative;
+  margin-right: 20px;
+}
+input[type=checkbox]::before {
+  content: '';
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  left: -6px;
+  top: -6px;
+  background: var(--blue-dark);
+  border-radius: 6px;
+}
+input[type=checkbox]:checked::before {
+  content: '✔';
+  color: var(--gray-vlight);
+  font-size: 32px;
+
+  /* Centers the check */
+  display: flex;
+  align-items: center;
+}
+input[type=checkbox]:disabled::before {
+  background: var(--gray-vvdark);
+  border: 1px solid var(--blue-dark);
+  cursor: not-allowed;
+}
+input[type=checkbox]:disabled ~ label:first-of-type {
+  color: var(--gray);
+  cursor: not-allowed;
+}
+
+input[type="text"],input[type="number"] {
+  background: var(--blue-dark);
+  outline: none;
+  border: none;
+  border-radius: 8px;
+  padding: 10px;
+  color: var(--gray-vlight);
+  font-size: 16px;
 }

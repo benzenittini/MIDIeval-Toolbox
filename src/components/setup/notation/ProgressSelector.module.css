@@ -1,0 +1,15 @@
+
+.section {
+    border: 1px solid var(--blue-dark);
+    padding: 30px 20px;
+    cursor: pointer;
+}
+.selectedSection {
+    composes: section;
+    border-color: var(--blue-light);
+    background: var(--blue-light);
+}
+.section:first-of-type { border-radius: 12px 12px 0 0; }
+.section:last-of-type  { border-radius: 0 0 12px 12px; }
+
+.secondsSelector { text-align: center; }
