@@ -85,6 +85,7 @@ input[type=checkbox]::before {
   top: -6px;
   background: var(--blue-dark);
   border-radius: 6px;
+  cursor: pointer;
 }
 input[type=checkbox]:checked::before {
   content: '✔';

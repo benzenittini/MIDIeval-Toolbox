@@ -1,15 +1,47 @@
 
+/* ======================= */
+/* "Blocky button" styling */
+/* ----------------------- */
+
 .section {
     border: 1px solid var(--blue-dark);
     padding: 30px 20px;
     cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s;
 }
 .selectedSection {
     composes: section;
     border-color: var(--blue-light);
     background: var(--blue-light);
 }
+.section:hover {
+    border-color: var(--blue-light);
+}
 .section:first-of-type { border-radius: 12px 12px 0 0; }
 .section:last-of-type  { border-radius: 0 0 12px 12px; }
 
-.secondsSelector { text-align: center; }
+
+/* ============== */
+/* "Timed" Styles */
+/* -------------- */
+
+.secondsSelector, .secondsDisplay {
+    text-align: center;
+    width: 150px;
+}
+.secondsDisplay {
+    display: inline-block;
+    background: var(--blue-dark);
+    border-radius: 8px;
+    padding: 10px;
+    color: var(--gray-vlight);
+    font-size: 16px;
+    cursor: text;
+}
+
+
+/* ============= */
+/* Miscellaneous */
+/* ------------- */
+
+.cursorPointer { cursor: pointer; }

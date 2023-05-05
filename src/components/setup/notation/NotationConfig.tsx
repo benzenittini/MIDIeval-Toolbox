@@ -1,11 +1,12 @@
 import KeySelection from "./KeySelection";
 
 import styles from './NotationConfig.module.css';
+import { NotationConfigProvider } from "./NotationConfigContext";
 import ProgressSelector from "./ProgressSelector";
 
 export default function NotationConfig() {
     return (
-        <>
+        <NotationConfigProvider>
             <h1>Practice<span className={styles.practiceType}> : Notation</span></h1>
 
             <KeySelection></KeySelection>
@@ -20,6 +21,6 @@ export default function NotationConfig() {
             </div>
 
             <ProgressSelector></ProgressSelector>
-        </>
+        </NotationConfigProvider>
     );
 }

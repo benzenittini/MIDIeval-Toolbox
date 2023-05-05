@@ -1,25 +1,16 @@
+import { MajorKeyConfigOpts, MiscKeyConfigOpts } from "../../../datatypes/Configs";
 
 export default function KeySelection() {
+
+    const miscKeyOpts  = Object.entries(MiscKeyConfigOpts).map(([key, val]) => (<option value={key}>{val}</option>));
+    const majorKeyOpts = Object.entries(MajorKeyConfigOpts).map(([key, val]) => (<option value={key}>{val}</option>));
+
     return (
         <>
             <label className="labelBefore">Key:</label>
             <select>
-                <option>(All Keys)</option>
-                <option>(Random Key)</option>
-                <optgroup label="Major Keys">
-                    <option>C Major</option>
-                    <option>C# Major</option>
-                    <option>D Major</option>
-                    <option>D# Major</option>
-                    <option>E Major</option>
-                    <option>F Major</option>
-                    <option>F# Major</option>
-                    <option>G Major</option>
-                    <option>G# Major</option>
-                    <option>A Major</option>
-                    <option>A# Major</option>
-                    <option>B Major</option>
-                </optgroup>
+                {miscKeyOpts}
+                <optgroup label="Major Keys">{majorKeyOpts}</optgroup>
             </select>
         </>
     );
