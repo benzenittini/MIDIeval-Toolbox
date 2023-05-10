@@ -44,12 +44,12 @@ export default function ProgressSelector() {
     return (
         <div>
             <div className={isTimedSelected} onClick={() => changeTypeTo('timed')}>
-                <label className={`labelBefore ${styles.cursorPointer}`}>Timed</label>
+                <label className={`labelBefore ${styles.cursorPointer} ${styles.optionHeading}`}>Timed</label>
                 {timeInput}
             </div>
 
             <div className={isMidiSelected} onClick={() => changeTypeTo('midi')}>
-                MIDI Input
+                <span className={styles.optionHeading}>MIDI Input</span>
             </div>
         </div>
     );

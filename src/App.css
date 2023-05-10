@@ -3,10 +3,12 @@
   --blue-light: #4666B9;
   --blue: #324167;
   --blue-dark: #303950;
+  --blue-vdark: #2B3245;
 
   --gray-vlight: #E2E4E9;
   --gray-light: #B8BCC7;
   --gray: #9BA1B0;
+  --gray-dark: #5E626E;
   --gray-vdark: #2D3039;
   --gray-vvdark: #22252C;
   --gray-vvvdark: #121317;
@@ -50,7 +52,6 @@ body {
   font-weight: bold;
 }
 .formLine {
-  margin: 20px 0;
   text-align: left;
 }
 
@@ -58,14 +59,19 @@ select {
   background: var(--blue-dark);
   color: var(--gray-vlight);
   font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.2s;
 
   border: none;
   outline: none;
   border-radius: 8px;
 
-  padding: 10px;
+  padding: 10px 15px;
   /* This adds "padding" to the right of the default arrow */
-  border-right: 10px solid transparent;
+  border-right: 15px solid transparent;
+}
+select:hover {
+  background: var(--blue-vdark);
 }
 option,optgroup {
   background-color: var(--gray-vvdark);
@@ -86,6 +92,10 @@ input[type=checkbox]::before {
   background: var(--blue-dark);
   border-radius: 6px;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+input[type=checkbox]:hover::before {
+  background: var(--blue-vdark);
 }
 input[type=checkbox]:checked::before {
   content: '✔';
@@ -100,13 +110,14 @@ input[type=checkbox]:disabled::before {
   background: var(--gray-vvdark);
   border: 1px solid var(--blue-dark);
   cursor: not-allowed;
+  color: var(--gray-dark);
 }
 input[type=checkbox]:disabled ~ label:first-of-type {
-  color: var(--gray);
+  color: var(--gray-dark);
   cursor: not-allowed;
 }
 
-input[type="text"],input[type="number"] {
+input[type=text],input[type=number] {
   background: var(--blue-dark);
   outline: none;
   border: none;
@@ -114,4 +125,24 @@ input[type="text"],input[type="number"] {
   padding: 10px;
   color: var(--gray-vlight);
   font-size: 16px;
+  transition: background-color 0.2s;
 }
+input[type=text]:hover,input[type=number]:hover {
+  background: var(--blue-vdark);
+}
+
+button {
+  background: var(--blue-light);
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--gray-vlight);
+  border: none;
+  padding: 14px 28px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover {
+  background: var(--blue);
+}
+button.btn-link       { background: none; font-weight: normal; }
+button.btn-link:hover { text-decoration: underline; }

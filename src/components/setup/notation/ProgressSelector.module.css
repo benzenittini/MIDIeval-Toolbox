@@ -29,6 +29,9 @@
     text-align: center;
     width: 150px;
 }
+.secondsDisplay:hover {
+    background: var(--blue-vdark);
+}
 .secondsDisplay {
     display: inline-block;
     background: var(--blue-dark);
@@ -37,6 +40,7 @@
     color: var(--gray-vlight);
     font-size: 16px;
     cursor: text;
+    transition: background-color 0.2s;
 }
 
 
@@ -45,3 +49,5 @@
 /* ------------- */
 
 .cursorPointer { cursor: pointer; }
+
+.optionHeading { font-weight: bold; }

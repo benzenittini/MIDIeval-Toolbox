@@ -25,6 +25,9 @@
     transition: box-shadow 0.1s;
 }
 
+/* TODO-ben : Uncomment once sign-reading-config is added */
+.practiceBox.comingSoon { cursor: not-allowed; }
+
 .heading {
     margin: 40px 0 0 0;
 }

@@ -64,7 +64,7 @@ export function stepUpNote(note: Note, halfSteps: number): Note {
 
 /**
  * Clamps the provided octave between 0 and 8, taking into consideration that
- * octave 0 only has the "A" key and octave 8 only has thee "C" key (on an 88-
+ * octave 0 only has the "A" key and octave 8 only has the "C" key (on an 88-
  * key piano).
  */
 export function sanitizeOctave(key: Key, dirtyOctave: number): Octave {

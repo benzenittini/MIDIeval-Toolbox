@@ -1,26 +1,46 @@
+import ChordSelection from "./ChordSelection";
 import KeySelection from "./KeySelection";
 
 import styles from './NotationConfig.module.css';
-import { NotationConfigProvider } from "./NotationConfigContext";
+import { useNotationConfig, useNotationConfigDispatch } from "./NotationConfigContext";
 import ProgressSelector from "./ProgressSelector";
 
-export default function NotationConfig() {
+export default function NotationConfig({ goBack }: { goBack: () => void}) {
+    const notationConfig = useNotationConfig();
+    const notationConfigDispatch = useNotationConfigDispatch();
+
     return (
-        <NotationConfigProvider>
+        <>
             <h1>Practice<span className={styles.practiceType}> : Notation</span></h1>
 
-            <KeySelection></KeySelection>
+            <div className={ styles.topRow }>
+                <div className={ styles.topLeft }>
+                    <KeySelection></KeySelection>
 
-            <div className="formLine">
-                <input type="checkbox" id="includeSingleNotes" />
-                <label htmlFor="includeSingleNotes">Include Single Notes (ex: F#)</label>
-            </div>
-            <div className="formLine">
-                <input type="checkbox" disabled id="includeChords" />
-                <label htmlFor="includeChords">Include Chords (ex: F#min)</label>
+                    <div className="formLine">
+                        <input type="checkbox" id="includeSingleNotes"
+                            checked={ notationConfig.includeSingleNotes }
+                            onChange={ (e) => notationConfigDispatch({ type: 'includeSingleNotes', data: e.target.checked }) } />
+                        <label htmlFor="includeSingleNotes">Include Single Notes (ex: F#)</label>
+                    </div>
+
+                    <div className="formLine">
+                        <input type="checkbox" id="includeChords"
+                            checked={ notationConfig.includeChords }
+                            onChange={ (e) => notationConfigDispatch({ type: 'includeChords', data: e.target.checked }) } />
+                        <label htmlFor="includeChords">Include Chords (ex: F#min)</label>
+                    </div>
+                </div>
+
+                <ProgressSelector></ProgressSelector>
             </div>
 
-            <ProgressSelector></ProgressSelector>
-        </NotationConfigProvider>
+            <ChordSelection></ChordSelection>
+
+            <div className={ styles.navigation }>
+                <button className="btn-link" onClick={ goBack }>Go Back</button>
+                <button>Begin</button>
+            </div>
+        </>
     );
 }
