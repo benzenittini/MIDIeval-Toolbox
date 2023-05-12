@@ -1,7 +1,7 @@
 
 import { Dispatch, createContext, useContext, useReducer } from "react";
 
-import { MiscKeyConfigOpts, NotationConfiguration } from "../../../datatypes/Configs";
+import { MiscKeys, NotationConfiguration } from "../../../datatypes/Configs";
 
 
 // ========
@@ -31,7 +31,7 @@ export function NotationConfigProvider({ children }: any) {
 }
 
 const initialConfig: NotationConfiguration = {
-    key: MiscKeyConfigOpts.ALL_KEYS,
+    key: MiscKeys.ALL_KEYS,
     progressSelector: { type: 'timed', timedDuration: 5 },
     includeSingleNotes: true,
     includeChords: true,
@@ -46,8 +46,8 @@ const initialConfig: NotationConfiguration = {
     includeMaj7: true,
     includeMin7: true,
     includeDom7: true,
+    includeHalfDim7: false,
     includeDim7: false,
-    includeAug7: false,
     includeMinMaj7: false,
     includeAugMaj7: false,
 }
@@ -79,8 +79,8 @@ function notationConfigReducer(config: NotationConfiguration, action: DispatchAc
         case 'includeMaj7':     return { ...config, includeMaj7: action.data };
         case 'includeMin7':     return { ...config, includeMin7: action.data };
         case 'includeDom7':     return { ...config, includeDom7: action.data };
+        case 'includeHalfDim7': return { ...config, includeHalfDim7: action.data };
         case 'includeDim7':     return { ...config, includeDim7: action.data };
-        case 'includeAug7':     return { ...config, includeAug7: action.data };
         case 'includeMinMaj7':  return { ...config, includeMinMaj7: action.data };
         case 'includeAugMaj7':  return { ...config, includeAugMaj7: action.data };
 

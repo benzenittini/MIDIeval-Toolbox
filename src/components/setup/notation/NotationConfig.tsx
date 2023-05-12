@@ -5,7 +5,7 @@ import styles from './NotationConfig.module.css';
 import { useNotationConfig, useNotationConfigDispatch } from "./NotationConfigContext";
 import ProgressSelector from "./ProgressSelector";
 
-export default function NotationConfig({ goBack }: { goBack: () => void}) {
+export default function NotationConfig({ goBack, begin }: { goBack: () => void, begin: () => void }) {
     const notationConfig = useNotationConfig();
     const notationConfigDispatch = useNotationConfigDispatch();
 
@@ -39,7 +39,7 @@ export default function NotationConfig({ goBack }: { goBack: () => void}) {
 
             <div className={ styles.navigation }>
                 <button className="btn-link" onClick={ goBack }>Go Back</button>
-                <button>Begin</button>
+                <button onClick={ begin }>Begin</button>
             </div>
         </>
     );

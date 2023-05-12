@@ -57,10 +57,10 @@ export default function ChordSelection() {
                         {getCheckbox('Dominant', 'includeDom7', disableSevenths)}
                     </div>
                     <div>
-                        {getCheckbox('Diminished',  'includeDim7',    disableSevenths)}
-                        {getCheckbox('Augmented',   'includeAug7',    disableSevenths)}
-                        {getCheckbox('Minor Major', 'includeMinMaj7', disableSevenths)}
-                        {getCheckbox('Aug. Major',  'includeAugMaj7', disableSevenths)}
+                        {getCheckbox('Half-Diminished', 'includeHalfDim7', disableSevenths)}
+                        {getCheckbox('Diminished',      'includeDim7',     disableSevenths)}
+                        {getCheckbox('Minor Major',     'includeMinMaj7',  disableSevenths)}
+                        {getCheckbox('Aug. Major',      'includeAugMaj7',  disableSevenths)}
                     </div>
                 </div>
             </div>
