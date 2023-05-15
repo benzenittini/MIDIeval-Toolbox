@@ -55,6 +55,8 @@ body {
   text-align: left;
 }
 
+/* -- Dropdowns -- */
+
 select {
   background: var(--blue-dark);
   color: var(--gray-vlight);
@@ -77,12 +79,14 @@ option,optgroup {
   background-color: var(--gray-vvdark);
 }
 
-input[type=checkbox] {
-  /* visibility: hidden; */
+/* -- Checkboxes and Radio buttons -- */
+
+input:is([type=checkbox],[type=radio]) {
   position: relative;
   margin-right: 20px;
 }
-input[type=checkbox]::before {
+
+input:is([type=checkbox],[type=radio])::before {
   content: '';
   position: absolute;
   width: 24px;
@@ -94,28 +98,45 @@ input[type=checkbox]::before {
   cursor: pointer;
   transition: background-color 0.2s;
 }
-input[type=checkbox]:hover::before {
+input[type=radio]::before {
+  border-radius: 12px;
+}
+
+input:is([type=checkbox],[type=radio]) ~ label:first-of-type {
+  cursor: pointer;
+}
+
+input:is([type=checkbox],[type=radio]):hover::before {
   background: var(--blue-vdark);
 }
-input[type=checkbox]:checked::before {
+
+input:is([type=checkbox],[type=radio]):checked::before {
   content: '✔';
   color: var(--gray-vlight);
   font-size: 32px;
 
-  /* Centers the check */
+  /* Vertically centers the check */
   display: flex;
   align-items: center;
+  justify-content: center;
 }
-input[type=checkbox]:disabled::before {
+input[type=radio]:checked::before {
+  content: '●';
+  font-size: 27px;
+}
+
+input:is([type=checkbox],[type=radio]):disabled::before {
   background: var(--gray-vvdark);
   border: 1px solid var(--blue-dark);
   cursor: not-allowed;
   color: var(--gray-dark);
 }
-input[type=checkbox]:disabled ~ label:first-of-type {
+input:is([type=checkbox],[type=radio]):disabled ~ label:first-of-type {
   color: var(--gray-dark);
   cursor: not-allowed;
 }
+
+/* -- Textboxes -- */
 
 input[type=text],input[type=number] {
   background: var(--blue-dark);
@@ -130,6 +151,8 @@ input[type=text],input[type=number] {
 input[type=text]:hover,input[type=number]:hover {
   background: var(--blue-vdark);
 }
+
+/* -- Buttons -- */
 
 button {
   background: var(--blue-light);
@@ -146,3 +169,8 @@ button:hover {
 }
 button.btn-link       { background: none; font-weight: normal; }
 button.btn-link:hover { text-decoration: underline; }
+button:disabled {
+  cursor: not-allowed;
+  background: var(--blue);
+  color: var(--gray);
+}

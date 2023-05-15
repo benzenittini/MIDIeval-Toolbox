@@ -22,8 +22,8 @@ export default function ChordSelection() {
         );
     }
 
-    const disableTriads   = !notationConfig.includeChords || !notationConfig.includeTriads;
-    const disableSevenths = !notationConfig.includeChords || !notationConfig.includeSevenths;
+    const disableTriads   = !notationConfig.practiceChords || !notationConfig.includeTriads;
+    const disableSevenths = !notationConfig.practiceChords || !notationConfig.includeSevenths;
     const disableNotInKey = notationConfig.key !== MiscKeys.ANYTHING_GOES;
 
     return (
@@ -32,7 +32,7 @@ export default function ChordSelection() {
             {/* Triads */}
             <div>
                 <div className={ styles.titleCheckbox }>
-                    {getCheckbox('Triads', 'includeTriads', !notationConfig.includeChords)}
+                    {getCheckbox('Triads', 'includeTriads', !notationConfig.practiceChords)}
                 </div>
 
                 <div className={ styles.checkboxGroups }>
@@ -48,7 +48,7 @@ export default function ChordSelection() {
             {/* Sevenths */}
             <div>
                 <div className={ styles.titleCheckbox }>
-                    {getCheckbox('Sevenths', 'includeSevenths', !notationConfig.includeChords)}
+                    {getCheckbox('Sevenths', 'includeSevenths', !notationConfig.practiceChords)}
                 </div>
 
                 <div className={ styles.checkboxGroups }>

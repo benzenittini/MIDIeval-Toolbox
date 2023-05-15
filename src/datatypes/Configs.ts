@@ -22,8 +22,8 @@ export function convertKeyConfigToKey(keyConfig: KeyConfigOpts): Key | null {
 export type NotationConfiguration = {
     key: KeyConfigOpts;
     progressSelector: { type: 'midi' | 'timed', timedDuration: number },
-    includeSingleNotes: boolean;
-    includeChords: boolean;
+    practiceSingleNotes: boolean;
+    practiceChords: boolean;
 
     // Triads
     includeTriads: boolean;
@@ -43,15 +43,16 @@ export type NotationConfiguration = {
     includeAugMaj7: boolean;
 }
 
-export function getAllowedChordQualities(config: NotationConfiguration): ChordQuality[] {
+export function getAllowedChordQualities(key: Key | null, config: NotationConfiguration): ChordQuality[] {
     const qualities: ChordQuality[] = [];
 
     // -- Triads --
     if (config.includeTriads) {
         if (config.includeMaj3) qualities.push(TriadQuality.MAJOR);
         if (config.includeMin3) qualities.push(TriadQuality.MINOR);
-        if (config.includeAug3) qualities.push(TriadQuality.AUGMENTED);
         if (config.includeDim3) qualities.push(TriadQuality.DIMINISHED);
+        // This requires no key to be set.
+        if (config.includeAug3 && key === null) qualities.push(TriadQuality.AUGMENTED);
     }
 
     // -- Sevenths --
@@ -60,9 +61,10 @@ export function getAllowedChordQualities(config: NotationConfiguration): ChordQu
         if (config.includeMin7)     qualities.push(SeventhQuality.MINOR_7);
         if (config.includeDom7)     qualities.push(SeventhQuality.DOMINANT_7);
         if (config.includeHalfDim7) qualities.push(SeventhQuality.HALF_DIM_7);
-        if (config.includeDim7)     qualities.push(SeventhQuality.DIMINISHED_7);
-        if (config.includeMinMaj7)  qualities.push(SeventhQuality.MINOR_MAJOR_7);
-        if (config.includeAugMaj7)  qualities.push(SeventhQuality.AUG_MAJOR_7);
+        // These require no key to be set.
+        if (config.includeDim7    && key === null) qualities.push(SeventhQuality.DIMINISHED_7);
+        if (config.includeMinMaj7 && key === null) qualities.push(SeventhQuality.MINOR_MAJOR_7);
+        if (config.includeAugMaj7 && key === null) qualities.push(SeventhQuality.AUG_MAJOR_7);
     }
 
     return qualities;

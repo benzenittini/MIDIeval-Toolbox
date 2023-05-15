@@ -33,8 +33,8 @@ export function NotationConfigProvider({ children }: any) {
 const initialConfig: NotationConfiguration = {
     key: MiscKeys.ANYTHING_GOES,
     progressSelector: { type: 'timed', timedDuration: 5 },
-    includeSingleNotes: true,
-    includeChords: true,
+    practiceSingleNotes: false,
+    practiceChords: true,
     // Triads
     includeTriads: true,
     includeMaj3: true,
@@ -57,15 +57,15 @@ const initialConfig: NotationConfiguration = {
 // Reducer
 // -------
 
-type DispatchAction = {type: string, data: any};
+type DispatchAction = {type: string, data?: any};
 function notationConfigReducer(config: NotationConfiguration, action: DispatchAction): NotationConfiguration {
     switch (action.type) {
         // -- Core Settings --
         case 'setKey':                   return { ...config, key: action.data };
         case 'setProgressType':          return { ...config, progressSelector: { ...config.progressSelector, type: action.data } };
         case 'setTimedProgressDuration': return { ...config, progressSelector: { ...config.progressSelector, timedDuration: action.data } };
-        case 'includeSingleNotes':       return { ...config, includeSingleNotes: action.data };
-        case 'includeChords':            return { ...config, includeChords: action.data };
+        case 'practiceSingleNotes':      return { ...config, practiceSingleNotes: true,  practiceChords: false };
+        case 'practiceChords':           return { ...config, practiceSingleNotes: false, practiceChords: true };
 
         // -- Triads --
         case 'includeTriads': return { ...config, includeTriads: action.data };

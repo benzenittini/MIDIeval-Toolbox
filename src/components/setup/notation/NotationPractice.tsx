@@ -13,15 +13,15 @@ import { getStringNotation } from '../../../utilities/NotationUtils';
 function generateDisplayText(key: Key | null, notationConfig: NotationConfiguration): string {
     // First, determine if we should generate a chord or a note. Assume chord, then change if needed.
     let generateChord = true;
-    if (notationConfig.includeSingleNotes && notationConfig.includeChords) {
+    if (notationConfig.practiceSingleNotes && notationConfig.practiceChords) {
         generateChord = Math.random() > 0.5;
-    } else if (notationConfig.includeSingleNotes) {
+    } else if (notationConfig.practiceSingleNotes) {
         generateChord = false;
     }
 
     // Next, generate that chord/note
     const chordOrNote = generateChord
-        ? getRandomChord(key, getAllowedChordQualities(notationConfig))
+        ? getRandomChord(key, getAllowedChordQualities(key, notationConfig))
         : getRandomNote(key);
     if (chordOrNote === null) {
         return "No chords available.";
@@ -71,7 +71,9 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
             </nav>
 
             {/* Chord / Note Display */}
-            <div className={ styles.chordDisplay } dangerouslySetInnerHTML={{ __html: display }} />
+            <div className={ styles.chordDisplay }>
+                <p dangerouslySetInnerHTML={{ __html: display }} />
+            </div>
 
             {/* Progress Feedback */}
             <div className={ styles.timeContainer }>

@@ -1,3 +1,4 @@
+import { MiscKeys, convertKeyConfigToKey, getAllowedChordQualities } from "../../../datatypes/Configs";
 import ChordSelection from "./ChordSelection";
 import KeySelection from "./KeySelection";
 
@@ -9,6 +10,12 @@ export default function NotationConfig({ goBack, begin }: { goBack: () => void, 
     const notationConfig = useNotationConfig();
     const notationConfigDispatch = useNotationConfigDispatch();
 
+    const chordsAvailable = (notationConfig.practiceChords)
+        ? getAllowedChordQualities(convertKeyConfigToKey(notationConfig.key), notationConfig).length > 0
+        : false;
+
+    const notesOrChordsAvailable = notationConfig.practiceSingleNotes || chordsAvailable;
+
     return (
         <>
             <h1>Practice<span className={styles.practiceType}> : Notation</span></h1>
@@ -18,17 +25,19 @@ export default function NotationConfig({ goBack, begin }: { goBack: () => void, 
                     <KeySelection></KeySelection>
 
                     <div className="formLine">
-                        <input type="checkbox" id="includeSingleNotes"
-                            checked={ notationConfig.includeSingleNotes }
-                            onChange={ (e) => notationConfigDispatch({ type: 'includeSingleNotes', data: e.target.checked }) } />
-                        <label htmlFor="includeSingleNotes">Include Single Notes (ex: F#)</label>
+                        <input type="radio" name="practiceType"
+                            id="practiceSingleNotes"
+                            checked={ notationConfig.practiceSingleNotes }
+                            onChange={ (e) => notationConfigDispatch({ type: 'practiceSingleNotes' }) } />
+                        <label htmlFor="practiceSingleNotes">Practice Single Notes (ex: F#)</label>
                     </div>
 
                     <div className="formLine">
-                        <input type="checkbox" id="includeChords"
-                            checked={ notationConfig.includeChords }
-                            onChange={ (e) => notationConfigDispatch({ type: 'includeChords', data: e.target.checked }) } />
-                        <label htmlFor="includeChords">Include Chords (ex: F#min)</label>
+                        <input type="radio" name="practiceType"
+                            id="practiceChords"
+                            checked={ notationConfig.practiceChords }
+                            onChange={ (e) => notationConfigDispatch({ type: 'practiceChords' }) } />
+                        <label htmlFor="practiceChords">Practice Chords (ex: F#min)</label>
                     </div>
                 </div>
 
@@ -39,8 +48,7 @@ export default function NotationConfig({ goBack, begin }: { goBack: () => void, 
 
             <div className={ styles.navigation }>
                 <button className="btn-link" onClick={ goBack }>Go Back</button>
-                {/* TODO-ben : Disable button if no chords available (considering the key) AND not including single notes. */}
-                <button onClick={ begin }>Begin</button>
+                <button onClick={ begin } disabled={ !notesOrChordsAvailable }>Begin</button>
             </div>
         </>
     );
