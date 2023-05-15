@@ -31,7 +31,7 @@ export function NotationConfigProvider({ children }: any) {
 }
 
 const initialConfig: NotationConfiguration = {
-    key: MiscKeys.ALL_KEYS,
+    key: MiscKeys.ANYTHING_GOES,
     progressSelector: { type: 'timed', timedDuration: 5 },
     includeSingleNotes: true,
     includeChords: true,
@@ -39,14 +39,14 @@ const initialConfig: NotationConfiguration = {
     includeTriads: true,
     includeMaj3: true,
     includeMin3: true,
-    includeAug3: true,
+    includeAug3: false,
     includeDim3: true,
     // Sevenths
     includeSevenths: false,
     includeMaj7: true,
     includeMin7: true,
     includeDom7: true,
-    includeHalfDim7: false,
+    includeHalfDim7: true,
     includeDim7: false,
     includeMinMaj7: false,
     includeAugMaj7: false,

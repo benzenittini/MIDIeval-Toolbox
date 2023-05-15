@@ -2,14 +2,14 @@ import { getRandomKey } from "../utilities/Generators";
 import { ChordQuality, Key, MajorKeys, SeventhQuality, TriadQuality } from "./Musics";
 
 export enum MiscKeys {
-    ALL_KEYS = '(All Keys)',
+    ANYTHING_GOES = '(Anything Goes)',
     RANDOM_KEY = '(Random Key)',
 }
 export type KeyConfigOpts = MiscKeys | MajorKeys;
 
 export function convertKeyConfigToKey(keyConfig: KeyConfigOpts): Key | null {
     switch (keyConfig) {
-        case MiscKeys.ALL_KEYS:
+        case MiscKeys.ANYTHING_GOES:
             return null;
         case MiscKeys.RANDOM_KEY:
             return getRandomKey();

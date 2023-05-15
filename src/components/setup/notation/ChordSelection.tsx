@@ -1,5 +1,5 @@
 
-import { NotationConfiguration } from '../../../datatypes/Configs';
+import { MiscKeys, NotationConfiguration } from '../../../datatypes/Configs';
 import styles from './ChordSelection.module.css';
 import { useNotationConfig, useNotationConfigDispatch } from './NotationConfigContext';
 
@@ -24,6 +24,7 @@ export default function ChordSelection() {
 
     const disableTriads   = !notationConfig.includeChords || !notationConfig.includeTriads;
     const disableSevenths = !notationConfig.includeChords || !notationConfig.includeSevenths;
+    const disableNotInKey = notationConfig.key !== MiscKeys.ANYTHING_GOES;
 
     return (
         <div className={styles.mainFlex}>
@@ -38,8 +39,8 @@ export default function ChordSelection() {
                     <div>
                         {getCheckbox('Major',      'includeMaj3', disableTriads)}
                         {getCheckbox('Minor',      'includeMin3', disableTriads)}
-                        {getCheckbox('Augmented',  'includeAug3', disableTriads)}
                         {getCheckbox('Diminished', 'includeDim3', disableTriads)}
+                        {getCheckbox('Augmented',  'includeAug3', disableTriads || disableNotInKey)}
                     </div>
                 </div>
             </div>
@@ -52,15 +53,15 @@ export default function ChordSelection() {
 
                 <div className={ styles.checkboxGroups }>
                     <div>
-                        {getCheckbox('Major',    'includeMaj7', disableSevenths)}
-                        {getCheckbox('Minor',    'includeMin7', disableSevenths)}
-                        {getCheckbox('Dominant', 'includeDom7', disableSevenths)}
+                        {getCheckbox('Major',           'includeMaj7',     disableSevenths)}
+                        {getCheckbox('Minor',           'includeMin7',     disableSevenths)}
+                        {getCheckbox('Dominant',        'includeDom7',     disableSevenths)}
+                        {getCheckbox('Half-Diminished', 'includeHalfDim7', disableSevenths)}
                     </div>
                     <div>
-                        {getCheckbox('Half-Diminished', 'includeHalfDim7', disableSevenths)}
-                        {getCheckbox('Diminished',      'includeDim7',     disableSevenths)}
-                        {getCheckbox('Minor Major',     'includeMinMaj7',  disableSevenths)}
-                        {getCheckbox('Aug. Major',      'includeAugMaj7',  disableSevenths)}
+                        {getCheckbox('Diminished',  'includeDim7',    disableSevenths || disableNotInKey)}
+                        {getCheckbox('Minor Major', 'includeMinMaj7', disableSevenths || disableNotInKey)}
+                        {getCheckbox('Aug. Major',  'includeAugMaj7', disableSevenths || disableNotInKey)}
                     </div>
                 </div>
             </div>

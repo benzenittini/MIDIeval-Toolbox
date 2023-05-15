@@ -39,6 +39,7 @@ export default function NotationConfig({ goBack, begin }: { goBack: () => void, 
 
             <div className={ styles.navigation }>
                 <button className="btn-link" onClick={ goBack }>Go Back</button>
+                {/* TODO-ben : Disable button if no chords available (considering the key) AND not including single notes. */}
                 <button onClick={ begin }>Begin</button>
             </div>
         </>

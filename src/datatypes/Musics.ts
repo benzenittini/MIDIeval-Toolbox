@@ -66,41 +66,52 @@ export type Chord = {
 // ----
 
 export enum MajorKeys {
-    CFLAT_MAJOR  = 'Cb Major',
+    CFLAT_MAJOR  = 'C♭ Major',
     C_MAJOR      = 'C Major',
-    CSHARP_MAJOR = 'C# Major',
-    DFLAT_MAJOR  = 'Db Major',
+    CSHARP_MAJOR = 'C♯ Major',
+    DFLAT_MAJOR  = 'D♭ Major',
     D_MAJOR      = 'D Major',
-    EFLAT_MAJOR  = 'Eb Major',
+    EFLAT_MAJOR  = 'E♭ Major',
     E_MAJOR      = 'E Major',
     F_MAJOR      = 'F Major',
-    FSHARP_MAJOR = 'F# Major',
-    GFLAT_MAJOR  = 'Gb Major',
+    FSHARP_MAJOR = 'F♯ Major',
+    GFLAT_MAJOR  = 'G♭ Major',
     G_MAJOR      = 'G Major',
-    AFLAT_MAJOR  = 'Ab Major',
+    AFLAT_MAJOR  = 'A♭ Major',
     A_MAJOR      = 'A Major',
-    BFLAT_MAJOR  = 'Bb Major',
+    BFLAT_MAJOR  = 'B♭ Major',
     B_MAJOR      = 'B Major',
 }
-
 export type Key = MajorKeys /* | MinorKeys */;
+
+export const MAJOR_KEYS = Object.values(MajorKeys);
 export const KEYS = Object.values(MajorKeys) /* | Object.values(MinorKeys) */;
+
+export const KeyToRootPitchClass: Record<Key, PitchClass> = {
+    [MajorKeys.CFLAT_MAJOR]: CFLAT, [MajorKeys.C_MAJOR]: C, [MajorKeys.CSHARP_MAJOR]: CSHARP,
+    [MajorKeys.DFLAT_MAJOR]: DFLAT, [MajorKeys.D_MAJOR]: D, /* No D Sharp Major */
+    [MajorKeys.EFLAT_MAJOR]: EFLAT, [MajorKeys.E_MAJOR]: E, /* No E Sharp Major */
+    /* No F Flat Major */           [MajorKeys.F_MAJOR]: F, [MajorKeys.FSHARP_MAJOR]: FSHARP,
+    [MajorKeys.GFLAT_MAJOR]: GFLAT, [MajorKeys.G_MAJOR]: G, /* No G Sharp Major */
+    [MajorKeys.AFLAT_MAJOR]: AFLAT, [MajorKeys.A_MAJOR]: A, /* No A Sharp Major */
+    [MajorKeys.BFLAT_MAJOR]: BFLAT, [MajorKeys.B_MAJOR]: B, /* No B Sharp Major */
+}
 
 /** Given a key and pitch, returns the letter representation of the pitch. */
 export const PITCH_LOOKUP: any = {
-    'Cb Major': {[CFLAT]: 'Cb',  [DFLAT]: 'Db',  [EFLAT]: 'Eb',  [FFLAT]: 'Fb',  [GFLAT]: 'Gb',  [AFLAT]: 'Ab',  [BFLAT]: 'Bb'},
+    'C♭ Major': {[CFLAT]: 'C♭',  [DFLAT]: 'D♭',  [EFLAT]: 'E♭',  [FFLAT]: 'F♭',  [GFLAT]: 'G♭',  [AFLAT]: 'A♭',  [BFLAT]: 'B♭'},
     'C Major':  {[C]: 'C',       [D]: 'D',       [E]: 'E',       [F]: 'F',       [G]: 'G',       [A]: 'A',       [B]: 'B'},
-    'C# Major': {[CSHARP]: 'C#', [DSHARP]: 'D#', [ESHARP]: 'E#', [FSHARP]: 'F#', [GSHARP]: 'G#', [ASHARP]: 'A#', [BSHARP]: 'B#'},
-    'Db Major': {[DFLAT]: 'Db',  [EFLAT]: 'Eb',  [F]: 'F',       [GFLAT]: 'Gb',  [AFLAT]: 'Ab',  [BFLAT]: 'Bb',  [C]: 'C'},
-    'D Major':  {[D]: 'D',       [E]: 'E',       [FSHARP]: 'F#', [G]: 'G',       [A]: 'A',       [B]: 'B',       [CSHARP]: 'C#'},
-    'Eb Major': {[EFLAT]: 'Eb',  [F]: 'F',       [G]: 'G',       [AFLAT]: 'Ab',  [BFLAT]: 'Bb',  [C]: 'C',       [D]: 'D'},
-    'E Major':  {[E]: 'E',       [FSHARP]: 'F#', [GSHARP]: 'G#', [A]: 'A',       [B]: 'B',       [CSHARP]: 'C#', [DSHARP]: 'D#'},
-    'F Major':  {[F]: 'F',       [G]: 'G',       [A]: 'A',       [BFLAT]: 'Bb',  [C]: 'C',       [D]: 'D',       [E]: 'E'},
-    'F# Major': {[FSHARP]: 'F#', [GSHARP]: 'G#', [ASHARP]: 'A#', [B]: 'B',       [CSHARP]: 'C#', [DSHARP]: 'D#', [ESHARP]: 'E#'},
-    'Gb Major': {[GFLAT]: 'Gb',  [AFLAT]: 'Ab',  [BFLAT]: 'Bb',  [CFLAT]: 'Cb',  [DFLAT]: 'Db',  [EFLAT]: 'Eb',  [F]: 'F'},
-    'G Major':  {[G]: 'G',       [A]: 'A',       [B]: 'B',       [C]: 'C',       [D]: 'D',       [E]: 'E',       [FSHARP]: 'F#'},
-    'Ab Major': {[AFLAT]: 'Ab',  [BFLAT]: 'Bb',  [C]: 'C',       [DFLAT]: 'Db',  [EFLAT]: 'Eb',  [F]: 'F',       [G]: 'G'},
-    'A Major':  {[A]: 'A',       [B]: 'B',       [CSHARP]: 'C#', [D]: 'D',       [E]: 'E',       [FSHARP]: 'F#', [GSHARP]: 'G#'},
-    'Bb Major': {[BFLAT]: 'Bb',  [C]: 'C',       [D]: 'D',       [EFLAT]: 'Eb',  [F]: 'F',       [G]: 'G',       [A]: 'A'},
-    'B Major':  {[B]: 'B',       [CSHARP]: 'C#', [DSHARP]: 'D#', [E]: 'E',       [FSHARP]: 'F#', [GSHARP]: 'G#', [ASHARP]: 'A#'},
+    'C♯ Major': {[CSHARP]: 'C♯', [DSHARP]: 'D♯', [ESHARP]: 'E♯', [FSHARP]: 'F♯', [GSHARP]: 'G♯', [ASHARP]: 'A♯', [BSHARP]: 'B♯'},
+    'D♭ Major': {[DFLAT]: 'D♭',  [EFLAT]: 'E♭',  [F]: 'F',       [GFLAT]: 'G♭',  [AFLAT]: 'A♭',  [BFLAT]: 'B♭',  [C]: 'C'},
+    'D Major':  {[D]: 'D',       [E]: 'E',       [FSHARP]: 'F♯', [G]: 'G',       [A]: 'A',       [B]: 'B',       [CSHARP]: 'C♯'},
+    'E♭ Major': {[EFLAT]: 'E♭',  [F]: 'F',       [G]: 'G',       [AFLAT]: 'A♭',  [BFLAT]: 'B♭',  [C]: 'C',       [D]: 'D'},
+    'E Major':  {[E]: 'E',       [FSHARP]: 'F♯', [GSHARP]: 'G♯', [A]: 'A',       [B]: 'B',       [CSHARP]: 'C♯', [DSHARP]: 'D♯'},
+    'F Major':  {[F]: 'F',       [G]: 'G',       [A]: 'A',       [BFLAT]: 'B♭',  [C]: 'C',       [D]: 'D',       [E]: 'E'},
+    'F♯ Major': {[FSHARP]: 'F♯', [GSHARP]: 'G♯', [ASHARP]: 'A♯', [B]: 'B',       [CSHARP]: 'C♯', [DSHARP]: 'D♯', [ESHARP]: 'E♯'},
+    'G♭ Major': {[GFLAT]: 'G♭',  [AFLAT]: 'A♭',  [BFLAT]: 'B♭',  [CFLAT]: 'C♭',  [DFLAT]: 'D♭',  [EFLAT]: 'E♭',  [F]: 'F'},
+    'G Major':  {[G]: 'G',       [A]: 'A',       [B]: 'B',       [C]: 'C',       [D]: 'D',       [E]: 'E',       [FSHARP]: 'F♯'},
+    'A♭ Major': {[AFLAT]: 'A♭',  [BFLAT]: 'B♭',  [C]: 'C',       [DFLAT]: 'D♭',  [EFLAT]: 'E♭',  [F]: 'F',       [G]: 'G'},
+    'A Major':  {[A]: 'A',       [B]: 'B',       [CSHARP]: 'C♯', [D]: 'D',       [E]: 'E',       [FSHARP]: 'F♯', [GSHARP]: 'G♯'},
+    'B♭ Major': {[BFLAT]: 'B♭',  [C]: 'C',       [D]: 'D',       [EFLAT]: 'E♭',  [F]: 'F',       [G]: 'G',       [A]: 'A'},
+    'B Major':  {[B]: 'B',       [CSHARP]: 'C♯', [DSHARP]: 'D♯', [E]: 'E',       [FSHARP]: 'F♯', [GSHARP]: 'G♯', [ASHARP]: 'A♯'},
 }

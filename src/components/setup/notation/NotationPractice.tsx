@@ -4,21 +4,24 @@ import * as TWEEN from '@tweenjs/tween.js';
 
 import styles from './NotationPractice.module.css';
 import { useNotationConfig } from './NotationConfigContext';
-import { getRandomChord, getRandomKey } from '../../../utilities/Generators';
+import { getRandomChord } from '../../../utilities/Generators';
 import { NotationConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from '../../../datatypes/Configs';
 import { Key } from '../../../datatypes/Musics';
 import { getStringNotation } from '../../../utilities/MusicUtils';
 
 
 function generateDisplayText(key: Key | null, notationConfig: NotationConfiguration): string {
-    const chordKey = key ?? getRandomKey();
-    return getStringNotation(chordKey, getRandomChord(chordKey, getAllowedChordQualities(notationConfig)))
+    // TODO-ben : Split logic for notationConfig.includeSingleNotes and includeChords
+    const chord = getRandomChord(key, getAllowedChordQualities(notationConfig));
+    if (chord === null) {
+        return "No chords available.";
+    }
+    return getStringNotation(key, chord);
 }
 
 
 export default function NotationPractice({ goHome, goToConfig }: { goHome: () => void, goToConfig: () => void }) {
     const notationConfig = useNotationConfig();
-    // TODO-ben : I don't think "Random Key" works correctly here. I think it gets randomized every time this re-renders.
     const [ key, setKey ] = useState(convertKeyConfigToKey(notationConfig.key));
     const [ display, setDisplay ] = useState(generateDisplayText(key, notationConfig));
     const [ progressWidth, setProgressWidth ] = useState(100);

@@ -1,5 +1,6 @@
 
-import { Chord, ChordQuality, PITCH_CLASSES, PitchClass, Note, Octave, RhythmicValue, SeventhQuality, TriadQuality, C, A, Key, MajorKeys, B, D, E, F, G, CFLAT, FFLAT, EFLAT, DFLAT, GFLAT, AFLAT, BFLAT, CSHARP, DSHARP, ESHARP, FSHARP, GSHARP, ASHARP, BSHARP, PITCH_LOOKUP } from "../datatypes/Musics";
+import { Chord, ChordQuality, PITCH_CLASSES, PitchClass, Note, Octave, RhythmicValue, SeventhQuality, TriadQuality, C, A, Key, MajorKeys, B, D, E, F, G, CFLAT, FFLAT, EFLAT, DFLAT, GFLAT, AFLAT, BFLAT, CSHARP, DSHARP, ESHARP, FSHARP, GSHARP, ASHARP, BSHARP, PITCH_LOOKUP, MAJOR_KEYS, KeyToRootPitchClass } from "../datatypes/Musics";
+import { randomItemFrom } from "./ArrayUtils";
 import { clamp } from "./NumUtils";
 
 
@@ -118,44 +119,101 @@ export function getChordNotes(chord: Chord): Note[] {
     return notes;
 }
 
+export function getChordsInKey(key: Key) {
+    let scale = getScale(key);
+    if (MAJOR_KEYS.includes(key)) {
+        return [
+            // -- Triads --
+            createChord(createNote(scale[0]), TriadQuality.MAJOR),
+            createChord(createNote(scale[1]), TriadQuality.MINOR),
+            createChord(createNote(scale[2]), TriadQuality.MINOR),
+            createChord(createNote(scale[3]), TriadQuality.MAJOR),
+            createChord(createNote(scale[4]), TriadQuality.MAJOR),
+            createChord(createNote(scale[5]), TriadQuality.MINOR),
+            createChord(createNote(scale[6]), TriadQuality.DIMINISHED),
+            // -- Sevenths --
+            createChord(createNote(scale[0]), SeventhQuality.MAJOR_7),
+            createChord(createNote(scale[1]), SeventhQuality.MINOR_7),
+            createChord(createNote(scale[2]), SeventhQuality.MINOR_7),
+            createChord(createNote(scale[3]), SeventhQuality.MAJOR_7),
+            createChord(createNote(scale[4]), SeventhQuality.DOMINANT_7),
+            createChord(createNote(scale[5]), SeventhQuality.MINOR_7),
+            createChord(createNote(scale[6]), SeventhQuality.HALF_DIM_7),
+        ];
+    } else {
+        throw new Error(`Unrecognized key: ${key}`);
+    }
+}
+
 export function getSpacedNotes(root: Note, ...halfSteps: number[]): Note[] {
     return [{...root}, ...halfSteps.map(steps => stepUpNote(root, steps))];
 }
 
-export function getStringNotation(key: Key, obj: Note | Chord): string {
+export function getStringNotation(key: Key | null, obj: Note | Chord): string {
     return ('root' in obj)
-        ? pitchClassToLetter(key, obj.root.pitchClass) + obj.quality // Chord
-        : pitchClassToLetter(key, obj.pitchClass);                   // Note
+        ? /* Chord */ pitchClassToLetter(key, obj.root.pitchClass) + getQualityNotation(obj.quality)
+        : /* Note  */ pitchClassToLetter(key, obj.pitchClass);
 }
 
-export function pitchClassToLetter(key: Key, pitchClass: PitchClass): string {
-    return PITCH_LOOKUP[key][pitchClass];
+export function getQualityNotation(quality: ChordQuality): string {
+    // TODO-ben : Add more notations, and allow for "sub- super- script" notations.
+    switch (quality) {
+        // -- Triads --
+        case TriadQuality.MAJOR:      return randomItemFrom(['maj']);
+        case TriadQuality.MINOR:      return randomItemFrom(['min']);
+        case TriadQuality.DIMINISHED: return randomItemFrom(['dim']);
+        case TriadQuality.AUGMENTED:  return randomItemFrom(['aug']);
+
+        // -- Sevenths --
+        case SeventhQuality.MAJOR_7:       return randomItemFrom(['maj7']);
+        case SeventhQuality.MINOR_7:       return randomItemFrom(['min7', '-7']);
+        case SeventhQuality.DOMINANT_7:    return randomItemFrom(['7']);
+        case SeventhQuality.HALF_DIM_7:    return randomItemFrom(['𝆩7', '-7♭5']);
+        case SeventhQuality.DIMINISHED_7:  return randomItemFrom(['o7']); // ('o' should be superscript...)
+        case SeventhQuality.MINOR_MAJOR_7: return randomItemFrom(['minMaj7', 'mM7']);
+        case SeventhQuality.AUG_MAJOR_7:   return randomItemFrom(['augMaj7']);
+    }
+}
+
+export function pitchClassToLetter(key: Key | null, pitchClass: PitchClass): string {
+    if (key === null) {
+        switch (pitchClass) {
+            case 0:  return randomItemFrom(['C', 'B♯']);
+            case 1:  return randomItemFrom(['C♯', 'D♭']);
+            case 2:  return randomItemFrom(['D']);
+            case 3:  return randomItemFrom(['D♯', 'E♭']);
+            case 4:  return randomItemFrom(['E', 'F♭']);
+            case 5:  return randomItemFrom(['F', 'E♯']);
+            case 6:  return randomItemFrom(['F♯', 'G♭']);
+            case 7:  return randomItemFrom(['G']);
+            case 8:  return randomItemFrom(['G♯', 'A♭']);
+            case 9:  return randomItemFrom(['A']);
+            case 10: return randomItemFrom(['A♯', 'B♭']);
+            case 11: return randomItemFrom(['B', 'C♭']);
+        }
+    } else {
+        return PITCH_LOOKUP[key][pitchClass];
+    }
 }
 
 export function getScale(key: Key): PitchClass[] {
-    switch (key) {
-        // -- Major Keys --
-        case MajorKeys.CFLAT_MAJOR:  return [CFLAT,  DFLAT,  EFLAT,  FFLAT,  GFLAT,  AFLAT,  BFLAT];
-        case MajorKeys.C_MAJOR:      return [C,      D,      E,      F,      G,      A,      B];
-        case MajorKeys.CSHARP_MAJOR: return [CSHARP, DSHARP, ESHARP, FSHARP, GSHARP, ASHARP, BSHARP];
-        case MajorKeys.DFLAT_MAJOR:  return [DFLAT,  EFLAT,  F,      GFLAT,  AFLAT,  BFLAT,  C];
-        case MajorKeys.D_MAJOR:      return [D,      E,      FSHARP, G,      A,      B,      CSHARP];
-        case MajorKeys.EFLAT_MAJOR:  return [EFLAT,  F,      G,      AFLAT,  BFLAT,  C,      D];
-        case MajorKeys.E_MAJOR:      return [E,      FSHARP, GSHARP, A,      B,      CSHARP, DSHARP];
-        case MajorKeys.F_MAJOR:      return [F,      G,      A,      BFLAT,  C,      D,      E];
-        case MajorKeys.FSHARP_MAJOR: return [FSHARP, GSHARP, ASHARP, B,      CSHARP, DSHARP, ESHARP];
-        case MajorKeys.GFLAT_MAJOR:  return [GFLAT,  AFLAT,  BFLAT,  CFLAT,  DFLAT,  EFLAT,  F];
-        case MajorKeys.G_MAJOR:      return [G,      A,      B,      C,      D,      E,      FSHARP];
-        case MajorKeys.AFLAT_MAJOR:  return [AFLAT,  BFLAT,  C,      DFLAT,  EFLAT,  F,      G];
-        case MajorKeys.A_MAJOR:      return [A,      B,      CSHARP, D,      E,      FSHARP, GSHARP];
-        case MajorKeys.BFLAT_MAJOR:  return [BFLAT,  C,      D,      EFLAT,  F,      G,      A];
-        case MajorKeys.B_MAJOR:      return [B,      CSHARP, DSHARP, E,      FSHARP, GSHARP, ASHARP];
+    let rootPitchClass = KeyToRootPitchClass[key];
 
-        // -- Minor Keys --
-        // (Coming soon?)
-
-        // -- Misc --
-        default:
-            throw new Error(`Unsupported key: ${key}.`);
+    // -- Major Keys --
+    if (MAJOR_KEYS.includes(key)) {
+        return [
+            PITCH_CLASSES[(rootPitchClass + 0) % 12],
+            PITCH_CLASSES[(rootPitchClass + 2) % 12],
+            PITCH_CLASSES[(rootPitchClass + 4) % 12],
+            PITCH_CLASSES[(rootPitchClass + 5) % 12],
+            PITCH_CLASSES[(rootPitchClass + 7) % 12],
+            PITCH_CLASSES[(rootPitchClass + 9) % 12],
+            PITCH_CLASSES[(rootPitchClass + 11) % 12],
+        ];
     }
+
+    // -- Minor Keys --
+    // (Coming soon?)
+
+    throw new Error(`Unsupported key: ${key}.`);
 }
