@@ -4,19 +4,31 @@ import * as TWEEN from '@tweenjs/tween.js';
 
 import styles from './NotationPractice.module.css';
 import { useNotationConfig } from './NotationConfigContext';
-import { getRandomChord } from '../../../utilities/Generators';
+import { getRandomChord, getRandomNote } from '../../../utilities/Generators';
 import { NotationConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from '../../../datatypes/Configs';
 import { Key } from '../../../datatypes/Musics';
-import { getStringNotation } from '../../../utilities/MusicUtils';
+import { getStringNotation } from '../../../utilities/NotationUtils';
 
 
 function generateDisplayText(key: Key | null, notationConfig: NotationConfiguration): string {
-    // TODO-ben : Split logic for notationConfig.includeSingleNotes and includeChords
-    const chord = getRandomChord(key, getAllowedChordQualities(notationConfig));
-    if (chord === null) {
+    // First, determine if we should generate a chord or a note. Assume chord, then change if needed.
+    let generateChord = true;
+    if (notationConfig.includeSingleNotes && notationConfig.includeChords) {
+        generateChord = Math.random() > 0.5;
+    } else if (notationConfig.includeSingleNotes) {
+        generateChord = false;
+    }
+
+    // Next, generate that chord/note
+    const chordOrNote = generateChord
+        ? getRandomChord(key, getAllowedChordQualities(notationConfig))
+        : getRandomNote(key);
+    if (chordOrNote === null) {
         return "No chords available.";
     }
-    return getStringNotation(key, chord);
+
+    // Lastly, convert it to its proper notation, and return it.
+    return getStringNotation(key, chordOrNote);
 }
 
 

@@ -3,6 +3,7 @@ import { randomItemFrom } from "./ArrayUtils";
 import { createChord, createNote, getChordsInKey, getScale } from "./MusicUtils";
 import { randInt } from "./NumberUtils";
 
+
 export function getRandomKey(): Key {
     return KEYS[randInt(0, KEYS.length)];
 }
