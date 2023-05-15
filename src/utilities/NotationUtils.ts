@@ -9,22 +9,21 @@ export function getStringNotation(key: Key | null, obj: Note | Chord): string {
 }
 
 export function getQualityNotation(quality: ChordQuality): string {
-    // TODO-ben : Add more notations, and allow for "sub- super- script" notations.
     switch (quality) {
         // -- Triads --
-        case TriadQuality.MAJOR:      return randomItemFrom(['maj']);
-        case TriadQuality.MINOR:      return randomItemFrom(['min']);
-        case TriadQuality.DIMINISHED: return randomItemFrom(['dim']);
-        case TriadQuality.AUGMENTED:  return randomItemFrom(['aug']);
+        case TriadQuality.MAJOR:      return randomItemFrom(['maj', '', 'M', 'Δ']);
+        case TriadQuality.MINOR:      return randomItemFrom(['min', 'm', '-']);
+        case TriadQuality.DIMINISHED: return randomItemFrom(['dim', '<sup>○</sup>', 'm<sup>♭5</sup>', 'm<sup>○5</sup>']);
+        case TriadQuality.AUGMENTED:  return randomItemFrom(['aug', '+', 'maj<sup>♯5</sup>', 'maj<sup>+5</sup>']);
 
         // -- Sevenths --
-        case SeventhQuality.MAJOR_7:       return randomItemFrom(['maj7']);
-        case SeventhQuality.MINOR_7:       return randomItemFrom(['min7', '-7']);
-        case SeventhQuality.DOMINANT_7:    return randomItemFrom(['7']);
-        case SeventhQuality.HALF_DIM_7:    return randomItemFrom(['𝆩7', '-7♭5']);
-        case SeventhQuality.DIMINISHED_7:  return randomItemFrom(['o7']); // ('o' should be superscript...)
-        case SeventhQuality.MINOR_MAJOR_7: return randomItemFrom(['minMaj7', 'mM7']);
-        case SeventhQuality.AUG_MAJOR_7:   return randomItemFrom(['augMaj7']);
+        case SeventhQuality.MAJOR_7:       return randomItemFrom(['<sup>Maj7</sup>']);
+        case SeventhQuality.MINOR_7:       return randomItemFrom(['m<sup>7</sup>', '-7']);
+        case SeventhQuality.DOMINANT_7:    return randomItemFrom(['<sup>7</sup>']);
+        case SeventhQuality.HALF_DIM_7:    return randomItemFrom(['<sup>∅</sup>7', '-7<sup>♭5</sup>']);
+        case SeventhQuality.DIMINISHED_7:  return randomItemFrom(['<sup>○</sup>7']);
+        case SeventhQuality.MINOR_MAJOR_7: return randomItemFrom(['min<sup>Maj7</sup>', 'm<sup>M7</sup>']);
+        case SeventhQuality.AUG_MAJOR_7:   return randomItemFrom(['aug<sup>Maj7</sup>']);
     }
 }
 

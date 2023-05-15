@@ -71,7 +71,7 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
             </nav>
 
             {/* Chord / Note Display */}
-            <div className={ styles.chordDisplay }>{ display }</div>
+            <div className={ styles.chordDisplay } dangerouslySetInnerHTML={{ __html: display }} />
 
             {/* Progress Feedback */}
             <div className={ styles.timeContainer }>
