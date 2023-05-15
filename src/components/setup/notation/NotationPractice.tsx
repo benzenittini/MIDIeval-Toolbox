@@ -8,6 +8,7 @@ import { getRandomChord, getRandomNote } from '../../../utilities/Generators';
 import { NotationConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from '../../../datatypes/Configs';
 import { Key } from '../../../datatypes/Musics';
 import { getStringNotation } from '../../../utilities/NotationUtils';
+import { clearChangeHandler, setChangeHandler } from '../../../utilities/MidiUtils';
 
 
 function generateDisplayText(key: Key | null, notationConfig: NotationConfiguration): string {
@@ -60,6 +61,19 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
             tween.stop();
         }
     }, []);
+
+    if (notationConfig.progressSelector.type === 'midi') {
+        useEffect(() => {
+            console.log("Registering midi change handler");
+            setChangeHandler((changedInput, pressedInputs) => {
+                console.log(JSON.stringify({changedInput, pressedInputs}));
+            });
+            return () => {
+                console.log("Clearing midi change handler");
+                clearChangeHandler();
+            }
+        }, []);
+    }
 
     return (
         <>

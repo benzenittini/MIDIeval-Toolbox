@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { useNotationConfig, useNotationConfigDispatch } from './NotationConfigContext';
 import styles from './ProgressSelector.module.css';
+import { initializeMidiConnection } from '../../../utilities/MidiUtils';
 
 export default function ProgressSelector() {
 
@@ -13,7 +14,15 @@ export default function ProgressSelector() {
     const isTimedSelected = notationConfig.progressSelector.type === 'timed' ? styles.selectedSection : styles.section;
     const isMidiSelected  = notationConfig.progressSelector.type === 'midi'  ? styles.selectedSection : styles.section;
     function changeTypeTo(type: 'midi' | 'timed') {
-        notationConfigDispatch({ type: 'setProgressType', data: type });
+        if (type === 'midi') {
+            initializeMidiConnection(() => {
+                notationConfigDispatch({ type: 'setProgressType', data: 'midi' });
+            }, (err) => {
+                alert(err.message);
+            });
+        } else {
+            notationConfigDispatch({ type: 'setProgressType', data: 'timed' });
+        }
     }
 
     // -- "Timed" Configs --
