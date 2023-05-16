@@ -47,4 +47,43 @@ button.breadcrumb:hover {
     border-radius: 5px;
     width: 50%;
     height: 100%;
+    transition: 0.2s width;
+}
+
+/* Show feedback to user for valid/invalid MIDI input attempts. */
+@keyframes flashRed {
+    0% {
+        background-color: var(--blue);
+        width: 100%;
+    }
+    50% {
+        background-color: red;
+        width: 100%;
+    }
+    100% {
+        background-color: var(--blue);
+        width: auto;
+    }
+}
+@keyframes flashGreen {
+    0% {
+        background-color: var(--blue);
+        width: 100%;
+    }
+    50% {
+        background-color: green;
+        width: 100%;
+    }
+    100% {
+        background-color: var(--blue);
+        width: auto;
+    }
+}
+.flashRed {
+    animation: flashRed 0.5s;
+    transition: 0s width;
+}
+.flashGreen {
+    animation: flashGreen 0.5s;
+    transition: 0s width;
 }

@@ -118,6 +118,10 @@ export function getChordNotes(chord: Chord): Note[] {
     return notes;
 }
 
+export function getSpacedNotes(root: Note, ...halfSteps: number[]): Note[] {
+    return [{...root}, ...halfSteps.map(steps => stepUpNote(root, steps))];
+}
+
 export function getChordsInKey(key: Key) {
     let scale = getScale(key);
     if (MAJOR_KEYS.includes(key)) {
@@ -144,9 +148,6 @@ export function getChordsInKey(key: Key) {
     }
 }
 
-export function getSpacedNotes(root: Note, ...halfSteps: number[]): Note[] {
-    return [{...root}, ...halfSteps.map(steps => stepUpNote(root, steps))];
-}
 export function getScale(key: Key): PitchClass[] {
     let rootPitchClass = KeyToRootPitchClass[key];
 
