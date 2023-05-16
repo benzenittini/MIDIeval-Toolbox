@@ -7,6 +7,8 @@ let midiAccess: MIDIAccess | null = null;
 let pressedInputs: MidiInput[] = [];
 let changeHandler: (changedInput: MidiInput, pressedInputs: MidiInput[]) => void = () => {};
 
+const midiInputIdsWithEvents: string[] = [];
+
 export function initializeMidiConnection(onSuccess: () => void, onFailure: (err: Error) => void) {
     navigator.requestMIDIAccess()
         .then((access) => {
@@ -15,15 +17,28 @@ export function initializeMidiConnection(onSuccess: () => void, onFailure: (err:
             if (midiAccess.inputs.size == 0) {
                 throw new Error("No MIDI devices detected");
             }
-            midiAccess.inputs.forEach((entry) => {
-                // TODO-ben : Make sure this doesn't get double-registered.
-                entry.onmidimessage = (e: Event) => processMidiEvent(e as MIDIMessageEvent);
-            });
+            registerMidiInputs(midiAccess);
+            midiAccess.onstatechange = (ev: Event) => registerMidiInputs(midiAccess!);
+
             onSuccess();
         }).catch((err: Error) => {
             console.error("MIDI failed to initialize: " + err);
             onFailure(err);
         });
+}
+
+function registerMidiInputs(midiAccess: MIDIAccess) {
+    midiAccess.inputs.forEach((entry) => {
+        const id = entry.id;
+
+        let registrationIndex = midiInputIdsWithEvents.indexOf(id);
+        let alreadyRegistered = registrationIndex !== -1;
+
+        if (!alreadyRegistered) {
+            entry.addEventListener('midimessage', processMidiEvent);
+            midiInputIdsWithEvents.push(id);
+        }
+    });
 }
 
 export function setChangeHandler(handler: (changedInput: MidiInput, pressedInputs: MidiInput[]) => void) {
@@ -33,15 +48,17 @@ export function clearChangeHandler() {
     changeHandler = () => {};
 }
 
-const NOTE_PRESSED_OR_RELEASED = 144;
-function processMidiEvent(event: MIDIMessageEvent) {
-    let [action, pitch, velocity] = event.data;
-    if (action === NOTE_PRESSED_OR_RELEASED) {
-        console.log("Processing event: " + JSON.stringify({ action, pitch, velocity })); // TODO-ben : delete
+const NOTE_PRESSED_OR_RELEASED = 144; // My keyboard sends 144 for both presses and releases...
+const NOTE_RELEASED = 128;
+const PEDAL_PRESSED_OR_RELEASED = 176;
+
+function processMidiEvent(event: Event) {
+    let [action, pitch, velocity] = (event as MIDIMessageEvent).data;
+    if (action === NOTE_PRESSED_OR_RELEASED || action === NOTE_RELEASED) {
         let changedInput = {
             note: convertToNote(pitch),
             velocity,
-            timestampMillis: event.timeStamp
+            timestampMillis: Date.now(),
         };
         if (velocity > 0) {
             // Note was pressed
@@ -56,9 +73,11 @@ function processMidiEvent(event: MIDIMessageEvent) {
             }
         }
         changeHandler(changedInput, pressedInputs);
-    } else if (action === 176) {
+    } else if (action === PEDAL_PRESSED_OR_RELEASED) {
         // Pedal pressed/released. Pitch is always 64, velocity is 127 or 0.
         // Currently a no-op, but captured here in case we want to incorporate it later.
+    } else {
+        console.log({ action, pitch, velocity });
     }
 }
 

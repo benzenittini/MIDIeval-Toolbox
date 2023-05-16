@@ -66,7 +66,7 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
         useEffect(() => {
             console.log("Registering midi change handler");
             setChangeHandler((changedInput, pressedInputs) => {
-                console.log(JSON.stringify({changedInput, pressedInputs}));
+                // console.log(JSON.stringify({changedInput, pressedInputs}));
             });
             return () => {
                 console.log("Clearing midi change handler");
