@@ -98,7 +98,7 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
                         }, 500);
                     } else if (!allInputsAreValid) {
                         // Only care about failures when it's pressed, not released.
-                        if (changedInput.velocity > 0) {
+                        if (changedInput.velocity > 0 && cssColorClass === null) {
                             setCssColorClass(styles.flashRed);
                             setTimeout(() => setCssColorClass(null), 500);
                         }
@@ -110,7 +110,7 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
             return () => {
                 clearChangeHandler();
             }
-        }, [chordOrNote]);
+        }, [chordOrNote, cssColorClass]);
     }
 
     if (notationConfig.progressSelector.type === 'timed') {
