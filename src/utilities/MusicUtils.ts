@@ -7,6 +7,9 @@ import { clamp } from "./NumUtils";
 // Factory Methods
 // ---------------
 
+/**
+ * Convenience function for creating a note.
+ */
 export function createNote(
     pitchClass: PitchClass,
     rhythmicValue: RhythmicValue = RhythmicValue.QUARTER,
@@ -16,7 +19,9 @@ export function createNote(
     return { pitchClass, rhythmicValue, octave: sanitizeOctave(pitchClass, octave), isDotted };
 }
 
-
+/**
+ * Convenience function for creating a chord.
+ */
 export function createChord(
     root: Note,
     quality: ChordQuality,
@@ -168,4 +173,23 @@ export function getScale(key: Key): PitchClass[] {
     // (Coming soon?)
 
     throw new Error(`Unsupported key: ${key}.`);
+}
+
+export function describeChordQuality(chordQuality: ChordQuality): string {
+    switch (chordQuality) {
+        // -- Triads --
+        case TriadQuality.DIMINISHED: return 'Diminished Triad = minor third with a diminished fifth.';
+        case TriadQuality.MINOR:      return 'Minor Triad = minor third with a perfect fifth.';
+        case TriadQuality.MAJOR:      return 'Major Triad = major third with a perfect fifth.';
+        case TriadQuality.AUGMENTED:  return 'Augmented Triad = major third with an augmented fifth.';
+
+        // -- Sevenths --
+        case SeventhQuality.DIMINISHED_7:  return 'Fully-Diminished Seventh = minor third, diminished fifth, and a diminished seventh.';
+        case SeventhQuality.HALF_DIM_7:    return 'Half-Diminished Seventh = minor third, diminished fifth, and a minor seventh.';
+        case SeventhQuality.MINOR_7:       return 'Minor 7 = minor third, perfect fifth, and a minor seventh.';
+        case SeventhQuality.MINOR_MAJOR_7: return 'Minor Major 7 = minor third, perfect fifth, and a major seventh.';
+        case SeventhQuality.DOMINANT_7:    return 'Dominant 7 = major third, perfect fifth, and a minor seventh.';
+        case SeventhQuality.MAJOR_7:       return 'Major 7 = major third, perfect fifth, and a major seventh.';
+        case SeventhQuality.AUG_MAJOR_7:   return 'Augmented Major 7 = major third, augmented fifth, and a major seventh.';
+    }
 }

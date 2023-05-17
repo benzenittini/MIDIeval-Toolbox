@@ -3,20 +3,24 @@ import { MidiInput } from "../datatypes/Midi";
 import { Note, Octave, PitchClass, RhythmicValue } from "../datatypes/Musics";
 import { createNote } from "./MusicUtils";
 
-let midiAccess: MIDIAccess | null = null;
-let pressedInputs: MidiInput[] = [];
-let changeHandler: (changedInput: MidiInput, pressedInputs: MidiInput[]) => void = () => {};
+// -- Some MIDI action IDs --
+const NOTE_PRESSED_OR_RELEASED = 144; // My keyboard sends 144 for both presses and releases...
+const NOTE_RELEASED = 128;
+const PEDAL_PRESSED_OR_RELEASED = 176;
 
-const midiInputIdsWithEvents: string[] = [];
-
+/**
+ * Sets up the MIDI connection by registering event handlers for all connected MIDI inputs. Calls "onSuccess" when it
+ * completes successfully, and "onFailure" (with an error) when it fails. It may fail due to permissions, or if there
+ * are no MIDI devices connected.
+ */
 export function initializeMidiConnection(onSuccess: () => void, onFailure: (err: Error) => void) {
     navigator.requestMIDIAccess()
-        .then((access) => {
-            midiAccess = access;
-            pressedInputs = [];
-            if (midiAccess.inputs.size == 0) {
+        .then((midiAccess) => {
+            if (midiAccess.inputs.size === 0) {
                 throw new Error("No MIDI devices detected");
             }
+
+            pressedInputs = [];
             registerMidiInputs(midiAccess);
             midiAccess.onstatechange = (ev: Event) => registerMidiInputs(midiAccess!);
 
@@ -27,6 +31,36 @@ export function initializeMidiConnection(onSuccess: () => void, onFailure: (err:
         });
 }
 
+
+// ==============
+// Change Handler
+// --------------
+
+/** Gets executed every time a note is pressed or released. */
+let changeHandler: (changedInput: MidiInput, pressedInputs: MidiInput[]) => void = () => {};
+
+/**
+ * Registers a handler which gets executed every time a note is pressed or released. "changedInput" is the changed
+ * note, and "pressedInputs" is an array containing every note currently being pressed.
+ */
+export function setChangeHandler(handler: (changedInput: MidiInput, pressedInputs: MidiInput[]) => void) {
+    changeHandler = handler;
+}
+
+/** Clears the currently-registered change handler, if any. */
+export function clearChangeHandler() {
+    changeHandler = () => {};
+}
+
+
+// =======================
+// MIDI Event Registration
+// -----------------------
+
+/** A list of all the midi input IDs that are being watched for events. Useful for preventing double-registrations. */
+const midiInputIdsWithEvents: string[] = [];
+
+/** Registers an event handler for every MIDI input that doesn't already have an event handler registered. */
 function registerMidiInputs(midiAccess: MIDIAccess) {
     midiAccess.inputs.forEach((entry) => {
         const id = entry.id;
@@ -41,17 +75,18 @@ function registerMidiInputs(midiAccess: MIDIAccess) {
     });
 }
 
-export function setChangeHandler(handler: (changedInput: MidiInput, pressedInputs: MidiInput[]) => void) {
-    changeHandler = handler;
-}
-export function clearChangeHandler() {
-    changeHandler = () => {};
-}
 
-const NOTE_PRESSED_OR_RELEASED = 144; // My keyboard sends 144 for both presses and releases...
-const NOTE_RELEASED = 128;
-const PEDAL_PRESSED_OR_RELEASED = 176;
+// ===================
+// MIDI Event Handling
+// -------------------
 
+/** A list of all the notes currently being pressed. */
+let pressedInputs: MidiInput[] = [];
+
+/**
+ * Processes a MIDI event by determining the event type and acting appropriately. Mainly, handles MIDI key presses
+ * and releases, tracks which notes are actively being pressed, and then calls the currently-registered changeHandler.
+ */
 function processMidiEvent(event: Event) {
     let [action, pitch, velocity] = (event as MIDIMessageEvent).data;
     if (action === NOTE_PRESSED_OR_RELEASED || action === NOTE_RELEASED) {
@@ -81,6 +116,9 @@ function processMidiEvent(event: Event) {
     }
 }
 
+/**
+ * Converts the given MIDI "pitch" to a note. Only the note's pitchClass and octave will have meaning.
+ */
 function convertToNote(pitch: number): Note {
     // Middle c gives pitch 60, which has pitchClass 0 and is octave 4.
     const pitchClass = pitch % 12 as PitchClass;

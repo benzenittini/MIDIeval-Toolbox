@@ -1,4 +1,8 @@
 
+/* =========== */
+/* Breadcrumbs */
+/* ----------- */
+
 .breadcrumbs {
     color: var(--gray);
     position: fixed;
@@ -20,6 +24,11 @@ button.breadcrumb:hover {
     text-decoration: underline;
 }
 
+
+/* ============= */
+/* Chord Display */
+/* ------------- */
+
 .chordDisplay {
     /* Sizes */
     width: 500px;
@@ -37,47 +46,36 @@ button.breadcrumb:hover {
     flex-direction: column;
 }
 
-.timeContainer {
+
+/* ============ */
+/* Progress Bar */
+/* ------------ */
+
+.progressContainer {
     width: 500px;
     height: 8px;
     margin-top: 30px;
 }
-.timeRemaining {
+.progressRemaining {
     background: var(--blue);
     border-radius: 5px;
     width: 50%;
     height: 100%;
+}
+.progressRemaining.midi {
     transition: 0.2s width;
 }
 
 /* Show feedback to user for valid/invalid MIDI input attempts. */
 @keyframes flashRed {
-    0% {
-        background-color: var(--blue);
-        width: 100%;
-    }
-    50% {
-        background-color: red;
-        width: 100%;
-    }
-    100% {
-        background-color: var(--blue);
-        width: auto;
-    }
+    0%   { background-color: var(--blue); width: 100%; }
+    50%  { background-color: red;       width: 100%; }
+    100% { background-color: var(--blue); width: auto; }
 }
 @keyframes flashGreen {
-    0% {
-        background-color: var(--blue);
-        width: 100%;
-    }
-    50% {
-        background-color: green;
-        width: 100%;
-    }
-    100% {
-        background-color: var(--blue);
-        width: auto;
-    }
+    0%   { background-color: var(--blue); width: 100%; }
+    50%  { background-color: green;     width: 100%; }
+    100% { background-color: var(--blue); width: auto; }
 }
 .flashRed {
     animation: flashRed 0.5s;
@@ -86,4 +84,16 @@ button.breadcrumb:hover {
 .flashGreen {
     animation: flashGreen 0.5s;
     transition: 0s width;
+}
+
+
+/* ================= */
+/* Chord Description */
+/* ----------------- */
+
+.chordDescription {
+    position: absolute;
+    width: 500px;
+    margin-top: 40px;
+    color: var(--gray);
 }
