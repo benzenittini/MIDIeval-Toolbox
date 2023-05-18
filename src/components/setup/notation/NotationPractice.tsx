@@ -40,7 +40,7 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
     const notationConfig = useNotationConfig();
 
     /** The key we're practicing, or "null" to indicate "anything goes" */
-    const [ key, setKey ] = useState(convertKeyConfigToKey(notationConfig.key));
+    const [ key, _ ] = useState(convertKeyConfigToKey(notationConfig.key));
 
     /** The current chord or note being displayed. May be "null" if the allowed chord qualities rules out all available chords. */
     const [ chordOrNote, setChordOrNote ] = useState(generateChordOrNote(key, notationConfig));

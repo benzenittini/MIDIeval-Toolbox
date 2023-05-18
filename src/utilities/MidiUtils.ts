@@ -22,7 +22,7 @@ export function initializeMidiConnection(onSuccess: () => void, onFailure: (err:
 
             pressedInputs = [];
             registerMidiInputs(midiAccess);
-            midiAccess.onstatechange = (ev: Event) => registerMidiInputs(midiAccess!);
+            midiAccess.onstatechange = (_: Event) => registerMidiInputs(midiAccess!);
 
             onSuccess();
         }).catch((err: Error) => {

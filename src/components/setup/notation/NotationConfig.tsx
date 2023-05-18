@@ -1,4 +1,5 @@
-import { MiscKeys, convertKeyConfigToKey, getAllowedChordQualities } from "../../../datatypes/Configs";
+
+import { convertKeyConfigToKey, getAllowedChordQualities } from "../../../datatypes/Configs";
 import ChordSelection from "./ChordSelection";
 import KeySelection from "./KeySelection";
 
@@ -28,7 +29,7 @@ export default function NotationConfig({ goBack, begin }: { goBack: () => void, 
                         <input type="radio" name="practiceType"
                             id="practiceSingleNotes"
                             checked={ notationConfig.practiceSingleNotes }
-                            onChange={ (e) => notationConfigDispatch({ type: 'practiceSingleNotes' }) } />
+                            onChange={ () => notationConfigDispatch({ type: 'practiceSingleNotes' }) } />
                         <label htmlFor="practiceSingleNotes">Practice Single Notes (ex: F#)</label>
                     </div>
 
@@ -36,7 +37,7 @@ export default function NotationConfig({ goBack, begin }: { goBack: () => void, 
                         <input type="radio" name="practiceType"
                             id="practiceChords"
                             checked={ notationConfig.practiceChords }
-                            onChange={ (e) => notationConfigDispatch({ type: 'practiceChords' }) } />
+                            onChange={ () => notationConfigDispatch({ type: 'practiceChords' }) } />
                         <label htmlFor="practiceChords">Practice Chords (ex: F#min)</label>
                     </div>
                 </div>
