@@ -1,7 +1,7 @@
 
 import { Dispatch, createContext, useContext, useReducer } from "react";
 
-import { MiscKeys, NotationConfiguration } from "../../../datatypes/Configs";
+import { MiscKeys, NotationConfiguration } from "../../datatypes/Configs";
 
 
 // ========

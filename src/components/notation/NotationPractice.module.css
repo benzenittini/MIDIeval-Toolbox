@@ -1,29 +1,4 @@
 
-/* =========== */
-/* Breadcrumbs */
-/* ----------- */
-
-.breadcrumbs {
-    color: var(--gray);
-    position: fixed;
-    top: 10px;
-    left: 10px;
-}
-.breadcrumb {
-    background: none;
-    padding: 10px;
-    font-weight: normal;
-    color: var(--gray);
-}
-span.breadcrumb {
-    font-weight: bold;
-}
-button.breadcrumb:hover {
-    background: none;
-    color: var(--gray-vlight);
-    text-decoration: underline;
-}
-
 
 /* ============= */
 /* Chord Display */

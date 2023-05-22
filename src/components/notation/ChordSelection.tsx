@@ -1,5 +1,5 @@
 
-import { MiscKeys, NotationConfiguration } from '../../../datatypes/Configs';
+import { MiscKeys, NotationConfiguration } from '../../datatypes/Configs';
 import styles from './ChordSelection.module.css';
 import { useNotationConfig, useNotationConfigDispatch } from './NotationConfigContext';
 

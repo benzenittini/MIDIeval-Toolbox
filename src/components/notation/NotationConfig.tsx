@@ -1,5 +1,5 @@
 
-import { convertKeyConfigToKey, getAllowedChordQualities } from "../../../datatypes/Configs";
+import { convertKeyConfigToKey, getAllowedChordQualities } from "../../datatypes/Configs";
 import ChordSelection from "./ChordSelection";
 import KeySelection from "./KeySelection";
 

@@ -4,12 +4,12 @@ import * as TWEEN from '@tweenjs/tween.js';
 
 import styles from './NotationPractice.module.css';
 import { useNotationConfig } from './NotationConfigContext';
-import { getRandomChord, getRandomNote } from '../../../utilities/Generators';
-import { NotationConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from '../../../datatypes/Configs';
-import { Chord, Key, Note } from '../../../datatypes/Musics';
-import { getStringNotation } from '../../../utilities/NotationUtils';
-import { clearChangeHandler, setChangeHandler } from '../../../utilities/MidiUtils';
-import { describeChordQuality, getChordNotes } from '../../../utilities/MusicUtils';
+import { getRandomChord, getRandomNote } from '../../utilities/Generators';
+import { NotationConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from '../../datatypes/Configs';
+import { Chord, Key, Note } from '../../datatypes/Musics';
+import { getStringNotation } from '../../utilities/NotationUtils';
+import { clearChangeHandler, setChangeHandler } from '../../utilities/MidiUtils';
+import { describeChordQuality, getChordNotes } from '../../utilities/MusicUtils';
 
 
 /**
@@ -147,10 +147,10 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
     return (
         <>
             {/* Breadcrumb Navigation */}
-            <nav className={ styles.breadcrumbs }>
-                <button className={ styles.breadcrumb } onClick={ goHome }>Home</button>&gt;
-                <button className={ styles.breadcrumb } onClick={ goToConfig }>Configuration</button>&gt;
-                <span className={ styles.breadcrumb }>Practice</span>
+            <nav className="breadcrumbs">
+                <button className="breadcrumb" onClick={ goHome }>Home</button>&gt;
+                <button className="breadcrumb" onClick={ goToConfig }>Configuration</button>&gt;
+                <span className="breadcrumb">Practice</span>
             </nav>
 
             {/* Chord / Note Display */}

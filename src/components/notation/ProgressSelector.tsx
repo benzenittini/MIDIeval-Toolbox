@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNotationConfig, useNotationConfigDispatch } from './NotationConfigContext';
 import styles from './ProgressSelector.module.css';
-import { initializeMidiConnection } from '../../../utilities/MidiUtils';
+import { initializeMidiConnection } from '../../utilities/MidiUtils';
 
 export default function ProgressSelector() {
 

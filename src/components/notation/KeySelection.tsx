@@ -1,6 +1,6 @@
 
-import { MiscKeys } from "../../../datatypes/Configs";
-import { MajorKeys } from "../../../datatypes/Musics";
+import { MiscKeys } from "../../datatypes/Configs";
+import { MajorKeys } from "../../datatypes/Musics";
 import { useNotationConfig, useNotationConfigDispatch } from "./NotationConfigContext";
 
 

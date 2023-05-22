@@ -43,7 +43,30 @@ export type NotationConfiguration = {
     includeAugMaj7: boolean;
 }
 
-export function getAllowedChordQualities(key: Key | null, config: NotationConfiguration): ChordQuality[] {
+export type SightReadingConfiguration = {
+    key: KeyConfigOpts;
+    practiceSingleNotes: boolean;
+    practiceChords: boolean;
+
+    // Triads
+    includeTriads: boolean;
+    includeMaj3: boolean;
+    includeMin3: boolean;
+    includeAug3: boolean;
+    includeDim3: boolean;
+
+    // Sevenths
+    includeSevenths: boolean;
+    includeMaj7: boolean;
+    includeMin7: boolean;
+    includeDom7: boolean;
+    includeHalfDim7: boolean;
+    includeDim7: boolean;
+    includeMinMaj7: boolean;
+    includeAugMaj7: boolean;
+}
+
+export function getAllowedChordQualities(key: Key | null, config: NotationConfiguration | SightReadingConfiguration): ChordQuality[] {
     const qualities: ChordQuality[] = [];
 
     // -- Triads --
