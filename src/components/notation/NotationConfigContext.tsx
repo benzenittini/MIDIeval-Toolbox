@@ -39,8 +39,8 @@ const initialConfig: NotationConfiguration = {
     includeTriads: true,
     includeMaj3: true,
     includeMin3: true,
-    includeAug3: false,
     includeDim3: true,
+    includeAug3: false,
     // Sevenths
     includeSevenths: false,
     includeMaj7: true,
@@ -71,8 +71,8 @@ function notationConfigReducer(config: NotationConfiguration, action: DispatchAc
         case 'includeTriads': return { ...config, includeTriads: action.data };
         case 'includeMaj3':   return { ...config, includeMaj3: action.data };
         case 'includeMin3':   return { ...config, includeMin3: action.data };
-        case 'includeAug3':   return { ...config, includeAug3: action.data };
         case 'includeDim3':   return { ...config, includeDim3: action.data };
+        case 'includeAug3':   return { ...config, includeAug3: action.data };
 
         // -- Sevenths --
         case 'includeSevenths': return { ...config, includeSevenths: action.data };

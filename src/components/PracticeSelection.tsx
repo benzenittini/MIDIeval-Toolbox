@@ -16,7 +16,9 @@ export default function PracticeSelection({ setPractice }: { setPractice: (pract
             </div>
 
             <div className={styles.practiceBox} onClick={ () => setPractice('sight-reading-config') }>
-                <SvgStaff width="150px" height="125px" stroke="var(--gray-vlight)"></SvgStaff>
+                <svg viewBox="0 0 150 125" preserveAspectRatio="none" style={{ width: "150px", height: "125px" }}>
+                    <SvgStaff width={ 150 } height={ 125 } strokeWidth={ 2 } stroke="var(--gray-vlight)"></SvgStaff>
+                </svg>
                 <h2 className={styles.heading}>Sight-Reading</h2>
             </div>
         </>

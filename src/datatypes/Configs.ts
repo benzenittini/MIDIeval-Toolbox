@@ -1,5 +1,5 @@
 import { getRandomKey } from "../utilities/Generators";
-import { ChordQuality, Key, MajorKeys, SeventhQuality, TriadQuality } from "./Musics";
+import { ChordQuality, Key, MajorKeys, SeventhQuality, TimeSignature, TriadQuality } from "./Musics";
 
 export enum MiscKeys {
     ANYTHING_GOES = '(Anything Goes)',
@@ -29,8 +29,8 @@ export type NotationConfiguration = {
     includeTriads: boolean;
     includeMaj3: boolean;
     includeMin3: boolean;
-    includeAug3: boolean;
     includeDim3: boolean;
+    includeAug3: boolean;
 
     // Sevenths
     includeSevenths: boolean;
@@ -44,16 +44,33 @@ export type NotationConfiguration = {
 }
 
 export type SightReadingConfiguration = {
+    // Basics
     key: KeyConfigOpts;
+    allowAccidentals: boolean;
+    includeTrebleClef: boolean;
+    includeBassClef: boolean;
+    timeSignature: TimeSignature;
+
+    // Difficulty
+    tempo: number;
+    playMetronome: boolean;
+    waitForCorrectNote: boolean;
+    allowRhythmicValues: boolean;
+    /** Called "adjacent note distance" to user, but used as a general difficulty level when generating notes/chords. */
+    adjacentNoteDistance: number;
+
+    // Note/Chord Types
     practiceSingleNotes: boolean;
     practiceChords: boolean;
+    includeBrokenChords: boolean;
+    includeInvertedChords: boolean;
 
     // Triads
     includeTriads: boolean;
     includeMaj3: boolean;
     includeMin3: boolean;
-    includeAug3: boolean;
     includeDim3: boolean;
+    includeAug3: boolean;
 
     // Sevenths
     includeSevenths: boolean;

@@ -1,11 +1,12 @@
-import { Chord, ChordQuality, PitchClass, Note, SeventhQuality, TriadQuality, C, A, Key, B, D, E, F, G, CFLAT, FFLAT, EFLAT, DFLAT, GFLAT, AFLAT, BFLAT, CSHARP, DSHARP, ESHARP, FSHARP, GSHARP, ASHARP, BSHARP } from "../datatypes/Musics";
+
+import { ChordQuality, PitchClass, SeventhQuality, TriadQuality, C, A, Key, B, D, E, F, G, CFLAT, FFLAT, EFLAT, DFLAT, GFLAT, AFLAT, BFLAT, CSHARP, DSHARP, ESHARP, FSHARP, GSHARP, ASHARP, BSHARP, Sound } from "../datatypes/Musics";
 import { randomItemFrom } from "./ArrayUtils";
 
 
-export function getStringNotation(key: Key | null, obj: Note | Chord): string {
-    return ('root' in obj)
-        ? /* Chord */ pitchClassToLetter(key, obj.root.pitchClass) + getQualityNotation(obj.quality)
-        : /* Note  */ pitchClassToLetter(key, obj.pitchClass);
+export function getStringNotation(key: Key | null, sound: Sound): string {
+    return ('root' in sound)
+        ? /* Chord */ pitchClassToLetter(key, sound.root.pitchClass) + getQualityNotation(sound.quality)
+        : /* Note  */ pitchClassToLetter(key, sound.pitchClass);
 }
 
 export function getQualityNotation(quality: ChordQuality): string {

@@ -99,3 +99,14 @@ export const KeyToRootPitchClass: Record<Key, PitchClass> = {
     [MajorKeys.AFLAT_MAJOR]: AFLAT,    [MajorKeys.A_MAJOR]: A,    /* No A Sharp Major */
     [MajorKeys.BFLAT_MAJOR]: BFLAT,    [MajorKeys.B_MAJOR]: B,    /* No B Sharp Major */
 }
+
+
+// =============
+// Miscellaneous
+// -------------
+
+export type Sound = Note | Chord;
+
+export type TimeSignature = { top: number, bottom: number };
+
+export enum Clef { TREBLE, BASS };

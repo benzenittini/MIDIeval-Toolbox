@@ -1,5 +1,5 @@
 
-import { Chord, ChordQuality, PITCH_CLASSES, PitchClass, Note, Octave, RhythmicValue, SeventhQuality, TriadQuality, C, A, Key, MAJOR_KEYS, KeyToRootPitchClass } from "../datatypes/Musics";
+import { Chord, ChordQuality, PITCH_CLASSES, PitchClass, Note, Octave, RhythmicValue, SeventhQuality, TriadQuality, C, A, Key, MAJOR_KEYS, KeyToRootPitchClass, TimeSignature, Sound } from "../datatypes/Musics";
 import { clamp } from "./NumUtils";
 
 
@@ -191,5 +191,16 @@ export function describeChordQuality(chordQuality: ChordQuality): string {
         case SeventhQuality.DOMINANT_7:    return 'Dominant 7 = major third, perfect fifth, and a minor seventh.';
         case SeventhQuality.MAJOR_7:       return 'Major 7 = major third, perfect fifth, and a major seventh.';
         case SeventhQuality.AUG_MAJOR_7:   return 'Augmented Major 7 = major third, augmented fifth, and a major seventh.';
+    }
+}
+
+export function getBeatCount(timeSignature: TimeSignature, sound: Sound) {
+    let note = ("root" in sound) ? sound.root : sound;
+    switch (note.rhythmicValue) {
+        case RhythmicValue.WHOLE:     return timeSignature.bottom / 1;
+        case RhythmicValue.HALF:      return timeSignature.bottom / 2;
+        case RhythmicValue.QUARTER:   return timeSignature.bottom / 4;
+        case RhythmicValue.EIGHTH:    return timeSignature.bottom / 8;
+        case RhythmicValue.SIXTEENTH: return timeSignature.bottom / 16;
     }
 }
