@@ -3,7 +3,7 @@
 // Pitch Class
 // -----------
 
-import { Letter, NoteLetter } from "../utilities/NotationUtils";
+import { Letter } from "../utilities/NotationUtils";
 
 /** For convenience, when referring to a PitchClass. */
 export const
@@ -16,6 +16,12 @@ export const
     BFLAT = 10, B = 11, BSHARP = 0;
 export type PitchClass = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11;
 export const PITCH_CLASSES: PitchClass[] = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 ];
+
+export type Pitch = number;
+export type PitchClassWithOctave = {
+    octave: Octave;
+    pitchClass: PitchClass;
+};
 
 
 // ===========
@@ -34,7 +40,7 @@ export type Note = {
 };
 
 /** Replaces pitchClass with a letter and (optional) accidental. Useful when prepping notes for display on a staff. */
-export type LabeledNote = Omit<Note, "pitchClass"> | {
+export type LabeledNote = Omit<Note, "pitchClass"> & {
     letter: Letter;
     accidental?: Accidental;
 }

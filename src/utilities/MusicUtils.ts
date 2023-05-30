@@ -1,5 +1,5 @@
 
-import { Chord, ChordQuality, PITCH_CLASSES, PitchClass, Note, Octave, RhythmicValue, SeventhQuality, TriadQuality, C, A, Key, MAJOR_KEYS, KeyToRootPitchClass, TimeSignature, Sound, MajorKeys, Clef } from "../datatypes/Musics";
+import { Chord, ChordQuality, PITCH_CLASSES, PitchClass, Note, Octave, RhythmicValue, SeventhQuality, TriadQuality, C, A, Key, MAJOR_KEYS, KeyToRootPitchClass, TimeSignature, Sound, MajorKeys, Clef, PitchClassWithOctave, Pitch } from "../datatypes/Musics";
 import { clamp } from "./NumUtils";
 
 
@@ -212,4 +212,14 @@ export function getBeatCount(timeSignature: TimeSignature, sound: Sound) {
         case RhythmicValue.EIGHTH:    return timeSignature.bottom / 8;
         case RhythmicValue.SIXTEENTH: return timeSignature.bottom / 16;
     }
+}
+
+export function convertToPitch({ octave, pitchClass }: PitchClassWithOctave): Pitch {
+    return octave * 12 + pitchClass;
+}
+export function convertToPitchClassWithOctave(pitch: Pitch): PitchClassWithOctave {
+    return {
+        octave: Math.floor(pitch / 12) as Octave,
+        pitchClass: pitch % 12 as PitchClass,
+    };
 }

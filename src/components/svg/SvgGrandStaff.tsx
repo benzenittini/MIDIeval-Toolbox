@@ -1,20 +1,23 @@
 
 import { ReactElement, useState } from "react";
 
-import { Clef, Key, Octave, PITCH_CLASSES, PitchClass, RhythmicValue, Sound } from "../../datatypes/Musics";
+import { Clef, Key, LabeledNote, Octave, PITCH_CLASSES, PitchClass, RhythmicValue, Sound, TimeSignature } from "../../datatypes/Musics";
 import { useSightReadingConfig } from "../sight-reading/SightReadingConfigContext";
 
 import SvgStaff from "./SvgStaff";
 import SvgBarLine from "./SvgBarLine";
 import SvgStaffDefinition from "./SvgStaffDefinition";
 import SvgChord from "./SvgChord";
-import { createNote, getChordsInKey, stepUpNote } from "../../utilities/MusicUtils";
+import { getChordsInKey } from "../../utilities/MusicUtils";
+import { LabeledMusic } from "../../utilities/MusicStream";
 
 
 type Params = {
     width: number;
     height: number;
     musicKey: Key;
+    timeSignature: TimeSignature;
+    music: LabeledMusic[]; // Each element of the array is one measure
 };
 
 // These need to add up to 100
@@ -22,47 +25,34 @@ const PADDING_RATIO = 12/100; // x2 because top and bottom
 const STAFF_RATIO   = 28/100; // x2 because 2 staffs
 const GAP_RATIO     = 20/100; // Gap between staffs
 
-// TODO-ben : delete this
-function createSampleSounds(height: number, staffThickness: number, musicKey: Key, clef: Clef, baseOctave: Octave): ReactElement[] {
-    let eles: ReactElement[] = [];
-
-    // // Upward notes
-    // let previousNote = createNote(0, RhythmicValue.QUARTER, baseOctave, false)
-    // for (let x = 0; x < 22; x++) {
-    //     eles.push((<SvgChord
-    //         key={ x }
-    //         musicKey={ musicKey }
-    //         clef={ clef }
-    //         x={ 40 + x * 50 }
-    //         staffLineHeight={ STAFF_RATIO * height / 4 }
-    //         strokeWidth={ staffThickness }
-    //         sound={ previousNote }></SvgChord>));
-    //         previousNote = stepUpNote(previousNote, 1);
-    // }
-
-    // Chords in a key
-    let chords = getChordsInKey(musicKey);
-    for (let x = 0; x < chords.length; x++ ) {
-        chords[x].root.octave = baseOctave;
-        eles.push((<SvgChord
-            key={ x }
-            musicKey={ musicKey }
-            clef={ clef }
-            x={ 40 + x * 50 }
-            staffLineHeight={ STAFF_RATIO * height / 4 }
-            strokeWidth={ staffThickness }
-            sound={ chords[x] }></SvgChord>));
-    }
-
-    return eles;
-}
-
-export default function GrandStaff({ width, height, musicKey }: Params) {
-    const sightReadingConfig = useSightReadingConfig();
+export default function GrandStaff({ width, height, musicKey, timeSignature, music }: Params) {
     const [ musicXShift, setMusicXShift ] = useState(0);
 
     // Line thicknesses
     const staffThickness = 1/100 * STAFF_RATIO * height;
+
+    function createSvgChord(labeledNoteGroup: LabeledNote[], x: number, clef: Clef) {
+        return (<SvgChord
+            key={ `chord-${x}` }
+            clef={ clef }
+            x={ x }
+            staffLineHeight={ STAFF_RATIO * height / 4 }
+            strokeWidth={ staffThickness }
+            labeledNoteGroup={ labeledNoteGroup }
+        ></SvgChord>);
+    }
+
+    // TODO-ben : Space "x" coordinates based on elapsed beat counts for the measure, and the shortest note in the measure.
+    const trebleChords = music.map((measure, mi) => {
+        return measure.trebleClef.map((noteGroup, ngi) => {
+            return createSvgChord(noteGroup, 40 + (mi*200) + (ngi*50), Clef.TREBLE);
+        }
+    )});
+    const bassChords = music.map((measure, mi) => {
+        return measure.bassClef.map((noteGroup, ngi) => {
+            return createSvgChord(noteGroup, 40 + (mi*200) + (ngi*50), Clef.BASS);
+        }
+    )});
 
     return (
         <svg viewBox={ `0 0 ${width} ${height}` } style={{ width: `${width}px`, height: `${height}px` }}>
@@ -76,7 +66,7 @@ export default function GrandStaff({ width, height, musicKey }: Params) {
                 {/* <SvgStaffDefinition clef={ Clef.TREBLE } musicKey={ musicKey } timeSignature={ sightReadingConfig.timeSignature }></SvgStaffDefinition> */}
                 <g style={{ transform: `translateX(${musicXShift}px)` }}>
                     {/* TODO-ben : Notes */}
-                    { createSampleSounds(height, staffThickness, musicKey, Clef.TREBLE, 4) }
+                    { trebleChords }
                 </g>
             </g>
 
@@ -87,7 +77,7 @@ export default function GrandStaff({ width, height, musicKey }: Params) {
                 {/* <SvgStaffDefinition clef={ Clef.TREBLE } musicKey={ musicKey } timeSignature={ sightReadingConfig.timeSignature }></SvgStaffDefinition> */}
                 <g style={{ transform: `translateX(${musicXShift}px)` }}>
                     {/* TODO-ben : Notes */}
-                    { createSampleSounds(height, staffThickness, musicKey, Clef.BASS, 2) }
+                    { bassChords }
                 </g>
             </g>
 

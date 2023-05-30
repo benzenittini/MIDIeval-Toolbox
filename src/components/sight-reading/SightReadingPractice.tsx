@@ -1,7 +1,7 @@
 
 
 import { useState } from 'react';
-import { MusicStream } from '../../utilities/MusicStream';
+import { LabeledMusic, Music, MusicStream } from '../../utilities/MusicStream';
 import { useSightReadingConfig } from './SightReadingConfigContext';
 import { convertKeyConfigToKey } from '../../datatypes/Configs';
 import GrandStaff from '../svg/SvgGrandStaff';
@@ -14,6 +14,7 @@ export default function SightReadingPractice({ goHome, goToConfig }: { goHome: (
     // const [ key ] = useState(convertKeyConfigToKey(sightReadingConfig.key)!);
     const [ key ] = useState(MajorKeys.C_MAJOR);
     const [ musicStream ] = useState(new MusicStream(sightReadingConfig, key));
+    const [ displayedMusic, setDisplayedMusic ] = useState([musicStream.labelMusic(musicStream.getNextMeasure())]);
 
     return (
         <>
@@ -24,7 +25,11 @@ export default function SightReadingPractice({ goHome, goToConfig }: { goHome: (
                 <span className="breadcrumb">Practice</span>
             </nav>
 
-            <GrandStaff width={ 1100 } height={ 350 } musicKey={ key }></GrandStaff>
+            <GrandStaff width={ 1100 } height={ 350 }
+                musicKey={ key }
+                timeSignature={ sightReadingConfig.timeSignature }
+                music={ displayedMusic }
+                ></GrandStaff>
         </>
     );
 }
