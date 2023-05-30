@@ -207,11 +207,13 @@ export class MusicStream {
         // TODO-ben : Make this actually generate a "flurry" (mostly-)in-key instead of a random mess
         const sounds: Sound[] = [];
 
+        const rhythmicValue = randomItemFrom(Object.values(RhythmicValue) as RhythmicValue[]);
+
         // Generate between 2 and 8 notes
         for (let i = 0; i < randInt(2, 8); i++) {
             const pitch = randInt(bounds.lower, bounds.upper+1);
             const {octave, pitchClass} = convertToPitchClassWithOctave(pitch);
-            sounds.push(createNote(pitchClass, RhythmicValue.QUARTER, octave, false));
+            sounds.push(createNote(pitchClass, rhythmicValue, octave, false));
         }
 
         return sounds;

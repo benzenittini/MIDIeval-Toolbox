@@ -10,11 +10,11 @@ import { MajorKeys } from '../../datatypes/Musics';
 
 export default function SightReadingPractice({ goHome, goToConfig }: { goHome: () => void, goToConfig: () => void }) {
     const sightReadingConfig = useSightReadingConfig();
-    // TODO-ben : Re-enable key setting.
-    // const [ key ] = useState(convertKeyConfigToKey(sightReadingConfig.key)!);
-    const [ key ] = useState(MajorKeys.C_MAJOR);
+    const [ key ] = useState(convertKeyConfigToKey(sightReadingConfig.key)!);
     const [ musicStream ] = useState(new MusicStream(sightReadingConfig, key));
-    const [ displayedMusic, setDisplayedMusic ] = useState([musicStream.labelMusic(musicStream.getNextMeasure())]);
+    const [ displayedMusic, setDisplayedMusic ] = useState(
+        new Array(3).fill(1).map(() => musicStream.labelMusic(musicStream.getNextMeasure()))
+    );
 
     return (
         <>

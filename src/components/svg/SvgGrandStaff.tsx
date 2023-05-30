@@ -43,16 +43,40 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
     }
 
     // TODO-ben : Space "x" coordinates based on elapsed beat counts for the measure, and the shortest note in the measure.
-    const trebleChords = music.map((measure, mi) => {
-        return measure.trebleClef.map((noteGroup, ngi) => {
-            return createSvgChord(noteGroup, 40 + (mi*200) + (ngi*50), Clef.TREBLE);
-        }
-    )});
-    const bassChords = music.map((measure, mi) => {
-        return measure.bassClef.map((noteGroup, ngi) => {
-            return createSvgChord(noteGroup, 40 + (mi*200) + (ngi*50), Clef.BASS);
-        }
-    )});
+    let trebleX = 40;
+    let bassX = 40;
+    const trebleMusic: ReactElement[] = [];
+    const bassMusic: ReactElement[] = [];
+    const barLines: ReactElement[] = [];
+    music.forEach(measure => {
+        // -- Treble Clef --
+        measure.trebleClef.forEach(noteGroup => {
+            let chord = createSvgChord(noteGroup, trebleX, Clef.TREBLE);
+            trebleX += 50;
+            trebleMusic.push(chord);
+        });
+
+        // -- Bass Clef --
+        measure.bassClef.forEach(noteGroup => {
+            let chord = createSvgChord(noteGroup, bassX, Clef.BASS);
+            bassX += 50;
+            bassMusic.push(chord);
+        });
+
+        // -- Bar Lines --
+        let barX = Math.max(trebleX, bassX); // treble/bass should be equal, but in case they're not...
+        barLines.push((<SvgBarLine
+            key={ `bar-${barX}` }
+            x={ barX }
+            y={ height * PADDING_RATIO }
+            height={ height * (2*STAFF_RATIO + GAP_RATIO)}
+            strokeWidth={ staffThickness }
+        ></SvgBarLine>));
+
+        // Increment trebleX/bassX to account for the bar line
+        trebleX = barX + 50;
+        bassX = barX + 50;
+    });
 
     return (
         <svg viewBox={ `0 0 ${width} ${height}` } style={{ width: `${width}px`, height: `${height}px` }}>
@@ -65,8 +89,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
                 {/* TODO-ben : Staff Definition */}
                 {/* <SvgStaffDefinition clef={ Clef.TREBLE } musicKey={ musicKey } timeSignature={ sightReadingConfig.timeSignature }></SvgStaffDefinition> */}
                 <g style={{ transform: `translateX(${musicXShift}px)` }}>
-                    {/* TODO-ben : Notes */}
-                    { trebleChords }
+                    { trebleMusic }
                 </g>
             </g>
 
@@ -76,8 +99,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
                 {/* TODO-ben : Staff Definition */}
                 {/* <SvgStaffDefinition clef={ Clef.TREBLE } musicKey={ musicKey } timeSignature={ sightReadingConfig.timeSignature }></SvgStaffDefinition> */}
                 <g style={{ transform: `translateX(${musicXShift}px)` }}>
-                    {/* TODO-ben : Notes */}
-                    { bassChords }
+                    { bassMusic }
                 </g>
             </g>
 
@@ -86,11 +108,10 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
                 y={ height * PADDING_RATIO }
                 height={ height * (2*STAFF_RATIO + GAP_RATIO)}
                 strokeWidth={ staffThickness }></SvgBarLine>
-            {/* TODO */}
 
             {/* Bar lines to separate measures */}
             <g style={{ transform: `translateX(${musicXShift}px)` }}>
-                {/* TODO */}
+                { barLines }
             </g>
         </svg>
     )
