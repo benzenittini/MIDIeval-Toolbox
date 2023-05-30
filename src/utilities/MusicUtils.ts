@@ -1,5 +1,5 @@
 
-import { Chord, ChordQuality, PITCH_CLASSES, PitchClass, Note, Octave, RhythmicValue, SeventhQuality, TriadQuality, C, A, Key, MAJOR_KEYS, KeyToRootPitchClass, TimeSignature, Sound } from "../datatypes/Musics";
+import { Chord, ChordQuality, PITCH_CLASSES, PitchClass, Note, Octave, RhythmicValue, SeventhQuality, TriadQuality, C, A, Key, MAJOR_KEYS, KeyToRootPitchClass, TimeSignature, Sound, MajorKeys, Clef } from "../datatypes/Musics";
 import { clamp } from "./NumUtils";
 
 
@@ -28,6 +28,15 @@ export function createChord(
     inversion: number = 0
 ): Chord {
     return { root, quality, inversion };
+}
+
+
+export function isANote(sound: Sound): sound is Note {
+    return 'pitchClass' in sound;
+}
+
+export function isAChord(sound: Sound): sound is Chord {
+    return 'root' in sound;
 }
 
 

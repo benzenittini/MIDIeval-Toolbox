@@ -1,6 +1,7 @@
 
-import { ChordQuality, PitchClass, SeventhQuality, TriadQuality, C, A, Key, B, D, E, F, G, CFLAT, FFLAT, EFLAT, DFLAT, GFLAT, AFLAT, BFLAT, CSHARP, DSHARP, ESHARP, FSHARP, GSHARP, ASHARP, BSHARP, Sound } from "../datatypes/Musics";
+import { ChordQuality, PitchClass, SeventhQuality, TriadQuality, Key, Sound, MajorKeys, Chord, Note, Accidental } from "../datatypes/Musics";
 import { randomItemFrom } from "./ArrayUtils";
+import { getChordNotes, getScale, isAChord, isANote } from "./MusicUtils";
 
 
 export function getStringNotation(key: Key | null, sound: Sound): string {
@@ -28,42 +29,94 @@ export function getQualityNotation(quality: ChordQuality): string {
     }
 }
 
-export function pitchClassToLetter(key: Key | null, pitchClass: PitchClass): string {
-    if (key === null) {
-        switch (pitchClass) {
-            case 0:  return randomItemFrom(['C', 'B♯']);
-            case 1:  return randomItemFrom(['C♯', 'D♭']);
-            case 2:  return randomItemFrom(['D']);
-            case 3:  return randomItemFrom(['D♯', 'E♭']);
-            case 4:  return randomItemFrom(['E', 'F♭']);
-            case 5:  return randomItemFrom(['F', 'E♯']);
-            case 6:  return randomItemFrom(['F♯', 'G♭']);
-            case 7:  return randomItemFrom(['G']);
-            case 8:  return randomItemFrom(['G♯', 'A♭']);
-            case 9:  return randomItemFrom(['A']);
-            case 10: return randomItemFrom(['A♯', 'B♭']);
-            case 11: return randomItemFrom(['B', 'C♭']);
-        }
-    } else {
-        return PITCH_LOOKUP[key][pitchClass];
+export function pitchClassToLetter(key: Key | null, pitchClass: PitchClass): NoteLetter {
+    // If a key is defined, and the pitch class is in key, use a non-accidental.
+    if (key !== null) {
+        const inKey = LETTERS_IN_KEY[key][pitchClass];
+        if (inKey !== null) return inKey;
+    }
+
+    // If all else fails, eenie meenie!
+    return randomItemFrom(PITCH_CLASS_TO_LETTERS[pitchClass]);
+}
+
+const BASE_LETTERS = 'ABCDEFG'.split('');
+export type Letter = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+export type NoteLetter =
+    'A♭' | 'A' | 'A♯' |
+    'B♭' | 'B' | 'B♯' |
+    'C♭' | 'C' | 'C♯' |
+    'D♭' | 'D' | 'D♯' |
+    'E♭' | 'E' | 'E♯' |
+    'F♭' | 'F' | 'F♯' |
+    'G♭' | 'G' | 'G♯';
+export const PITCH_CLASS_TO_LETTERS: NoteLetter[][] = [
+    ['C', 'B♯'],
+    ['D♭', 'C♯'],
+    ['D'],
+    ['E♭', 'D♯'],
+    ['F♭', 'E'],
+    ['F',  'E♯'],
+    ['G♭', 'F♯'],
+    ['G'],
+    ['A♭', 'G♯'],
+    ['A'],
+    ['B♭', 'A♯'],
+    ['C♭', 'B'],
+];
+
+/**
+ * Returns the interval between two note letters. "1" === root, "3" === third, "5" === fifth, ...
+ */
+export function getInterval(a: NoteLetter, b: NoteLetter): number {
+    return Math.abs(BASE_LETTERS.indexOf(a.charAt(0)) - BASE_LETTERS.indexOf(b.charAt(0))) + 1;
+}
+
+export function getAccidental(letter: NoteLetter): Accidental {
+    switch (letter.charAt(1)) {
+        case '♭': return Accidental.FLAT;
+        case '':  return Accidental.NATURAL;
+        case '♯': return Accidental.SHARP;
+
+        // Should never come up.
+        default: return Accidental.NATURAL;
     }
 }
 
-/** Given a key and pitch, returns the letter representation of the pitch. */
-export const PITCH_LOOKUP: any = {
-    'C♭ Major': {[CFLAT]: 'C♭',  [DFLAT]: 'D♭',  [EFLAT]: 'E♭',  [FFLAT]: 'F♭',  [GFLAT]: 'G♭',  [AFLAT]: 'A♭',  [BFLAT]: 'B♭'},
-    'C Major':  {[C]: 'C',       [D]: 'D',       [E]: 'E',       [F]: 'F',       [G]: 'G',       [A]: 'A',       [B]: 'B'},
-    'C♯ Major': {[CSHARP]: 'C♯', [DSHARP]: 'D♯', [ESHARP]: 'E♯', [FSHARP]: 'F♯', [GSHARP]: 'G♯', [ASHARP]: 'A♯', [BSHARP]: 'B♯'},
-    'D♭ Major': {[DFLAT]: 'D♭',  [EFLAT]: 'E♭',  [F]: 'F',       [GFLAT]: 'G♭',  [AFLAT]: 'A♭',  [BFLAT]: 'B♭',  [C]: 'C'},
-    'D Major':  {[D]: 'D',       [E]: 'E',       [FSHARP]: 'F♯', [G]: 'G',       [A]: 'A',       [B]: 'B',       [CSHARP]: 'C♯'},
-    'E♭ Major': {[EFLAT]: 'E♭',  [F]: 'F',       [G]: 'G',       [AFLAT]: 'A♭',  [BFLAT]: 'B♭',  [C]: 'C',       [D]: 'D'},
-    'E Major':  {[E]: 'E',       [FSHARP]: 'F♯', [GSHARP]: 'G♯', [A]: 'A',       [B]: 'B',       [CSHARP]: 'C♯', [DSHARP]: 'D♯'},
-    'F Major':  {[F]: 'F',       [G]: 'G',       [A]: 'A',       [BFLAT]: 'B♭',  [C]: 'C',       [D]: 'D',       [E]: 'E'},
-    'F♯ Major': {[FSHARP]: 'F♯', [GSHARP]: 'G♯', [ASHARP]: 'A♯', [B]: 'B',       [CSHARP]: 'C♯', [DSHARP]: 'D♯', [ESHARP]: 'E♯'},
-    'G♭ Major': {[GFLAT]: 'G♭',  [AFLAT]: 'A♭',  [BFLAT]: 'B♭',  [CFLAT]: 'C♭',  [DFLAT]: 'D♭',  [EFLAT]: 'E♭',  [F]: 'F'},
-    'G Major':  {[G]: 'G',       [A]: 'A',       [B]: 'B',       [C]: 'C',       [D]: 'D',       [E]: 'E',       [FSHARP]: 'F♯'},
-    'A♭ Major': {[AFLAT]: 'A♭',  [BFLAT]: 'B♭',  [C]: 'C',       [DFLAT]: 'D♭',  [EFLAT]: 'E♭',  [F]: 'F',       [G]: 'G'},
-    'A Major':  {[A]: 'A',       [B]: 'B',       [CSHARP]: 'C♯', [D]: 'D',       [E]: 'E',       [FSHARP]: 'F♯', [GSHARP]: 'G♯'},
-    'B♭ Major': {[BFLAT]: 'B♭',  [C]: 'C',       [D]: 'D',       [EFLAT]: 'E♭',  [F]: 'F',       [G]: 'G',       [A]: 'A'},
-    'B Major':  {[B]: 'B',       [CSHARP]: 'C♯', [DSHARP]: 'D♯', [E]: 'E',       [FSHARP]: 'F♯', [GSHARP]: 'G♯', [ASHARP]: 'A♯'},
+export const LETTERS_IN_KEY: Record<Key, (NoteLetter | null)[]> = {
+    [MajorKeys.CFLAT_MAJOR]:  getNotesInKey(MajorKeys.CFLAT_MAJOR,  'C♭'),
+    [MajorKeys.C_MAJOR]:      getNotesInKey(MajorKeys.C_MAJOR,      'C'),
+    [MajorKeys.CSHARP_MAJOR]: getNotesInKey(MajorKeys.CSHARP_MAJOR, 'C♯'),
+    [MajorKeys.DFLAT_MAJOR]:  getNotesInKey(MajorKeys.DFLAT_MAJOR,  'D♭'),
+    [MajorKeys.D_MAJOR]:      getNotesInKey(MajorKeys.D_MAJOR,      'D'),
+    [MajorKeys.EFLAT_MAJOR]:  getNotesInKey(MajorKeys.EFLAT_MAJOR,  'E♭'),
+    [MajorKeys.E_MAJOR]:      getNotesInKey(MajorKeys.E_MAJOR,      'E'),
+    [MajorKeys.F_MAJOR]:      getNotesInKey(MajorKeys.F_MAJOR,      'F'),
+    [MajorKeys.FSHARP_MAJOR]: getNotesInKey(MajorKeys.FSHARP_MAJOR, 'F♯'),
+    [MajorKeys.GFLAT_MAJOR]:  getNotesInKey(MajorKeys.GFLAT_MAJOR,  'G♭'),
+    [MajorKeys.G_MAJOR]:      getNotesInKey(MajorKeys.G_MAJOR,      'G'),
+    [MajorKeys.AFLAT_MAJOR]:  getNotesInKey(MajorKeys.AFLAT_MAJOR,  'A♭'),
+    [MajorKeys.A_MAJOR]:      getNotesInKey(MajorKeys.A_MAJOR,      'A'),
+    [MajorKeys.BFLAT_MAJOR]:  getNotesInKey(MajorKeys.BFLAT_MAJOR,  'B♭'),
+    [MajorKeys.B_MAJOR]:      getNotesInKey(MajorKeys.B_MAJOR,      'B'),
+}
+
+/**
+ * Returns an array of string-represented notes, indexed by the note's pitch class (0 = C, ...). For pitch
+ * classes outside the key, a "null" value is returned. The "starting note" is the root note of the key.
+ * 
+ * Examples:
+ *   C major is: ['C',  null, 'D', null, 'E', 'F',  null, 'G', null, 'A', null, 'B']
+ *   D major is: [null, 'C♯', 'D', null, 'E', null, 'F♯', 'G', null, 'A', null, 'B']
+ */
+function getNotesInKey(key: Key, startingNote: NoteLetter): (NoteLetter | null)[] {
+    let retVal = new Array(12).fill(null);
+    let currentLetterIndex = BASE_LETTERS.indexOf(startingNote.charAt(0));
+    for (let pc of getScale(key)) {
+        let availableLetters = PITCH_CLASS_TO_LETTERS[pc];
+        retVal[pc] = availableLetters.find(opt => opt.startsWith(BASE_LETTERS[currentLetterIndex]));
+        currentLetterIndex++;
+        currentLetterIndex %= BASE_LETTERS.length;
+    }
+    return retVal;
 }

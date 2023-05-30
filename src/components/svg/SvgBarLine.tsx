@@ -7,7 +7,7 @@ type Params = {
     stroke?: string;
 };
 
-export default function SvgStaff({ x, y, height, strokeWidth, stroke = "var(--gray-light)" }: Params) {
+export default function SvgBarLine({ x, y, height, strokeWidth, stroke = "var(--gray-light)" }: Params) {
     return (
         <line
             x1={ x }

@@ -3,6 +3,8 @@
 // Pitch Class
 // -----------
 
+import { Letter, NoteLetter } from "../utilities/NotationUtils";
+
 /** For convenience, when referring to a PitchClass. */
 export const
     CFLAT = 11, C = 0,  CSHARP = 1,
@@ -30,6 +32,13 @@ export type Note = {
     octave: Octave;
     isDotted: boolean; // Lengthens duration by 1/2 its original value.
 };
+
+/** Replaces pitchClass with a letter and (optional) accidental. Useful when prepping notes for display on a staff. */
+export type LabeledNote = Omit<Note, "pitchClass"> | {
+    letter: Letter;
+    accidental?: Accidental;
+}
+export enum Accidental { SHARP, FLAT, NATURAL };
 
 
 // ======
