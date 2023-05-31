@@ -30,7 +30,14 @@ export type PitchClassWithOctave = {
 
 /** 0 only has A and B, 8 only has C. See: https://en.wikipedia.org/wiki/Octave#/media/File:Piano_Frequencies.svg */
 export type Octave = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-export enum RhythmicValue { WHOLE, HALF, QUARTER, EIGHTH, SIXTEENTH }
+export enum RhythmicValue {
+    WHOLE = 'whole',
+    HALF = 'half',
+    QUARTER = 'quarter',
+    EIGHTH = 'eighth',
+    SIXTEENTH = 'sixteenth'
+};
+export const RHYTHMIC_VALUES = Object.values(RhythmicValue);
 
 export type Note = {
     pitchClass: PitchClass;

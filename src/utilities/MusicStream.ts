@@ -1,5 +1,5 @@
 import { SightReadingConfiguration } from "../datatypes/Configs";
-import { Key, LabeledNote, Note, Octave, Pitch, PitchClass, RhythmicValue, Sound } from "../datatypes/Musics";
+import { Key, LabeledNote, Note, Octave, Pitch, PitchClass, RHYTHMIC_VALUES, RhythmicValue, Sound } from "../datatypes/Musics";
 import { randomItemFrom } from "./ArrayUtils";
 import { getRandomNote } from "./Generators";
 import { convertToPitch, convertToPitchClassWithOctave, createNote, getBeatCount, getChordNotes, isANote } from "./MusicUtils";
@@ -115,10 +115,14 @@ export class MusicStream {
             }
         }
 
-        return {
+        let retVal = {
             trebleClef: this.pullOffMeasure(this.generatedMusic.trebleClef),
             bassClef:   this.pullOffMeasure(this.generatedMusic.bassClef),
         };
+        this.trebleBeatCount -= this.config.timeSignature.top;
+        this.bassBeatCount   -= this.config.timeSignature.top;
+
+        return retVal;
     }
 
     public labelMusic(music: Music): LabeledMusic {
@@ -127,7 +131,12 @@ export class MusicStream {
 
         // Label the music, swapping out "notes" for "labeled notes"
 
-        // First, label the notes that are in key.
+        // First, if the note is bordering its staff's bounds, and one option would push it beyond, choose the other.
+        // (ex: Treble staff, C4 is the lowest ... but B# is the same note, but rendered 1 line lower, which is OOB for the staffs.)
+        treble = labelUnlabeled(treble, labelIfOOB(this.key, TREBLE_BOUNDS));
+        bass   = labelUnlabeled(bass,   labelIfOOB(this.key, BASS_BOUNDS));
+
+        // Then, label the notes that are in key.
         treble = labelUnlabeled(treble, labelIfInKey(this.key));
         bass   = labelUnlabeled(bass,   labelIfInKey(this.key));
 
@@ -159,8 +168,6 @@ export class MusicStream {
             measure.push(sound);
             beatsRemaining -= getBeatCount(this.config.timeSignature, sound);
         }
-        this.trebleBeatCount -= this.config.timeSignature.top;
-        this.bassBeatCount   -= this.config.timeSignature.top;
 
         return measure;
     }
@@ -207,11 +214,20 @@ export class MusicStream {
         // TODO-ben : Make this actually generate a "flurry" (mostly-)in-key instead of a random mess
         const sounds: Sound[] = [];
 
-        const rhythmicValue = randomItemFrom(Object.values(RhythmicValue) as RhythmicValue[]);
+        // const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
+
+        // // Generate between 2 and 8 notes
+        // for (let i = 0; i < randInt(2, 8); i++) {
+        //     const pitch = randInt(bounds.lower, bounds.upper+1);
+        //     const {octave, pitchClass} = convertToPitchClassWithOctave(pitch);
+        //     sounds.push(createNote(pitchClass, rhythmicValue, octave, false));
+        // }
+
+        const rhythmicValue = RhythmicValue.HALF;
 
         // Generate between 2 and 8 notes
-        for (let i = 0; i < randInt(2, 8); i++) {
-            const pitch = randInt(bounds.lower, bounds.upper+1);
+        for (let currentPitch = bounds.lower; currentPitch < bounds.upper+1; currentPitch++) {
+            const pitch = currentPitch;
             const {octave, pitchClass} = convertToPitchClassWithOctave(pitch);
             sounds.push(createNote(pitchClass, rhythmicValue, octave, false));
         }
@@ -274,6 +290,27 @@ function labelUnlabeled(notes: SemiLabeledNotes[], labelFn: (note: Note) => Note
             }
         });
     });
+}
+
+function labelIfOOB(key: Key, bounds: Bounds): (note: Note) => Note | LabeledNote {
+    return (note: Note) => {
+        // If "just one" option, then we don't have a choice to keep it "in bounds".
+        const options = PITCH_CLASS_TO_LETTERS[note.pitchClass];
+        if (options.length > 1) {
+            const pitch = convertToPitch(note);
+            if (pitch === bounds.lower) {
+                // Choose the higher letter
+                const notation = options[0].charAt(0) > options[1].charAt(0) ? options[0] : options[1];
+                return noteToLabeledNote(note, notation, key);
+            } else if (pitch === bounds.upper) {
+                // Choose the lower letter
+                const notation = options[0].charAt(0) < options[1].charAt(0) ? options[0] : options[1];
+                return noteToLabeledNote(note, notation, key);
+            }
+        }
+
+        return note;
+    };
 }
 
 function labelIfInKey(key: Key): (note: Note) => Note | LabeledNote {
@@ -343,9 +380,7 @@ function noteToLabeledNote(note: Note, notation: NoteLetter, key: Key): LabeledN
     delete labeled.pitchClass;
 
     labeled.letter = notation.charAt(0);
-    if (!LETTERS_IN_KEY[key].includes(notation)) {
-        labeled.accidental = getAccidental(notation);
-    }
+    labeled.accidental = getAccidental(notation);
 
     return labeled;
 }

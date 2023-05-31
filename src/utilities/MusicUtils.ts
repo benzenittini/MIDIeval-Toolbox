@@ -203,7 +203,7 @@ export function describeChordQuality(chordQuality: ChordQuality): string {
     }
 }
 
-export function getBeatCount(timeSignature: TimeSignature, sound: Sound) {
+export function getBeatCount(timeSignature: TimeSignature, sound: Sound): number {
     let note = ("root" in sound) ? sound.root : sound;
     switch (note.rhythmicValue) {
         case RhythmicValue.WHOLE:     return timeSignature.bottom / 1;
@@ -211,6 +211,7 @@ export function getBeatCount(timeSignature: TimeSignature, sound: Sound) {
         case RhythmicValue.QUARTER:   return timeSignature.bottom / 4;
         case RhythmicValue.EIGHTH:    return timeSignature.bottom / 8;
         case RhythmicValue.SIXTEENTH: return timeSignature.bottom / 16;
+        default: throw new Error("Unrecognized rhythmic value: " + note.rhythmicValue);
     }
 }
 

@@ -13,7 +13,7 @@ export default function SightReadingPractice({ goHome, goToConfig }: { goHome: (
     const [ key ] = useState(convertKeyConfigToKey(sightReadingConfig.key)!);
     const [ musicStream ] = useState(new MusicStream(sightReadingConfig, key));
     const [ displayedMusic, setDisplayedMusic ] = useState(
-        new Array(3).fill(1).map(() => musicStream.labelMusic(musicStream.getNextMeasure()))
+        new Array(5).fill(1).map(() => musicStream.labelMusic(musicStream.getNextMeasure()))
     );
 
     return (
