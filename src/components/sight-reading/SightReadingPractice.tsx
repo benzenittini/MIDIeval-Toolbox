@@ -1,11 +1,10 @@
 
 
 import { useState } from 'react';
-import { LabeledMusic, Music, MusicStream } from '../../utilities/MusicStream';
+import { MusicStream } from '../../utilities/MusicStream';
 import { useSightReadingConfig } from './SightReadingConfigContext';
 import { convertKeyConfigToKey } from '../../datatypes/Configs';
 import GrandStaff from '../svg/SvgGrandStaff';
-import { MajorKeys } from '../../datatypes/Musics';
 
 
 export default function SightReadingPractice({ goHome, goToConfig }: { goHome: () => void, goToConfig: () => void }) {

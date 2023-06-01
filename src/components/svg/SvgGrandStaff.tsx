@@ -1,15 +1,15 @@
 
 import { ReactElement, useState } from "react";
 
-import { Clef, Key, LabeledNote, Octave, PITCH_CLASSES, PitchClass, RhythmicValue, Sound, TimeSignature } from "../../datatypes/Musics";
 import { useSightReadingConfig } from "../sight-reading/SightReadingConfigContext";
 
 import SvgStaff from "./SvgStaff";
 import SvgBarLine from "./SvgBarLine";
 import SvgStaffDefinition from "./SvgStaffDefinition";
 import SvgChord from "./SvgChord";
-import { getChordsInKey } from "../../utilities/MusicUtils";
 import { LabeledMusic } from "../../utilities/MusicStream";
+import { Key, Note } from "../../datatypes/ComplexTypes";
+import { TimeSignature, Clef, Accidental } from "../../datatypes/BasicTypes";
 
 
 type Params = {
@@ -22,16 +22,19 @@ type Params = {
 
 // These need to add up to 100
 const PADDING_RATIO = 12/100; // x2 because top and bottom
-const STAFF_RATIO   = 28/100; // x2 because 2 staffs
-const GAP_RATIO     = 20/100; // Gap between staffs
+const STAFF_RATIO   = 25/100; // x2 because 2 staffs
+const GAP_RATIO     = 26/100; // Gap between staffs
 
 export default function GrandStaff({ width, height, musicKey, timeSignature, music }: Params) {
     const [ musicXShift, setMusicXShift ] = useState(0);
 
+    /** Map of a letter to its accidental. */
+    const originalKeyLetters = musicKey.getNoteLabelsInKey();
+
     // Line thicknesses
     const staffThickness = 1/100 * STAFF_RATIO * height;
 
-    function createSvgChord(labeledNoteGroup: LabeledNote[], x: number, clef: Clef) {
+    function createSvgChord(labeledNoteGroup: Note[], x: number, clef: Clef) {
         return (<SvgChord
             key={ `chord-${x}` }
             clef={ clef }
@@ -39,6 +42,12 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             staffLineHeight={ STAFF_RATIO * height / 4 }
             strokeWidth={ staffThickness }
             labeledNoteGroup={ labeledNoteGroup }
+            // TODO-ben : Every note in a chord will have the same accidental ... we can't do this.
+            // TODO-ben : But we also want to make sure we properly set/unset accidentals based on the preceeding notes in the measure...
+            // TODO-ben : Pass the current "key letters" into here. Map of letters to the accidental.
+            // accidental={ Accidental.FLAT }
+            // accidental={ Accidental.NATURAL }
+            accidental={ Accidental.SHARP }
         ></SvgChord>);
     }
 

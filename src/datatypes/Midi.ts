@@ -1,4 +1,6 @@
-import { Note } from "./Musics"
+
+import { Note } from "./ComplexTypes";
+
 
 export type MidiInput = {
     note: Note;

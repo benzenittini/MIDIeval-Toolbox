@@ -1,6 +1,7 @@
-import { Chord, ChordQuality, Note, RhythmicValue, SEVENTH_QUALITIES, TRIAD_QUALITIES, Key, KEYS, PITCH_CLASSES } from "../datatypes/Musics";
+
+import { ChordQuality, PITCH_CLASSES, RhythmicValue, SEVENTH_QUALITIES, TRIAD_QUALITIES } from "../datatypes/BasicTypes";
+import { Chord, KEYS, Key, Note } from "../datatypes/ComplexTypes";
 import { randomItemFrom } from "./ArrayUtils";
-import { createChord, createNote, getChordsInKey, getScale } from "./MusicUtils";
 import { randInt } from "./NumberUtils";
 
 
@@ -9,9 +10,9 @@ export function getRandomKey(): Key {
 }
 
 export function getRandomNote(key: Key | null): Note {
-    const availablePitches = key === null ? PITCH_CLASSES : getScale(key);
+    const availablePitches = key === null ? PITCH_CLASSES : key.getScale();
     const pitchClass = availablePitches[randInt(0, availablePitches.length)];
-    return createNote(pitchClass, RhythmicValue.QUARTER, 4, false);
+    return new Note(Note.convertToPitch(4, pitchClass), RhythmicValue.QUARTER, false);
 }
 
 export function getRandomChord(key: Key | null, allowedQualities: ChordQuality[]): Chord | null {
@@ -19,9 +20,9 @@ export function getRandomChord(key: Key | null, allowedQualities: ChordQuality[]
     if (key === null) {
         const note = getRandomNote(key);
         const quality = allowedQualities[randInt(0, allowedQualities.length)];
-        rootChord = createChord(note, quality);
+        rootChord = new Chord(note, quality);
     } else {
-        const validChords = getChordsInKey(key).filter(c => allowedQualities.includes(c.quality));
+        const validChords = key.getChords().filter(c => allowedQualities.includes(c.quality));
         if (validChords.length === 0) {
             return null;
         }
@@ -33,5 +34,5 @@ export function getRandomChord(key: Key | null, allowedQualities: ChordQuality[]
         (SEVENTH_QUALITIES.includes(rootChord.quality as any)) ? randInt(0, 4) :
         0;
 
-    return createChord(rootChord.root, rootChord.quality, inversion);
+    return new Chord(rootChord.root, rootChord.quality, inversion);
 }

@@ -1,11 +1,14 @@
+
 import { getRandomKey } from "../utilities/Generators";
-import { ChordQuality, Key, MajorKeys, SeventhQuality, TimeSignature, TriadQuality } from "./Musics";
+import { TimeSignature, ChordQuality, TriadQuality, SeventhQuality } from "./BasicTypes";
+import { Key, MAJOR_KEY_LOOKUP } from "./ComplexTypes";
+
 
 export enum MiscKeys {
     ANYTHING_GOES = '(Anything Goes)',
     RANDOM_KEY = '(Random Key)',
 }
-export type KeyConfigOpts = MiscKeys | MajorKeys;
+export type KeyConfigOpts = MiscKeys | keyof typeof MAJOR_KEY_LOOKUP;
 
 export function convertKeyConfigToKey(keyConfig: KeyConfigOpts): Key | null {
     switch (keyConfig) {
@@ -14,8 +17,8 @@ export function convertKeyConfigToKey(keyConfig: KeyConfigOpts): Key | null {
         case MiscKeys.RANDOM_KEY:
             return getRandomKey();
         default:
-            // All other options are already a keys.
-            return keyConfig;
+            // All other options are already keys.
+            return MAJOR_KEY_LOOKUP[keyConfig];
     }
 }
 

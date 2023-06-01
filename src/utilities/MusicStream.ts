@@ -1,9 +1,9 @@
+
+import { Pitch, RhythmicValue } from "../datatypes/BasicTypes";
+import { Key, Sound, Note, NoteLabel, PITCH_CLASS_TO_LABELS } from "../datatypes/ComplexTypes";
 import { SightReadingConfiguration } from "../datatypes/Configs";
-import { Key, LabeledNote, Note, Octave, Pitch, PitchClass, RHYTHMIC_VALUES, RhythmicValue, Sound } from "../datatypes/Musics";
 import { randomItemFrom } from "./ArrayUtils";
 import { getRandomNote } from "./Generators";
-import { convertToPitch, convertToPitchClassWithOctave, createNote, getBeatCount, getChordNotes, isANote } from "./MusicUtils";
-import { LETTERS_IN_KEY, NoteLetter, PITCH_CLASS_TO_LETTERS, getAccidental, getInterval } from "./NotationUtils";
 import { randInt } from "./NumberUtils";
 
 
@@ -42,17 +42,16 @@ import { randInt } from "./NumberUtils";
 //     return eles;
 // }
 
+// TODO-ben : Move these to "Complex Types"?
 export type Music = {
     trebleClef: Sound[],
     bassClef: Sound[],
 }
-
-type SemiLabeledNotes = (Note | LabeledNote)[];
-
 export type LabeledMusic = {
-    trebleClef: LabeledNote[][],
-    bassClef:   LabeledNote[][],
+    trebleClef: Note[][],
+    bassClef:   Note[][],
 }
+
 
 enum TrebleState {
     // If "single-notes" is selected
@@ -77,12 +76,12 @@ enum BassState {
 // Limits the range of notes we generate. All bounds are inclusive.
 type Bounds = { upper: Pitch, lower: Pitch };
 const TREBLE_BOUNDS: Bounds = {
-    upper: convertToPitch({ octave: 5, pitchClass: 9 }), // A5
-    lower: convertToPitch({ octave: 4, pitchClass: 0 }), // C4, "middle C"
+    upper: Note.convertToPitch(5, 9), // A5
+    lower: Note.convertToPitch(4, 0), // C4, "middle C"
 }
 const BASS_BOUNDS: Bounds = {
-    upper: convertToPitch({ octave: 4, pitchClass: 0 }), // C4, "middle C"
-    lower: convertToPitch({ octave: 2, pitchClass: 4 }), // E2
+    upper: Note.convertToPitch(4, 0), // C4, "middle C"
+    lower: Note.convertToPitch(2, 4), // E2
 }
 
 export class MusicStream {
@@ -126,35 +125,29 @@ export class MusicStream {
     }
 
     public labelMusic(music: Music): LabeledMusic {
-        let treble: SemiLabeledNotes[] = music.trebleClef.map((sound) => isANote(sound) ? [sound] : getChordNotes(sound));
-        let bass:   SemiLabeledNotes[] = music.bassClef  .map((sound) => isANote(sound) ? [sound] : getChordNotes(sound));
+        let treble: Note[][] = music.trebleClef.map((sound) => sound.getNotes());
+        let bass:   Note[][] = music.bassClef  .map((sound) => sound.getNotes());
 
         // Label the music, swapping out "notes" for "labeled notes"
 
+        // TODO-ben : Change all the label functions to just modify the note inline instead of mapping and returning values.
+
         // First, if the note is bordering its staff's bounds, and one option would push it beyond, choose the other.
         // (ex: Treble staff, C4 is the lowest ... but B# is the same note, but rendered 1 line lower, which is OOB for the staffs.)
-        treble = labelUnlabeled(treble, labelIfOOB(this.key, TREBLE_BOUNDS));
-        bass   = labelUnlabeled(bass,   labelIfOOB(this.key, BASS_BOUNDS));
+        treble = labelUnlabeled(treble, labelIfOOB(TREBLE_BOUNDS));
+        bass   = labelUnlabeled(bass,   labelIfOOB(BASS_BOUNDS));
 
         // Then, label the notes that are in key.
         treble = labelUnlabeled(treble, labelIfInKey(this.key));
         bass   = labelUnlabeled(bass,   labelIfInKey(this.key));
 
-        // Then, label the notes that only have one option.
-        treble = labelUnlabeled(treble, labelIfOneOption(this.key));
-        bass   = labelUnlabeled(bass,   labelIfOneOption(this.key));
-
         // Then, label the notes based on the number of roots/thirds/fifths/sevenths in the rest of the measure.
-        treble = labelUnlabeled(treble, labelByScore(this.key, treble, bass));
-        bass   = labelUnlabeled(bass,   labelByScore(this.key, bass, treble));
-
-        // Then, randomly label the rest.
-        let labeledTreble = labelUnlabeled(treble, labelRandomly(this.key)) as LabeledNote[][];
-        let labeledBass   = labelUnlabeled(bass,   labelRandomly(this.key)) as LabeledNote[][];
+        treble = labelUnlabeled(treble, labelByScore(treble, bass));
+        bass   = labelUnlabeled(bass,   labelByScore(bass, treble));
 
         return {
-            trebleClef: labeledTreble,
-            bassClef:   labeledBass,
+            trebleClef: treble,
+            bassClef:   bass,
         };
     }
 
@@ -166,7 +159,7 @@ export class MusicStream {
             let sound = musicClef.shift();
             if (!sound) break; // Shouldn't happen... but you never know.
             measure.push(sound);
-            beatsRemaining -= getBeatCount(this.config.timeSignature, sound);
+            beatsRemaining -= sound.getBeatCount(this.config.timeSignature);
         }
 
         return measure;
@@ -187,7 +180,7 @@ export class MusicStream {
         }
         this.generatedMusic.trebleClef.push(...trebleSounds);
         this.trebleBeatCount += trebleSounds
-            .map(sound => getBeatCount(this.config.timeSignature, sound))
+            .map(sound => sound.getBeatCount(this.config.timeSignature))
             .reduce((a, b) => a+b, 0);
     }
 
@@ -206,7 +199,7 @@ export class MusicStream {
         }
         this.generatedMusic.bassClef.push(...bassSounds);
         this.bassBeatCount += bassSounds
-            .map(sound => getBeatCount(this.config.timeSignature, sound))
+            .map(sound => sound.getBeatCount(this.config.timeSignature))
             .reduce((a, b) => a+b, 0);
     }
 
@@ -223,13 +216,11 @@ export class MusicStream {
         //     sounds.push(createNote(pitchClass, rhythmicValue, octave, false));
         // }
 
-        const rhythmicValue = RhythmicValue.HALF;
+        const rhythmicValue = RhythmicValue.QUARTER;
 
         // Generate between 2 and 8 notes
         for (let currentPitch = bounds.lower; currentPitch < bounds.upper+1; currentPitch++) {
-            const pitch = currentPitch;
-            const {octave, pitchClass} = convertToPitchClassWithOctave(pitch);
-            sounds.push(createNote(pitchClass, rhythmicValue, octave, false));
+            sounds.push(new Note(currentPitch, rhythmicValue, false));
         }
 
         return sounds;
@@ -280,7 +271,7 @@ function getValidBassStates(config: SightReadingConfiguration): BassState[] {
 // Note Labeling
 // -------------
 
-function labelUnlabeled(notes: SemiLabeledNotes[], labelFn: (note: Note) => Note | LabeledNote): SemiLabeledNotes[] {
+function labelUnlabeled(notes: Note[][], labelFn: (note: Note) => Note): Note[][] {
     return notes.map(noteGroup => {
         return noteGroup.map(note => {
             if ('pitchClass' in note) {
@@ -292,20 +283,19 @@ function labelUnlabeled(notes: SemiLabeledNotes[], labelFn: (note: Note) => Note
     });
 }
 
-function labelIfOOB(key: Key, bounds: Bounds): (note: Note) => Note | LabeledNote {
+function labelIfOOB(bounds: Bounds): (note: Note) => Note {
     return (note: Note) => {
-        // If "just one" option, then we don't have a choice to keep it "in bounds".
-        const options = PITCH_CLASS_TO_LETTERS[note.pitchClass];
+        // If "just one" option, then we don't have a choice if we want to keep it "in bounds".
+        const options = PITCH_CLASS_TO_LABELS[note.getPitchClass()];
         if (options.length > 1) {
-            const pitch = convertToPitch(note);
-            if (pitch === bounds.lower) {
+            if (note.pitch === bounds.lower) {
                 // Choose the higher letter
-                const notation = options[0].charAt(0) > options[1].charAt(0) ? options[0] : options[1];
-                return noteToLabeledNote(note, notation, key);
-            } else if (pitch === bounds.upper) {
+                const notation = options[0].letter > options[1].letter ? options[0] : options[1];
+                note.setLabel(notation);
+            } else if (note.pitch === bounds.upper) {
                 // Choose the lower letter
-                const notation = options[0].charAt(0) < options[1].charAt(0) ? options[0] : options[1];
-                return noteToLabeledNote(note, notation, key);
+                const notation = options[0].letter < options[1].letter ? options[0] : options[1];
+                note.setLabel(notation);
             }
         }
 
@@ -313,45 +303,37 @@ function labelIfOOB(key: Key, bounds: Bounds): (note: Note) => Note | LabeledNot
     };
 }
 
-function labelIfInKey(key: Key): (note: Note) => Note | LabeledNote {
+function labelIfInKey(key: Key): (note: Note) => Note {
     return (note: Note) => {
-        const notation = LETTERS_IN_KEY[key][note.pitchClass];
-        return (notation === null) ? note : noteToLabeledNote(note, notation, key);
+        const notation = key.getNoteLabelsInKey()[note.getPitchClass()];
+        if (notation !== null) {
+            note.setLabel(notation);
+        }
+        return note;
     };
 }
 
-function labelIfOneOption(key: Key): (note: Note) => Note | LabeledNote {
-    return (note: Note) => {
-        const options = PITCH_CLASS_TO_LETTERS[note.pitchClass];
-        return (options.length > 1) ? note : noteToLabeledNote(note, options[0], key);
-    }
-}
-
 // TODO-ben : This function needs to be heavily tested.
-function labelByScore(key: Key, sameClef: SemiLabeledNotes[], otherClef: SemiLabeledNotes[]): (note: Note) => Note | LabeledNote {
+function labelByScore(sameClef: Note[][], otherClef: Note[][]): (note: Note) => Note {
     return (note: Note) => {
-        const options = PITCH_CLASS_TO_LETTERS[note.pitchClass];
+        const options = PITCH_CLASS_TO_LABELS[note.getPitchClass()];
         const indexInClef = sameClef.findIndex(ng => ng.indexOf(note) !== -1);
         const scores = options.map(opt => {
             return scoreClef(sameClef, opt, indexInClef) + scoreClef(otherClef, opt, -1);
         });
         const topScore = Math.max(...scores);
-        return (topScore > 0) ? note : noteToLabeledNote(note, options[scores.indexOf(topScore)], key);
+        if (topScore > 0) {
+            note.setLabel(options[scores.indexOf(topScore)]);
+        }
+        return note;
     };
-}
-
-function labelRandomly(key: Key): (note: Note) => Note | LabeledNote {
-    return (note: Note) => {
-        const notation = randomItemFrom(PITCH_CLASS_TO_LETTERS[note.pitchClass]);
-        return noteToLabeledNote(note, notation, key);
-    }
 }
 
 /**
  * Returns the score of the given note based on the surrounding notes in the given clef. An "indexInClef" of -1
  * indicates our note is from the other clef, so don't give it bonuses for distance/same-clef.
  */
-function scoreClef(clef: SemiLabeledNotes[], option: NoteLetter, indexInClef: number): number {
+function scoreClef(clef: Note[][], option: NoteLabel, indexInClef: number): number {
     // For now, score is determined by:
     // 1.) Determining the interval between two notes, only caring about roots/thirds/fifths/sevenths
     // 2.) Determining the "time-ish"-distance between those two notes if they're on the same clef
@@ -360,8 +342,8 @@ function scoreClef(clef: SemiLabeledNotes[], option: NoteLetter, indexInClef: nu
     for (let i = 0; i < clef.length; i++) {
         let noteGroupB = clef[i];
         for (let noteB of noteGroupB) {
-            if ('letter' in noteB) {
-                let interval = getInterval(option, noteB.letter);
+            if (noteB.hasLabel()) {
+                let interval = option.getInterval(noteB.getLabel());
                 if ([1, 3, 5, 7].includes(interval)) {
                     const intervalScore = 4-(interval-1)/2; // root = 4, third = 3, fifth = 2, seventh = 1
                     const distanceScore = (indexInClef === -1)
@@ -373,14 +355,4 @@ function scoreClef(clef: SemiLabeledNotes[], option: NoteLetter, indexInClef: nu
         }
     }
     return score;
-}
-
-function noteToLabeledNote(note: Note, notation: NoteLetter, key: Key): LabeledNote {
-    let labeled: any = {...note};
-    delete labeled.pitchClass;
-
-    labeled.letter = notation.charAt(0);
-    labeled.accidental = getAccidental(notation);
-
-    return labeled;
 }

@@ -6,10 +6,8 @@ import styles from './NotationPractice.module.css';
 import { useNotationConfig } from './NotationConfigContext';
 import { getRandomChord, getRandomNote } from '../../utilities/Generators';
 import { NotationConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from '../../datatypes/Configs';
-import { Chord, Key, Note } from '../../datatypes/Musics';
-import { getStringNotation } from '../../utilities/NotationUtils';
 import { clearChangeHandler, setChangeHandler } from '../../utilities/MidiUtils';
-import { describeChordQuality, getChordNotes } from '../../utilities/MusicUtils';
+import { Chord, Key, Note, Sound } from '../../datatypes/ComplexTypes';
 
 
 /**
@@ -28,10 +26,10 @@ function generateChordOrNote(key: Key | null, notationConfig: NotationConfigurat
  * Converts the given key and chord/note into a human-readable string. If the chordOrNote is null,
  * returns "No chords available", as all valid chords must have been ruled out from selection.
  */
-function getDisplayedText(key: Key | null, chordOrNote: Chord | Note | null): string {
-    return (chordOrNote === null)
+function getDisplayedText(key: Key | null, sound: Sound | null): string {
+    return (sound === null)
         ? "No chords available."
-        : getStringNotation(key, chordOrNote);
+        : sound.toString(key);
 }
 
 
@@ -103,12 +101,12 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
             setChangeHandler((changedInput, pressedInputs) => {
                 if (chordOrNote !== null) {
                     const necessaryNotes = ('root' in chordOrNote)
-                        ? getChordNotes(chordOrNote) // It's a chord!
-                        : [chordOrNote];             // It's a note!
+                        ? chordOrNote.getNotes() // It's a chord!
+                        : [chordOrNote];         // It's a note!
 
                     // Determine how many of the necessary notes the user is pressing.
-                    const numValidInputs    = pressedInputs.filter(pi => necessaryNotes.find(nn => nn.pitchClass === pi.note.pitchClass)).length;
-                    const numNecessaryNotes = necessaryNotes.filter(nn => pressedInputs.find(pi => nn.pitchClass === pi.note.pitchClass)).length;
+                    const numValidInputs    = pressedInputs.filter(pi => necessaryNotes.find(nn => nn.getPitchClass() === pi.note.getPitchClass())).length;
+                    const numNecessaryNotes = necessaryNotes.filter(nn => pressedInputs.find(pi => nn.getPitchClass() === pi.note.getPitchClass())).length;
                     // ...and whether they've gotten all the correct notes without any wrong ones.
                     const allInputsAreValid    = numValidInputs === pressedInputs.length;
                     const hasAllNecessaryNotes = numNecessaryNotes === necessaryNotes.length;
@@ -169,7 +167,7 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
 
             {/* Chord Description */}
             {(notationConfig.practiceChords) ? (
-                <p className={ styles.chordDescription }>{ describeChordQuality((chordOrNote as Chord).quality) }</p>
+                <p className={ styles.chordDescription }>{ (chordOrNote as Chord).describeChordQuality() }</p>
             ) : ''}
         </>
     );
