@@ -167,7 +167,7 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
 
             {/* Chord Description */}
             {(notationConfig.practiceChords) ? (
-                <p className={ styles.chordDescription }>{ (chordOrNote as Chord).describeChordQuality() }</p>
+                <p className={ styles.chordDescription }>{ (chordOrNote as Chord).quality.getDescription() }</p>
             ) : ''}
         </>
     );

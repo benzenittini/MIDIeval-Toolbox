@@ -33,32 +33,6 @@ export const BASE_LETTER_PCS: (Letter | null)[] = ['C', null, 'D', null, 'E', 'F
 
 
 // ===========
-// Chord Types
-// -----------
-
-export enum TriadQuality {
-    MAJOR = "maj",
-    MINOR = "min",
-    DIMINISHED = "dim",
-    AUGMENTED = "aug",
-}
-export const TRIAD_QUALITIES = Object.values(TriadQuality);
-
-export enum SeventhQuality {
-    MAJOR_7 = "maj7",
-    MINOR_7 = "min7",
-    DOMINANT_7 = "dom7",
-    HALF_DIM_7 = "halfDim7",
-    DIMINISHED_7 = "dim7",
-    MINOR_MAJOR_7 = "minMaj7",
-    AUG_MAJOR_7 = "augMaj7",
-}
-export const SEVENTH_QUALITIES = Object.values(SeventhQuality);
-
-export type ChordQuality = TriadQuality | SeventhQuality;
-
-
-// ===========
 // Staff Types
 // -----------
 

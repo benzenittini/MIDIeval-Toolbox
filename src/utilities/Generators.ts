@@ -1,6 +1,6 @@
 
-import { ChordQuality, PITCH_CLASSES, RhythmicValue, SEVENTH_QUALITIES, TRIAD_QUALITIES } from "../datatypes/BasicTypes";
-import { Chord, KEYS, Key, Note } from "../datatypes/ComplexTypes";
+import { PITCH_CLASSES, RhythmicValue } from "../datatypes/BasicTypes";
+import { Chord, ChordQuality, KEYS, Key, Note, SEVENTH_QUALITIES, TRIAD_QUALITIES } from "../datatypes/ComplexTypes";
 import { randomItemFrom } from "./ArrayUtils";
 import { randInt } from "./NumberUtils";
 

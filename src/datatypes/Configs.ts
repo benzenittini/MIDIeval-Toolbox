@@ -1,7 +1,7 @@
 
 import { getRandomKey } from "../utilities/Generators";
-import { TimeSignature, ChordQuality, TriadQuality, SeventhQuality } from "./BasicTypes";
-import { Key, MAJOR_KEY_LOOKUP } from "./ComplexTypes";
+import { TimeSignature } from "./BasicTypes";
+import { AUGMENTED_3, AUG_MAJOR_7, ChordQuality, DIMINISHED_3, DIMINISHED_7, DOMINANT_7, HALF_DIM_7, Key, MAJOR_3, MAJOR_7, MAJOR_KEY_LOOKUP, MINOR_3, MINOR_7, MINOR_MAJOR_7 } from "./ComplexTypes";
 
 
 export enum MiscKeys {
@@ -91,23 +91,23 @@ export function getAllowedChordQualities(key: Key | null, config: NotationConfig
 
     // -- Triads --
     if (config.includeTriads) {
-        if (config.includeMaj3) qualities.push(TriadQuality.MAJOR);
-        if (config.includeMin3) qualities.push(TriadQuality.MINOR);
-        if (config.includeDim3) qualities.push(TriadQuality.DIMINISHED);
+        if (config.includeMaj3) qualities.push(MAJOR_3);
+        if (config.includeMin3) qualities.push(MINOR_3);
+        if (config.includeDim3) qualities.push(DIMINISHED_3);
         // This requires no key to be set.
-        if (config.includeAug3 && key === null) qualities.push(TriadQuality.AUGMENTED);
+        if (config.includeAug3 && key === null) qualities.push(AUGMENTED_3);
     }
 
     // -- Sevenths --
     if (config.includeSevenths) {
-        if (config.includeMaj7)     qualities.push(SeventhQuality.MAJOR_7);
-        if (config.includeMin7)     qualities.push(SeventhQuality.MINOR_7);
-        if (config.includeDom7)     qualities.push(SeventhQuality.DOMINANT_7);
-        if (config.includeHalfDim7) qualities.push(SeventhQuality.HALF_DIM_7);
+        if (config.includeMaj7)     qualities.push(MAJOR_7);
+        if (config.includeMin7)     qualities.push(MINOR_7);
+        if (config.includeDom7)     qualities.push(DOMINANT_7);
+        if (config.includeHalfDim7) qualities.push(HALF_DIM_7);
         // These require no key to be set.
-        if (config.includeDim7    && key === null) qualities.push(SeventhQuality.DIMINISHED_7);
-        if (config.includeMinMaj7 && key === null) qualities.push(SeventhQuality.MINOR_MAJOR_7);
-        if (config.includeAugMaj7 && key === null) qualities.push(SeventhQuality.AUG_MAJOR_7);
+        if (config.includeDim7    && key === null) qualities.push(DIMINISHED_7);
+        if (config.includeMinMaj7 && key === null) qualities.push(MINOR_MAJOR_7);
+        if (config.includeAugMaj7 && key === null) qualities.push(AUG_MAJOR_7);
     }
 
     return qualities;

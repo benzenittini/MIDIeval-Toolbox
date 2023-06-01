@@ -1,5 +1,4 @@
 
-import { Octave, PitchClass } from "../datatypes/BasicTypes";
 import { Note } from "../datatypes/ComplexTypes";
 import { MidiInput } from "../datatypes/Midi";
 

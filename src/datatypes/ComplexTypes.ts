@@ -1,6 +1,6 @@
 
 import { randomItemFrom } from "../utilities/ArrayUtils";
-import { Accidental, BASE_LETTERS, BASE_LETTER_PCS, ChordQuality, Letter, Octave, PITCH_CLASSES, Pitch, PitchClass, RhythmicValue, SeventhQuality, TimeSignature, TriadQuality } from "./BasicTypes";
+import { Accidental, BASE_LETTERS, BASE_LETTER_PCS, Letter, Octave, PITCH_CLASSES, Pitch, PitchClass, RhythmicValue, TimeSignature } from "./BasicTypes";
 
 
 // ===========
@@ -161,6 +161,46 @@ NOTE_LABELS.forEach(nl => {
 });
 
 
+// ===================
+// Chord Quality Types
+// -------------------
+
+export class ChordQuality {
+
+    notations: string[];
+    description: string;
+    noteGaps: number[];
+
+    constructor(noteGaps: number[], notations: string[], description: string) {
+        this.noteGaps = noteGaps;
+        this.notations = notations;
+        this.description = description;
+    }
+
+    getNotes(root: any): Note[] { return Note.getSpacedNotes(root, ...this.noteGaps); }
+    getNotation():       string { return randomItemFrom(this.notations); }
+    getDescription():    string { return this.description; }
+}
+
+// -- Chord Quality Instances --
+export const MAJOR_3      = new ChordQuality([4, 7], ['maj', '', 'M', 'Δ'],                                       'Major Triad = major third with a perfect fifth.');
+export const MINOR_3      = new ChordQuality([3, 7], ['min', 'm', '-'],                                           'Minor Triad = minor third with a perfect fifth.');
+export const DIMINISHED_3 = new ChordQuality([3, 6], ['dim', '<sup>○</sup>', 'm<sup>♭5</sup>', 'm<sup>○5</sup>'], 'Diminished Triad = minor third with a diminished fifth.');
+export const AUGMENTED_3  = new ChordQuality([4, 8], ['aug', '+', 'maj<sup>♯5</sup>', 'maj<sup>+5</sup>'],        'Augmented Triad = major third with an augmented fifth.');
+
+export const DIMINISHED_7  = new ChordQuality([3, 6, 9],  ['<sup>○</sup>7'],                        'Fully-Diminished Seventh = minor third, diminished fifth, and a diminished seventh.');
+export const HALF_DIM_7    = new ChordQuality([3, 6, 10], ['<sup>∅</sup>7', '-7<sup>♭5</sup>'],     'Half-Diminished Seventh = minor third, diminished fifth, and a minor seventh.');
+export const MINOR_7       = new ChordQuality([3, 7, 10], ['m<sup>7</sup>', '-7'],                  'Minor 7 = minor third, perfect fifth, and a minor seventh.');
+export const MINOR_MAJOR_7 = new ChordQuality([3, 7, 11], ['min<sup>Maj7</sup>', 'm<sup>M7</sup>'], 'Minor Major 7 = minor third, perfect fifth, and a major seventh.');
+export const DOMINANT_7    = new ChordQuality([4, 7, 10], ['<sup>7</sup>'],                         'Dominant 7 = major third, perfect fifth, and a minor seventh.');
+export const MAJOR_7       = new ChordQuality([4, 7, 11], ['<sup>Maj7</sup>'],                      'Major 7 = major third, perfect fifth, and a major seventh.');
+export const AUG_MAJOR_7   = new ChordQuality([4, 8, 11], ['aug<sup>Maj7</sup>'],                   'Augmented Major 7 = major third, augmented fifth, and a major seventh.');
+
+// -- Chord Quality Arrays --
+export const TRIAD_QUALITIES   = [ MAJOR_3, MINOR_3, DIMINISHED_3, AUGMENTED_3 ];
+export const SEVENTH_QUALITIES = [ DIMINISHED_7, HALF_DIM_7, MINOR_7, MINOR_MAJOR_7, DOMINANT_7, MAJOR_7, AUG_MAJOR_7 ];
+
+
 // ===========
 // Chord Types
 // -----------
@@ -178,69 +218,12 @@ export class Chord extends Sound {
         this.inversion = inversion;
     }
 
-    // -- Chord Qualities --
-    getQualityNotation(): string { return Chord.getQualityNotation(this.quality); }
-    static getQualityNotation(quality: ChordQuality): string {
-        switch (quality) {
-            // -- Triads --
-            case TriadQuality.MAJOR:      return randomItemFrom(['maj', '', 'M', 'Δ']);
-            case TriadQuality.MINOR:      return randomItemFrom(['min', 'm', '-']);
-            case TriadQuality.DIMINISHED: return randomItemFrom(['dim', '<sup>○</sup>', 'm<sup>♭5</sup>', 'm<sup>○5</sup>']);
-            case TriadQuality.AUGMENTED:  return randomItemFrom(['aug', '+', 'maj<sup>♯5</sup>', 'maj<sup>+5</sup>']);
-
-            // -- Sevenths --
-            case SeventhQuality.MAJOR_7:       return randomItemFrom(['<sup>Maj7</sup>']);
-            case SeventhQuality.MINOR_7:       return randomItemFrom(['m<sup>7</sup>', '-7']);
-            case SeventhQuality.DOMINANT_7:    return randomItemFrom(['<sup>7</sup>']);
-            case SeventhQuality.HALF_DIM_7:    return randomItemFrom(['<sup>∅</sup>7', '-7<sup>♭5</sup>']);
-            case SeventhQuality.DIMINISHED_7:  return randomItemFrom(['<sup>○</sup>7']);
-            case SeventhQuality.MINOR_MAJOR_7: return randomItemFrom(['min<sup>Maj7</sup>', 'm<sup>M7</sup>']);
-            case SeventhQuality.AUG_MAJOR_7:   return randomItemFrom(['aug<sup>Maj7</sup>']);
-        }
-    }
-
-    describeChordQuality(): string { return Chord.describeChordQuality(this.quality); }
-    static describeChordQuality(chordQuality: ChordQuality): string {
-        switch (chordQuality) {
-            // -- Triads --
-            case TriadQuality.DIMINISHED: return 'Diminished Triad = minor third with a diminished fifth.';
-            case TriadQuality.MINOR:      return 'Minor Triad = minor third with a perfect fifth.';
-            case TriadQuality.MAJOR:      return 'Major Triad = major third with a perfect fifth.';
-            case TriadQuality.AUGMENTED:  return 'Augmented Triad = major third with an augmented fifth.';
-
-            // -- Sevenths --
-            case SeventhQuality.DIMINISHED_7:  return 'Fully-Diminished Seventh = minor third, diminished fifth, and a diminished seventh.';
-            case SeventhQuality.HALF_DIM_7:    return 'Half-Diminished Seventh = minor third, diminished fifth, and a minor seventh.';
-            case SeventhQuality.MINOR_7:       return 'Minor 7 = minor third, perfect fifth, and a minor seventh.';
-            case SeventhQuality.MINOR_MAJOR_7: return 'Minor Major 7 = minor third, perfect fifth, and a major seventh.';
-            case SeventhQuality.DOMINANT_7:    return 'Dominant 7 = major third, perfect fifth, and a minor seventh.';
-            case SeventhQuality.MAJOR_7:       return 'Major 7 = major third, perfect fifth, and a major seventh.';
-            case SeventhQuality.AUG_MAJOR_7:   return 'Augmented Major 7 = major third, augmented fifth, and a major seventh.';
-        }
-    }
-
     // -- Parent Functions --
-    toString(key?: Key | null): string { return this.root.toString(key) + this.getQualityNotation(); }
+    toString(key?: Key | null): string { return this.root.toString(key) + this.quality.getNotation(); }
     getRhythmicValue(): RhythmicValue { return this.root.rhythmicValue; }
     getNotes(): Note[] {
-        let notes: Note[];
         // Start with the base notes
-        switch (this.quality) {
-            // -- Triads --
-            case TriadQuality.DIMINISHED: notes = Note.getSpacedNotes(this.root, 3, 6); break;
-            case TriadQuality.MINOR:      notes = Note.getSpacedNotes(this.root, 3, 7); break;
-            case TriadQuality.MAJOR:      notes = Note.getSpacedNotes(this.root, 4, 7); break;
-            case TriadQuality.AUGMENTED:  notes = Note.getSpacedNotes(this.root, 4, 8); break;
-
-            // -- Sevenths --
-            case SeventhQuality.DIMINISHED_7:  notes = Note.getSpacedNotes(this.root, 3, 6, 9);  break;
-            case SeventhQuality.HALF_DIM_7:    notes = Note.getSpacedNotes(this.root, 3, 6, 10); break;
-            case SeventhQuality.MINOR_7:       notes = Note.getSpacedNotes(this.root, 3, 7, 10); break;
-            case SeventhQuality.MINOR_MAJOR_7: notes = Note.getSpacedNotes(this.root, 3, 7, 11); break;
-            case SeventhQuality.DOMINANT_7:    notes = Note.getSpacedNotes(this.root, 4, 7, 10); break;
-            case SeventhQuality.MAJOR_7:       notes = Note.getSpacedNotes(this.root, 4, 7, 11); break;
-            case SeventhQuality.AUG_MAJOR_7:   notes = Note.getSpacedNotes(this.root, 4, 8, 11); break;
-        }
+        let notes: Note[] = this.quality.getNotes(this.root);
 
         // Now adjust based on the inversion
         if (this.inversion < 0) {
@@ -298,21 +281,21 @@ export class Key {
             case KeyType.MAJOR:
                 return [
                     // -- Triads --
-                    new Chord(new Note(scale[0]), TriadQuality.MAJOR),
-                    new Chord(new Note(scale[1]), TriadQuality.MINOR),
-                    new Chord(new Note(scale[2]), TriadQuality.MINOR),
-                    new Chord(new Note(scale[3]), TriadQuality.MAJOR),
-                    new Chord(new Note(scale[4]), TriadQuality.MAJOR),
-                    new Chord(new Note(scale[5]), TriadQuality.MINOR),
-                    new Chord(new Note(scale[6]), TriadQuality.DIMINISHED),
+                    new Chord(new Note(scale[0]), MAJOR_3),
+                    new Chord(new Note(scale[1]), MINOR_3),
+                    new Chord(new Note(scale[2]), MINOR_3),
+                    new Chord(new Note(scale[3]), MAJOR_3),
+                    new Chord(new Note(scale[4]), MAJOR_3),
+                    new Chord(new Note(scale[5]), MINOR_3),
+                    new Chord(new Note(scale[6]), DIMINISHED_3),
                     // -- Sevenths --
-                    new Chord(new Note(scale[0]), SeventhQuality.MAJOR_7),
-                    new Chord(new Note(scale[1]), SeventhQuality.MINOR_7),
-                    new Chord(new Note(scale[2]), SeventhQuality.MINOR_7),
-                    new Chord(new Note(scale[3]), SeventhQuality.MAJOR_7),
-                    new Chord(new Note(scale[4]), SeventhQuality.DOMINANT_7),
-                    new Chord(new Note(scale[5]), SeventhQuality.MINOR_7),
-                    new Chord(new Note(scale[6]), SeventhQuality.HALF_DIM_7),
+                    new Chord(new Note(scale[0]), MAJOR_7),
+                    new Chord(new Note(scale[1]), MINOR_7),
+                    new Chord(new Note(scale[2]), MINOR_7),
+                    new Chord(new Note(scale[3]), MAJOR_7),
+                    new Chord(new Note(scale[4]), DOMINANT_7),
+                    new Chord(new Note(scale[5]), MINOR_7),
+                    new Chord(new Note(scale[6]), HALF_DIM_7),
                 ];
         }
     }
