@@ -104,7 +104,7 @@ function getNoteY(labeledNote: Note, clef: Clef, staffLineHeight: number) {
     if (label.letter === 'C' && label.accidental === Accidental.FLAT)  octaveAdjustment = 1;
     if (label.letter === 'B' && label.accidental === Accidental.SHARP) octaveAdjustment = -1;
 
-    // 2.) Use the octave to determine the final shift
+    // 3.) Use the octave to determine the final shift
     basePosition += ((labeledNote.getOctave() - baseClefOctave + octaveAdjustment) * 7);
 
     // Determine the y height by using the line/gap for this note

@@ -81,7 +81,7 @@ export class Note extends Sound {
     }
 
     // -- Static Functions --
-    static convertToPitch(octave: Octave, pitchClass: PitchClass): Pitch { return octave * PITCH_CLASSES.length + pitchClass; }
+    static convertToPitch(octave: Octave, pitchClass: PitchClass): Pitch { return (octave+1) * PITCH_CLASSES.length + pitchClass; }
     static getSpacedNotes(root: Note, ...halfSteps: number[]): Note[]    { return [root.clone(), ...halfSteps.map(steps => root.clone().stepUp(steps))]; }
 }
 
