@@ -1,5 +1,5 @@
 
-import { Pitch, RhythmicValue } from "../datatypes/BasicTypes";
+import { Pitch, RHYTHMIC_VALUES, RhythmicValue, TimeSignature } from "../datatypes/BasicTypes";
 import { Key, Sound, Note, NoteLabel, PITCH_CLASS_TO_LABELS } from "../datatypes/ComplexTypes";
 import { SightReadingConfiguration } from "../datatypes/Configs";
 import { randomItemFrom } from "./ArrayUtils";
@@ -41,6 +41,25 @@ import { randInt } from "./NumberUtils";
 
 //     return eles;
 // }
+
+class GeneratedSounds {
+
+    private timeSignature: TimeSignature;
+
+    sounds: Sound[];
+    beatCount: number;
+
+    constructor(timeSignature: TimeSignature) {
+        this.timeSignature = timeSignature;
+        this.sounds = [];
+        this.beatCount = 0;
+    }
+
+    addSound(sound: Sound) {
+        this.sounds.push(sound);
+        this.beatCount += sound.getBeatCount(this.timeSignature);
+    }
+}
 
 // TODO-ben : Move these to "Complex Types"?
 export type Music = {
@@ -168,60 +187,81 @@ export class MusicStream {
     private generateMoreTreble(): void {
         // TODO-ben : Make sure our generation has clean cutoffs at measures
         const type = randomItemFrom(getValidTrebleStates(this.config));
-        let trebleSounds: Sound[] = [];
+        let sounds: GeneratedSounds;
         switch (type) {
             // TODO-ben : Update with other generation functions.
-            case TrebleState.NoteFlurry:         trebleSounds = this.createNoteFlurry(TREBLE_BOUNDS); break;
-            case TrebleState.MirroredNoteFlurry: trebleSounds = this.createNoteFlurry(TREBLE_BOUNDS); break;
-            case TrebleState.RepeatedNoteFlurry: trebleSounds = this.createNoteFlurry(TREBLE_BOUNDS); break;
-            case TrebleState.ChordThenBroken:    trebleSounds = this.createNoteFlurry(TREBLE_BOUNDS); break;
-            case TrebleState.BrokenThenChord:    trebleSounds = this.createNoteFlurry(TREBLE_BOUNDS); break;
-            case TrebleState.RepeatedChord:      trebleSounds = this.createNoteFlurry(TREBLE_BOUNDS); break;
+            case TrebleState.NoteFlurry:         sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
+            case TrebleState.MirroredNoteFlurry: sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
+            case TrebleState.RepeatedNoteFlurry: sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
+            case TrebleState.ChordThenBroken:    sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
+            case TrebleState.BrokenThenChord:    sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
+            case TrebleState.RepeatedChord:      sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
         }
-        this.generatedMusic.trebleClef.push(...trebleSounds);
-        this.trebleBeatCount += trebleSounds
-            .map(sound => sound.getBeatCount(this.config.timeSignature))
-            .reduce((a, b) => a+b, 0);
+        this.generatedMusic.trebleClef.push(...sounds.sounds);
+        this.trebleBeatCount += sounds.beatCount;
     }
 
     private generateMoreBass(): void {
         // TODO-ben : Make sure our generation has clean cutoffs at measures
         // TODO-ben : Match treble pitch classes (if applicable) down 1-2 octaves
         const type = randomItemFrom(getValidBassStates(this.config));
-        let bassSounds: Sound[] = [];
+        let sounds: GeneratedSounds;
         switch (type) {
             // TODO-ben : Update with other generation functions.
-            case BassState.SingleNote:                 bassSounds = this.createNoteFlurry(BASS_BOUNDS); break;
-            case BassState.Octave:                     bassSounds = this.createNoteFlurry(BASS_BOUNDS); break;
-            case BassState.OctaveWithFifth:            bassSounds = this.createNoteFlurry(BASS_BOUNDS); break;
-            case BassState.OctaveWithDelayedFifth:     bassSounds = this.createNoteFlurry(BASS_BOUNDS); break;
-            case BassState.RootWithDelayedFifthEighth: bassSounds = this.createNoteFlurry(BASS_BOUNDS); break;
+            case BassState.SingleNote:                 sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
+            case BassState.Octave:                     sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
+            case BassState.OctaveWithFifth:            sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
+            case BassState.OctaveWithDelayedFifth:     sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
+            case BassState.RootWithDelayedFifthEighth: sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
         }
-        this.generatedMusic.bassClef.push(...bassSounds);
-        this.bassBeatCount += bassSounds
-            .map(sound => sound.getBeatCount(this.config.timeSignature))
-            .reduce((a, b) => a+b, 0);
+        this.generatedMusic.bassClef.push(...sounds.sounds);
+        this.bassBeatCount += sounds.beatCount;
     }
 
-    private createNoteFlurry(bounds: Bounds): Sound[] {
+    /**
+     * Ensures the notes we generate have clean cutoffs between each measure by choosing the minimum value between:
+     *   - The number of beats left in the measure.
+     *   - The provided rhythmic value.
+     */
+    private fitRhythmicValue(desired: RhythmicValue, beatCount: number): RhythmicValue {
+        const beatsRemainingInMeasure = this.config.timeSignature.top - beatCount % this.config.timeSignature.top;
+
+        // If our desired rhythmic value fits, let's use that!
+        // Otherwise, we'll use the biggest one that fits.
+        for (let rv of [desired, RhythmicValue.WHOLE, RhythmicValue.HALF, RhythmicValue.QUARTER, RhythmicValue.EIGHTH, RhythmicValue.SIXTEENTH]) {
+            if (Sound.getBeatCount(this.config.timeSignature, rv) <= beatsRemainingInMeasure) {
+                return rv;
+            }
+        }
+
+        // Should never get here, but in case we do...
+        return RhythmicValue.SIXTEENTH;
+    }
+
+    private createNoteFlurry(bounds: Bounds, beatsSoFar: number): GeneratedSounds {
         // TODO-ben : Make this actually generate a "flurry" (mostly-)in-key instead of a random mess
-        const sounds: Sound[] = [];
+        const sounds = new GeneratedSounds(this.config.timeSignature);
 
+        // TODO-ben : Generate all rhythmic values
         // const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
-
-        // // Generate between 2 and 8 notes
-        // for (let i = 0; i < randInt(2, 8); i++) {
-        //     const pitch = randInt(bounds.lower, bounds.upper+1);
-        //     const {octave, pitchClass} = convertToPitchClassWithOctave(pitch);
-        //     sounds.push(createNote(pitchClass, rhythmicValue, octave, false));
-        // }
-
-        const rhythmicValue = RhythmicValue.QUARTER;
+        const rhythmicValue = randomItemFrom([
+            RhythmicValue.WHOLE,
+            RhythmicValue.HALF,
+            RhythmicValue.QUARTER,
+        ]);
 
         // Generate between 2 and 8 notes
-        for (let currentPitch = bounds.lower; currentPitch < bounds.upper+1; currentPitch++) {
-            sounds.push(new Note(currentPitch, rhythmicValue, false));
+        for (let i = 0; i < randInt(2, 4); i++) {
+            const pitch = randInt(bounds.lower, bounds.upper+1);
+            sounds.addSound(new Note(pitch, this.fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount), false));
         }
+
+        // TODO-ben : Delete
+        // const rhythmicValue = RhythmicValue.QUARTER;
+        // // Generate between 2 and 8 notes
+        // for (let currentPitch = bounds.lower; currentPitch < bounds.upper+1; currentPitch++) {
+        //     sounds.push(new Note(currentPitch, rhythmicValue, false));
+        // }
 
         return sounds;
     }

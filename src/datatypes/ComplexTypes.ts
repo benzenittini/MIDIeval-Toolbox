@@ -14,7 +14,10 @@ export abstract class Sound {
     abstract getRhythmicValue(): RhythmicValue;
 
     getBeatCount(timeSignature: TimeSignature): number {
-        switch (this.getRhythmicValue()) {
+        return Sound.getBeatCount(timeSignature, this.getRhythmicValue());
+    }
+    static getBeatCount(timeSignature: TimeSignature, rhythmicValue: RhythmicValue) {
+        switch (rhythmicValue) {
             case RhythmicValue.WHOLE:     return timeSignature.bottom / 1;
             case RhythmicValue.HALF:      return timeSignature.bottom / 2;
             case RhythmicValue.QUARTER:   return timeSignature.bottom / 4;

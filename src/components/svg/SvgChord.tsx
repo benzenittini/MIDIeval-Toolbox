@@ -72,7 +72,7 @@ function createAccidental(noteX: number, noteY: number, staffLineHeight: number,
 
     return (<text
         key={ `accidental-${noteX}-${noteY}` }
-        x={ noteX - NOTE_WIDTH_RATIO*staffLineHeight }
+        x={ noteX - NOTE_WIDTH_RATIO*staffLineHeight - 3 } // -3 is an arbitrary budge factor.
         y={ noteY + budge }
         fill={ NOTE_COLOR }
         fontSize={ 2*staffLineHeight }
