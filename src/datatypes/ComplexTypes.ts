@@ -22,7 +22,6 @@ export abstract class Sound {
             case RhythmicValue.HALF:      return timeSignature.bottom / 2;
             case RhythmicValue.QUARTER:   return timeSignature.bottom / 4;
             case RhythmicValue.EIGHTH:    return timeSignature.bottom / 8;
-            case RhythmicValue.SIXTEENTH: return timeSignature.bottom / 16;
         }
     }
 }

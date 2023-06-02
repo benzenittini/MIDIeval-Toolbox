@@ -25,6 +25,9 @@ const PADDING_RATIO = 20/100; // x2 because top and bottom
 const STAFF_RATIO   = 20/100; // x2 because 2 staffs
 const GAP_RATIO     = 20/100; // Gap between staffs
 
+// This is relative to the overall grand staff height. Determines gap between WHOLE notes.
+const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO;
+
 export default function GrandStaff({ width, height, musicKey, timeSignature, music }: Params) {
     const [ musicXShift, setMusicXShift ] = useState(0);
 
@@ -61,24 +64,23 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             }, {} as Record<Letter, Accidental>)
     }
 
-    // TODO-ben : Space "x" coordinates based on elapsed beat counts for the measure, and the shortest note in the measure.
     let trebleX = 40;
     let bassX = 40;
     const trebleMusic: ReactElement[] = [];
     const bassMusic: ReactElement[] = [];
     const barLines: ReactElement[] = [];
-    let trebleAccidentals: Record<Letter, Accidental>;
-    let bassAccidentals: Record<Letter, Accidental>;
     music.forEach(measure => {
         // For each measure, we need to track which notes are flats/naturals/sharps so we know what to label them.
         // At the start of each measure, they get reset to the flats/naturals/sharps in our key.
-        trebleAccidentals = {...originalKeyLetters};
-        bassAccidentals = {...originalKeyLetters};
+        let trebleAccidentals = {...originalKeyLetters};
+        let bassAccidentals = {...originalKeyLetters};
+
+        // let smallestRV = 
 
         // -- Treble Clef --
         measure.trebleClef.forEach(noteGroup => {
             let chord = createSvgChord(noteGroup, trebleX, Clef.TREBLE, trebleAccidentals);
-            trebleX += 50;
+            trebleX += BASE_NOTE_GAP_RATIO * height * noteGroup[0].rhythmicValue;
             trebleMusic.push(chord);
 
             // Update our displayed accidentals for this measure
@@ -89,7 +91,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
         // -- Bass Clef --
         measure.bassClef.forEach(noteGroup => {
             let chord = createSvgChord(noteGroup, bassX, Clef.BASS, bassAccidentals);
-            bassX += 50;
+            bassX += BASE_NOTE_GAP_RATIO * height * noteGroup[0].rhythmicValue;
             bassMusic.push(chord);
 
             // Update our displayed accidentals for this measure

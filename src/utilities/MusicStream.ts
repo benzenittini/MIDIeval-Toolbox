@@ -228,27 +228,21 @@ export class MusicStream {
 
         // If our desired rhythmic value fits, let's use that!
         // Otherwise, we'll use the biggest one that fits.
-        for (let rv of [desired, RhythmicValue.WHOLE, RhythmicValue.HALF, RhythmicValue.QUARTER, RhythmicValue.EIGHTH, RhythmicValue.SIXTEENTH]) {
+        for (let rv of [desired, RhythmicValue.WHOLE, RhythmicValue.HALF, RhythmicValue.QUARTER, RhythmicValue.EIGHTH]) {
             if (Sound.getBeatCount(this.config.timeSignature, rv) <= beatsRemainingInMeasure) {
                 return rv;
             }
         }
 
         // Should never get here, but in case we do...
-        return RhythmicValue.SIXTEENTH;
+        return RhythmicValue.EIGHTH;
     }
 
     private createNoteFlurry(bounds: Bounds, beatsSoFar: number): GeneratedSounds {
         // TODO-ben : Make this actually generate a "flurry" (mostly-)in-key instead of a random mess
         const sounds = new GeneratedSounds(this.config.timeSignature);
 
-        // TODO-ben : Generate all rhythmic values
-        // const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
-        const rhythmicValue = randomItemFrom([
-            RhythmicValue.WHOLE,
-            RhythmicValue.HALF,
-            RhythmicValue.QUARTER,
-        ]);
+        const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
 
         // Generate between 2 and 8 notes
         for (let i = 0; i < randInt(2, 4); i++) {

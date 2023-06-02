@@ -11,13 +11,12 @@ export const PITCH_CLASSES: PitchClass[] = [ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1
 
 
 export enum RhythmicValue {
-    WHOLE = 'whole',
-    HALF = 'half',
-    QUARTER = 'quarter',
-    EIGHTH = 'eighth',
-    SIXTEENTH = 'sixteenth'
+    WHOLE = 1,
+    HALF = 1/2,
+    QUARTER = 1/4,
+    EIGHTH = 1/8
 };
-export const RHYTHMIC_VALUES = Object.values(RhythmicValue);
+export const RHYTHMIC_VALUES = [RhythmicValue.WHOLE, RhythmicValue.HALF, RhythmicValue.QUARTER, RhythmicValue.EIGHTH];
 
 
 // ===========
