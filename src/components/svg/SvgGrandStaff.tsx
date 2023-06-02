@@ -9,7 +9,7 @@ import SvgStaffDefinition from "./SvgStaffDefinition";
 import SvgChord from "./SvgChord";
 import { LabeledMusic } from "../../utilities/MusicStream";
 import { Key, Note } from "../../datatypes/ComplexTypes";
-import { TimeSignature, Clef, Accidental } from "../../datatypes/BasicTypes";
+import { TimeSignature, Clef, Accidental, Letter } from "../../datatypes/BasicTypes";
 
 
 type Params = {
@@ -21,20 +21,24 @@ type Params = {
 };
 
 // These need to add up to 100
-const PADDING_RATIO = 12/100; // x2 because top and bottom
-const STAFF_RATIO   = 25/100; // x2 because 2 staffs
-const GAP_RATIO     = 26/100; // Gap between staffs
+const PADDING_RATIO = 20/100; // x2 because top and bottom
+const STAFF_RATIO   = 20/100; // x2 because 2 staffs
+const GAP_RATIO     = 20/100; // Gap between staffs
 
 export default function GrandStaff({ width, height, musicKey, timeSignature, music }: Params) {
     const [ musicXShift, setMusicXShift ] = useState(0);
 
     /** Map of a letter to its accidental. */
-    const originalKeyLetters = musicKey.getNoteLabelsInKey();
+    const originalKeyLetters: Record<Letter, Accidental> = musicKey.getNoteLabelsInKey()
+        .reduce((obj, label) => {
+            if (label) obj[label.letter] = label.accidental;
+            return obj;
+        }, {} as Record<Letter, Accidental>);
 
     // Line thicknesses
     const staffThickness = 1/100 * STAFF_RATIO * height;
 
-    function createSvgChord(labeledNoteGroup: Note[], x: number, clef: Clef) {
+    function createSvgChord(labeledNoteGroup: Note[], x: number, clef: Clef, accidentals: Record<Letter, Accidental>) {
         return (<SvgChord
             key={ `chord-${x}` }
             clef={ clef }
@@ -42,13 +46,19 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             staffLineHeight={ STAFF_RATIO * height / 4 }
             strokeWidth={ staffThickness }
             labeledNoteGroup={ labeledNoteGroup }
-            // TODO-ben : Every note in a chord will have the same accidental ... we can't do this.
-            // TODO-ben : But we also want to make sure we properly set/unset accidentals based on the preceeding notes in the measure...
-            // TODO-ben : Pass the current "key letters" into here. Map of letters to the accidental.
-            // accidental={ Accidental.FLAT }
-            // accidental={ Accidental.NATURAL }
-            accidental={ Accidental.SHARP }
+            accidentals={ accidentals }
         ></SvgChord>);
+    }
+
+    function getDisplayedAccidentals(noteGroup: Note[], accidentals: Record<Letter, Accidental>) {
+        return noteGroup
+            .reduce((obj, note) => {
+                const {letter, accidental} = note.getLabel();
+                if (accidentals[letter] !== accidental) {
+                    obj[letter] = accidental;
+                }
+                return obj;
+            }, {} as Record<Letter, Accidental>)
     }
 
     // TODO-ben : Space "x" coordinates based on elapsed beat counts for the measure, and the shortest note in the measure.
@@ -57,19 +67,34 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
     const trebleMusic: ReactElement[] = [];
     const bassMusic: ReactElement[] = [];
     const barLines: ReactElement[] = [];
+    let trebleAccidentals: Record<Letter, Accidental>;
+    let bassAccidentals: Record<Letter, Accidental>;
     music.forEach(measure => {
+        // For each measure, we need to track which notes are flats/naturals/sharps so we know what to label them.
+        // At the start of each measure, they get reset to the flats/naturals/sharps in our key.
+        trebleAccidentals = {...originalKeyLetters};
+        bassAccidentals = {...originalKeyLetters};
+
         // -- Treble Clef --
         measure.trebleClef.forEach(noteGroup => {
-            let chord = createSvgChord(noteGroup, trebleX, Clef.TREBLE);
+            let chord = createSvgChord(noteGroup, trebleX, Clef.TREBLE, trebleAccidentals);
             trebleX += 50;
             trebleMusic.push(chord);
+
+            // Update our displayed accidentals for this measure
+            let chordAccidentals = getDisplayedAccidentals(noteGroup, trebleAccidentals);
+            trebleAccidentals = {...trebleAccidentals, ...chordAccidentals};
         });
 
         // -- Bass Clef --
         measure.bassClef.forEach(noteGroup => {
-            let chord = createSvgChord(noteGroup, bassX, Clef.BASS);
+            let chord = createSvgChord(noteGroup, bassX, Clef.BASS, bassAccidentals);
             bassX += 50;
             bassMusic.push(chord);
+
+            // Update our displayed accidentals for this measure
+            let chordAccidentals = getDisplayedAccidentals(noteGroup, bassAccidentals);
+            bassAccidentals = {...bassAccidentals, ...chordAccidentals};
         });
 
         // -- Bar Lines --

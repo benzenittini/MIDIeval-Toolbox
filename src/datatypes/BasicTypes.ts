@@ -3,7 +3,6 @@
 // Note Types
 // ----------
 
-/** 0 only has A and B, 8 only has C. See: https://en.wikipedia.org/wiki/Octave#/media/File:Piano_Frequencies.svg */
 export type Octave = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 export type Pitch = number;

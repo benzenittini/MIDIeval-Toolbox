@@ -112,6 +112,12 @@ export class NoteLabel {
     /** Returns the interval between two note letters. "1" === root, "3" === third, "5" === fifth, ... */
     getInterval(other: NoteLabel) { return Math.abs(BASE_LETTERS.indexOf(this.letter) - BASE_LETTERS.indexOf(other.letter)) + 1; }
 
+    getDisplayedAccidental(lettersToAccidentals: Record<Letter, Accidental>): Accidental | null {
+        return (lettersToAccidentals[this.letter] === this.accidental)
+            ? null // No accidental displayed if we're in the current key.
+            : this.accidental;
+    }
+
     equals(other: NoteLabel) { return this.letter === other.letter && this.accidental === other.accidental; }
 }
 
@@ -322,21 +328,21 @@ export class Key {
 }
 
 // -- Major Keys --
-const CFLAT_MAJOR  = new Key(C_FLAT,  KeyType.MAJOR);
-const C_MAJOR      = new Key(C,       KeyType.MAJOR);
-const CSHARP_MAJOR = new Key(C_SHARP, KeyType.MAJOR);
-const DFLAT_MAJOR  = new Key(D_FLAT,  KeyType.MAJOR);
-const D_MAJOR      = new Key(D,       KeyType.MAJOR);
-const EFLAT_MAJOR  = new Key(E_FLAT,  KeyType.MAJOR);
-const E_MAJOR      = new Key(E,       KeyType.MAJOR);
-const F_MAJOR      = new Key(F,       KeyType.MAJOR);
-const FSHARP_MAJOR = new Key(F_SHARP, KeyType.MAJOR);
-const GFLAT_MAJOR  = new Key(G_FLAT,  KeyType.MAJOR);
-const G_MAJOR      = new Key(G,       KeyType.MAJOR);
-const AFLAT_MAJOR  = new Key(A_FLAT,  KeyType.MAJOR);
-const A_MAJOR      = new Key(A,       KeyType.MAJOR);
-const BFLAT_MAJOR  = new Key(B_FLAT,  KeyType.MAJOR);
-const B_MAJOR      = new Key(B,       KeyType.MAJOR);
+export const CFLAT_MAJOR  = new Key(C_FLAT,  KeyType.MAJOR);
+export const C_MAJOR      = new Key(C,       KeyType.MAJOR);
+export const CSHARP_MAJOR = new Key(C_SHARP, KeyType.MAJOR);
+export const DFLAT_MAJOR  = new Key(D_FLAT,  KeyType.MAJOR);
+export const D_MAJOR      = new Key(D,       KeyType.MAJOR);
+export const EFLAT_MAJOR  = new Key(E_FLAT,  KeyType.MAJOR);
+export const E_MAJOR      = new Key(E,       KeyType.MAJOR);
+export const F_MAJOR      = new Key(F,       KeyType.MAJOR);
+export const FSHARP_MAJOR = new Key(F_SHARP, KeyType.MAJOR);
+export const GFLAT_MAJOR  = new Key(G_FLAT,  KeyType.MAJOR);
+export const G_MAJOR      = new Key(G,       KeyType.MAJOR);
+export const AFLAT_MAJOR  = new Key(A_FLAT,  KeyType.MAJOR);
+export const A_MAJOR      = new Key(A,       KeyType.MAJOR);
+export const BFLAT_MAJOR  = new Key(B_FLAT,  KeyType.MAJOR);
+export const B_MAJOR      = new Key(B,       KeyType.MAJOR);
 
 export const MAJOR_KEY_LOOKUP = {
     CFLAT_MAJOR, C_MAJOR, CSHARP_MAJOR,

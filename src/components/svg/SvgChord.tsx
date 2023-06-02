@@ -5,7 +5,7 @@ import { Note } from "../../datatypes/ComplexTypes";
 
 /** Starting with the ledger line below the staff and going upwards for one octave, the Treble Clef's letters. */
 const TREBLE_CLEF: Letter[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
-const NOTE_COLOR = 'var(--gray-vlight)';
+const NOTE_COLOR = 'var(--gray-light)';
 
 // Relative to the staffLineHeight
 const NOTE_WIDTH_RATIO  = 7/12;
@@ -18,7 +18,7 @@ type Params = {
     labeledNoteGroup: Note[];
     clef: Clef;
     stemTo?: number; // If set, will draw a stem to the given height. Used for beamed chords where the stem has a variable length.
-    accidental?: Accidental; // If set, will draw the given flat/natural/sharp symbol
+    accidentals: Record<Letter, Accidental>;
 };
 
 function createNoteHead(x: number, y: number, staffLineHeight: number, strokeWidth: number, note: Note) {
@@ -60,24 +60,16 @@ function createNoteStem(noteX: number, noteY: number, stemTo: number | undefined
     ></line>)
 }
 
-// TODO-ben : Pull this into a separate React SVG file..?
+// TODO-ben : Pull this into a separate React SVG file..? Could be useful for displaying the key signature.
 function createAccidental(noteX: number, noteY: number, staffLineHeight: number, accidental: Accidental) {
-    let budge = 0; // Each symbol needs to be moved up or down slightly to properly center them.
-    let symbol = '';
+    // Each symbol needs to be moved up or down slightly to properly center them.
+    let budge = 0;
     switch (accidental) {
-        case Accidental.FLAT:
-            symbol = '♭';
-            budge = -3;
-            break;
-        case Accidental.NATURAL:
-            symbol = '♮';
-            budge = 5;
-            break;
-        case Accidental.SHARP:
-            symbol = '♯';
-            budge = 3;
-            break;
+        case Accidental.FLAT:    budge = -3; break;
+        case Accidental.NATURAL: budge = 5;  break;
+        case Accidental.SHARP:   budge = 3;  break;
     }
+
     return (<text
         key={ `accidental-${noteX}-${noteY}` }
         x={ noteX - NOTE_WIDTH_RATIO*staffLineHeight }
@@ -86,7 +78,7 @@ function createAccidental(noteX: number, noteY: number, staffLineHeight: number,
         fontSize={ 2*staffLineHeight }
         dominantBaseline="middle"
         textAnchor="end"
-    >{ symbol }</text>);
+    >{ accidental }</text>);
 }
 
 function getNoteY(labeledNote: Note, clef: Clef, staffLineHeight: number) {
@@ -111,19 +103,24 @@ function getNoteY(labeledNote: Note, clef: Clef, staffLineHeight: number) {
     return (5*staffLineHeight) - (basePosition * staffLineHeight/2);
 }
 
-export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteGroup, clef, stemTo, accidental }: Params) {
+export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteGroup, clef, stemTo, accidentals }: Params) {
 
     let elements: ReactElement[] = [];
     for (let labeledNote of labeledNoteGroup) {
         const y = getNoteY(labeledNote, clef, staffLineHeight);
+
+        // -- Note Head --
         elements.push(createNoteHead(x, y, staffLineHeight, strokeWidth, labeledNote));
 
+        // -- Note Stem --
         if (labeledNote.rhythmicValue !== RhythmicValue.WHOLE) {
             elements.push(createNoteStem(x, y, stemTo, staffLineHeight, strokeWidth));
         }
 
-        if (accidental !== undefined) {
-            elements.push(createAccidental(x, y, staffLineHeight, accidental));
+        // -- Accidental --
+        const displayedAccidental = labeledNote.getLabel().getDisplayedAccidental(accidentals);
+        if (displayedAccidental) {
+            elements.push(createAccidental(x, y, staffLineHeight, displayedAccidental));
         }
     }
 

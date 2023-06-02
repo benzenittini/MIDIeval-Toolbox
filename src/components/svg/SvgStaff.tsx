@@ -10,7 +10,7 @@ type Params = {
 
 const GAP_RATIO = 1/4; // 4 gaps make a staff
 
-export default function SvgStaff({ width, height, strokeWidth, stroke = "var(--gray-light)" }: Params) {
+export default function SvgStaff({ width, height, strokeWidth, stroke = "var(--gray)" }: Params) {
     const lines: ReactElement[] = [];
     let currentY = 0;
     for (let x = 0; x < 5; x++) {
