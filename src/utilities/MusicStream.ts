@@ -1,9 +1,9 @@
 
 import { Pitch, RHYTHMIC_VALUES, RhythmicValue, TimeSignature } from "../datatypes/BasicTypes";
-import { Key, Sound, Note, NoteLabel, PITCH_CLASS_TO_LABELS } from "../datatypes/ComplexTypes";
+import { Key, Sound, Note, NoteLabel, PITCH_CLASS_TO_LABELS, Chord, MAJOR_3 } from "../datatypes/ComplexTypes";
 import { SightReadingConfiguration } from "../datatypes/Configs";
 import { randomItemFrom } from "./ArrayUtils";
-import { getRandomNote } from "./Generators";
+import { getRandomChord, getRandomNote } from "./Generators";
 import { randInt } from "./NumberUtils";
 
 
@@ -195,7 +195,7 @@ export class MusicStream {
             case TrebleState.RepeatedNoteFlurry: sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
             case TrebleState.ChordThenBroken:    sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
             case TrebleState.BrokenThenChord:    sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
-            case TrebleState.RepeatedChord:      sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
+            case TrebleState.RepeatedChord:      sounds = this.createRepeatedChord(TREBLE_BOUNDS, this.trebleBeatCount); break;
         }
         this.generatedMusic.trebleClef.push(...sounds.sounds);
         this.trebleBeatCount += sounds.beatCount;
@@ -260,6 +260,30 @@ export class MusicStream {
         return sounds;
     }
 
+    private createRepeatedChord(bounds: Bounds, beatsSoFar: number): GeneratedSounds {
+        // TODO-ben : Make this actually generate something (mostly-)in-key instead of a random mess
+        const sounds = new GeneratedSounds(this.config.timeSignature);
+
+        const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
+        // TODO-ben : Chords need ALL their notes to be within range... not just the root note. Inversion impacts this too.
+        const pitch = randInt(bounds.lower, bounds.upper+1);
+        const chordQuality = MAJOR_3;
+        const inversion = 0;
+
+        // Generate between 1 and 4 repeats
+        for (let i = 0; i < randInt(1, 4); i++) {
+            sounds.addSound(
+                new Chord(
+                    new Note(pitch, this.fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount), false),
+                    chordQuality,
+                    inversion,
+                )
+            );
+        }
+
+        return sounds;
+    }
+
 }
 
 
@@ -270,15 +294,17 @@ export class MusicStream {
 function getValidTrebleStates(config: SightReadingConfiguration): TrebleState[] {
     let validStates: TrebleState[] = [];
 
-    if (config.practiceSingleNotes) {
-        validStates.push(TrebleState.NoteFlurry, TrebleState.MirroredNoteFlurry, TrebleState.RepeatedNoteFlurry);
-    }
-    if (config.practiceChords) {
-        validStates.push(TrebleState.RepeatedChord);
-        if (config.includeBrokenChords) {
-            validStates.push(TrebleState.ChordThenBroken, TrebleState.BrokenThenChord);
-        }
-    }
+    // TODO-ben : Switch this back
+    validStates.push(TrebleState.NoteFlurry, TrebleState.RepeatedChord);
+    // if (config.practiceSingleNotes) {
+    //     validStates.push(TrebleState.NoteFlurry, TrebleState.MirroredNoteFlurry, TrebleState.RepeatedNoteFlurry);
+    // }
+    // if (config.practiceChords) {
+    //     validStates.push(TrebleState.RepeatedChord);
+    //     if (config.includeBrokenChords) {
+    //         validStates.push(TrebleState.ChordThenBroken, TrebleState.BrokenThenChord);
+    //     }
+    // }
 
     return validStates;
 }
