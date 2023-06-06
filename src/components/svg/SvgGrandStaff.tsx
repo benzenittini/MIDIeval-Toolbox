@@ -29,7 +29,10 @@ const GAP_RATIO     = 20/100; // Gap between staffs
 const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO;
 
 export default function GrandStaff({ width, height, musicKey, timeSignature, music }: Params) {
-    const [ musicXShift, setMusicXShift ] = useState(0);
+    const [ musicXShift, setMusicXShift ] = useState(150);
+
+    /** The height of one line on the staff. */
+    const staffLineHeight = STAFF_RATIO * height / 4;
 
     /** Map of a letter to its accidental. */
     const originalKeyLetters: Record<Letter, Accidental> = musicKey.getNoteLabelsInKey()
@@ -46,7 +49,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             key={ `chord-${x}` }
             clef={ clef }
             x={ x }
-            staffLineHeight={ STAFF_RATIO * height / 4 }
+            staffLineHeight={ staffLineHeight }
             strokeWidth={ staffThickness }
             labeledNoteGroup={ labeledNoteGroup }
             accidentals={ accidentals }
@@ -122,8 +125,13 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             {/* Treble */}
             <g transform={ `translate(0 ${height * PADDING_RATIO})` }>
                 <SvgStaff width={ width } height={ height * STAFF_RATIO } strokeWidth={ staffThickness }></SvgStaff>
-                {/* TODO-ben : Staff Definition */}
-                {/* <SvgStaffDefinition clef={ Clef.TREBLE } musicKey={ musicKey } timeSignature={ sightReadingConfig.timeSignature }></SvgStaffDefinition> */}
+                <SvgStaffDefinition
+                    clef={ Clef.TREBLE }
+                    musicKey={ musicKey }
+                    timeSignature={ timeSignature }
+                    staffLineHeight={ staffLineHeight }
+                    ></SvgStaffDefinition>
+
                 <g style={{ transform: `translateX(${musicXShift}px)` }}>
                     { trebleMusic }
                 </g>
@@ -132,8 +140,13 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             {/* Bass */}
             <g transform={ `translate(0 ${height * (PADDING_RATIO + STAFF_RATIO + GAP_RATIO)})` }>
                 <SvgStaff width={ width } height={ height * STAFF_RATIO } strokeWidth={ staffThickness }></SvgStaff>
-                {/* TODO-ben : Staff Definition */}
-                {/* <SvgStaffDefinition clef={ Clef.TREBLE } musicKey={ musicKey } timeSignature={ sightReadingConfig.timeSignature }></SvgStaffDefinition> */}
+                <SvgStaffDefinition
+                    clef={ Clef.BASS }
+                    musicKey={ musicKey }
+                    timeSignature={ timeSignature }
+                    staffLineHeight={ staffLineHeight }
+                    ></SvgStaffDefinition>
+
                 <g style={{ transform: `translateX(${musicXShift}px)` }}>
                     { bassMusic }
                 </g>

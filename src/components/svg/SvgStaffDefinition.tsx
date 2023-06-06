@@ -1,18 +1,25 @@
-import { Clef, Key, TimeSignature } from "../../datatypes/Musics";
+
+import { Clef, TimeSignature } from "../../datatypes/BasicTypes";
+import { Key } from "../../datatypes/ComplexTypes";
+import SvgBassClef from "./SvgBassClef";
+import SvgTrebleClef from "./SvgTrebleClef";
 
 type Props = {
     clef: Clef,
     musicKey: Key,
-    timeSignature: TimeSignature
+    timeSignature: TimeSignature,
+    staffLineHeight: number,
 }
 
-export default function SvgStaffDefinition({ clef, musicKey, timeSignature }: Props) {
+export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staffLineHeight }: Props) {
 
-    console.log({ clef, musicKey, timeSignature });
+    const clefIcon = (clef === Clef.TREBLE)
+        ? (<SvgTrebleClef height={ staffLineHeight * 7.0 } x={ 10 } y={ -1.25*staffLineHeight }></SvgTrebleClef>)
+        : (<SvgBassClef   height={ staffLineHeight * 3.5 } x={ 10 } y={ 0 }></SvgBassClef>);
 
     return (
         <>
-            {/* TODO-ben : Clef icon */}
+            { clefIcon }
             {/* TODO-ben : Key signature */}
             {/* TODO-ben : Time signature */}
         </>
