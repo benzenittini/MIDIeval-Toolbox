@@ -3,9 +3,9 @@ import { ReactElement } from "react";
 import { Accidental, Clef, Letter, RhythmicValue } from "../../datatypes/BasicTypes";
 import { Note } from "../../datatypes/ComplexTypes";
 import { getPairCombinations } from "../../utilities/ArrayUtils";
+import SvgAccidental from "./SvgAccidental";
+import { getPositionByNote, positionToY } from "../../utilities/MusicUtils";
 
-/** Starting with the ledger line below the staff and going upwards for one octave, the Treble Clef's letters. */
-const TREBLE_CLEF: Letter[] = ['C', 'D', 'E', 'F', 'G', 'A', 'B'];
 const NOTE_COLOR = 'var(--gray-light)';
 
 // Relative to the staffLineHeight
@@ -48,60 +48,12 @@ function createNoteStem(stemX: number, stemY: number, stemY2: number, strokeWidt
     ></line>)
 }
 
-// TODO-ben : Pull this into a separate React SVG file..? Could be useful for displaying the key signature.
-function createAccidental(accidentalX: number, noteY: number, staffLineHeight: number, accidental: Accidental) {
-    // Each symbol needs to be moved up or down slightly to properly center them.
-    let budge = 0;
-    switch (accidental) {
-        case Accidental.FLAT:    budge = -3; break;
-        case Accidental.NATURAL: budge = 5;  break;
-        case Accidental.SHARP:   budge = 3;  break;
-    }
-
-    return (<text
-        key={ `accidental-${accidentalX}-${noteY}` }
-        x={ accidentalX }
-        y={ noteY + budge }
-        fill={ NOTE_COLOR }
-        fontSize={ 2*staffLineHeight }
-        dominantBaseline="middle"
-        textAnchor="end"
-    >{ accidental }</text>);
-}
-
-/**
- * Calculates and returns the "position" of the note. The position is the line or gap the note appears on, starting
- * one ledger line below the staff ("position 0") and counting upwards. Each line or gap increases the position by 1.
- */
-function getNotePosition(labeledNote: Note, clef: Clef) {
-    const baseClefOctave = clef === Clef.BASS ? 2 : 4;
-    const label = labeledNote.getLabel();
-
-    // Determine the line/gap the note goes into by:
-    // 1.) Using the letter and the clef to determine the base position for this clef. Bass clef is 2 spots lower.
-    let basePosition = TREBLE_CLEF.indexOf(label.letter) + ((Clef.BASS === clef) ? -2 : 0);
-
-    // 2.) Adjust based on the "Octave borderline" notes.
-    //     Cb should be rendered one octave higher to go with the B below it.
-    //     B# should be rendered one octave lower to go with the C above it.
-    let octaveAdjustment = 0;
-    if (label.letter === 'C' && label.accidental === Accidental.FLAT)  octaveAdjustment = 1;
-    if (label.letter === 'B' && label.accidental === Accidental.SHARP) octaveAdjustment = -1;
-
-    // 3.) Use the octave to determine the final shift
-    basePosition += ((labeledNote.getOctave() - baseClefOctave + octaveAdjustment) * 7);
-
-    return basePosition;
-}
-function positionToY(position: number, staffLineHeight: number): number {
-    return (5*staffLineHeight) - (position  * staffLineHeight/2);
-}
 
 export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteGroup, clef, stemTo, accidentals }: Params) {
 
     // First, determine which lines/gaps the notes are on, sorted so the highest notes come first.
     let notePositions = labeledNoteGroup
-        .map(note => ({ note, position: getNotePosition(note, clef) }))
+        .map(note => ({ note, position: getPositionByNote(note, clef) }))
         .sort((a, b) => b.position - a.position);
     
     // Then, calculate some useful things that span the entire group of notes.
@@ -192,7 +144,14 @@ export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteG
         // -- Accidental --
         const displayedAccidental = note.getLabel().getDisplayedAccidental(accidentals);
         if (displayedAccidental) {
-            elements.push(createAccidental(accidentalX, noteY, staffLineHeight, displayedAccidental));
+            // elements.push(createAccidental(accidentalX, noteY, staffLineHeight, displayedAccidental));
+            elements.push((<SvgAccidental
+                key={ `accidental-${accidentalX}-${noteY}` }
+                x={ accidentalX }
+                y={ noteY }
+                staffLineHeight={ staffLineHeight }
+                accidental={ displayedAccidental }
+                ></SvgAccidental>));
         }
     }
 

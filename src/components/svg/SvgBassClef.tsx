@@ -8,7 +8,7 @@ type Params = {
 
 const WIDTH_RATIO = 79/90;
 
-export default function SvgBassClef({ height, x = 0, y = 0, color = "var(--gray-light)" }: Params) {
+export default function SvgBassClef({ height, x = 0, y = 0, color = "var(--gray-dark)" }: Params) {
     return (
         <g transform={ `translate(${x} ${y})` }>
             <svg width={ WIDTH_RATIO * height } height={ height } viewBox="0 0 79 90" fill="none" xmlns="http://www.w3.org/2000/svg">
