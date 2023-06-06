@@ -29,7 +29,7 @@ const GAP_RATIO     = 20/100; // Gap between staffs
 const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO;
 
 export default function GrandStaff({ width, height, musicKey, timeSignature, music }: Params) {
-    const [ musicXShift, setMusicXShift ] = useState(150);
+    const [ musicXShift, setMusicXShift ] = useState(200);
 
     /** The height of one line on the staff. */
     const staffLineHeight = STAFF_RATIO * height / 4;

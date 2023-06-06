@@ -16,13 +16,16 @@ type Props = {
 
 export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staffLineHeight }: Props) {
 
+    let currentX = 10;
+
     // =========
     // Clef Icon
     // ---------
 
     const clefIcon = (clef === Clef.TREBLE)
-        ? (<SvgTrebleClef height={ staffLineHeight * 7.0 } x={ 10 } y={ -1.25*staffLineHeight }></SvgTrebleClef>)
-        : (<SvgBassClef   height={ staffLineHeight * 3.5 } x={ 10 } y={ 0 }></SvgBassClef>);
+        ? (<SvgTrebleClef height={ staffLineHeight * 7.0 } x={ currentX } y={ -1.25*staffLineHeight }></SvgTrebleClef>)
+        : (<SvgBassClef   height={ staffLineHeight * 3.5 } x={ currentX } y={ 0 }></SvgBassClef>);
+    currentX += 80;
 
 
     // =============
@@ -49,8 +52,9 @@ export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staf
         if ([G_FLAT, F_FLAT].includes(flatsSharps[i]))  octave = octave - 1 as Octave
 
         // Figure out the correct x/y coordinates for this symbol.
-        const accidentalX = 90 + i*10;
+        const accidentalX = currentX;
         const accidentalY = positionToY(getPositionByOctave(flatsSharps[i], octave, clef, false), staffLineHeight);
+        currentX += 10;
 
         // Lastly, construct the SVG element!
         keySignature.push(<SvgAccidental
@@ -63,11 +67,29 @@ export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staf
             ></SvgAccidental>);
     }
 
+
+    // ==============
+    // Time Signature
+    // --------------
+
+    const timeSig = [timeSignature.top, timeSignature.bottom].map((ts, i) => {
+        return (<text x={ currentX }
+            key={ `timesig-${i}` }
+            y={ (i === 0 ? 1 : 3) * staffLineHeight }
+            fill="var(--gray-dark)"
+            fontSize={ 2.5*staffLineHeight }
+            fontFamily="serif"
+            fontWeight="bold"
+            dominantBaseline="central"
+            >{ ts }</text>);
+    });
+
+
     return (
         <>
             { clefIcon }
             { keySignature }
-            {/* TODO-ben : Time signature */}
+            { timeSig }
         </>
     );
 }
