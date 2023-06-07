@@ -1,7 +1,7 @@
 
 import { ReactElement } from "react";
 import { Accidental, Clef, Octave, TimeSignature } from "../../datatypes/BasicTypes";
-import { C_FLAT, F_FLAT, G_FLAT, G_SHARP, Key, NoteLabel } from "../../datatypes/ComplexTypes";
+import { F_FLAT, G_FLAT, Key, NoteLabel } from "../../datatypes/ComplexTypes";
 import SvgAccidental from "./SvgAccidental";
 import SvgBassClef from "./SvgBassClef";
 import SvgTrebleClef from "./SvgTrebleClef";
@@ -14,6 +14,8 @@ type Props = {
     staffLineHeight: number,
 }
 
+const MAIN_COLOR = 'var(--gray-dark)';
+
 export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staffLineHeight }: Props) {
 
     let currentX = 10;
@@ -23,8 +25,8 @@ export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staf
     // ---------
 
     const clefIcon = (clef === Clef.TREBLE)
-        ? (<SvgTrebleClef height={ staffLineHeight * 7.0 } x={ currentX } y={ -1.25*staffLineHeight }></SvgTrebleClef>)
-        : (<SvgBassClef   height={ staffLineHeight * 3.5 } x={ currentX } y={ 0 }></SvgBassClef>);
+        ? (<SvgTrebleClef color={ MAIN_COLOR } height={ staffLineHeight * 7.0 } x={ currentX } y={ -1.25*staffLineHeight }></SvgTrebleClef>)
+        : (<SvgBassClef   color={ MAIN_COLOR } height={ staffLineHeight * 3.5 } x={ currentX } y={ 0 }></SvgBassClef>);
     currentX += 80;
 
 
@@ -63,7 +65,7 @@ export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staf
             y={ accidentalY }
             staffLineHeight={ staffLineHeight }
             accidental={ flatsSharps[i].accidental }
-            color="var(--gray-dark)"
+            color={ MAIN_COLOR }
             ></SvgAccidental>);
     }
 
@@ -76,7 +78,7 @@ export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staf
         return (<text x={ currentX }
             key={ `timesig-${i}` }
             y={ (i === 0 ? 1 : 3) * staffLineHeight }
-            fill="var(--gray-dark)"
+            fill={ MAIN_COLOR }
             fontSize={ 2.5*staffLineHeight }
             fontFamily="serif"
             fontWeight="bold"

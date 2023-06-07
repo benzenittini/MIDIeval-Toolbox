@@ -5,6 +5,7 @@ import { Note } from "../../datatypes/ComplexTypes";
 import { getPairCombinations } from "../../utilities/ArrayUtils";
 import SvgAccidental from "./SvgAccidental";
 import { getPositionByNote, positionToY } from "../../utilities/MusicUtils";
+import SvgNoteFlag from "./SvgNoteFlag";
 
 const NOTE_COLOR = 'var(--gray-light)';
 
@@ -144,15 +145,36 @@ export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteG
         // -- Accidental --
         const displayedAccidental = note.getLabel().getDisplayedAccidental(accidentals);
         if (displayedAccidental) {
-            // elements.push(createAccidental(accidentalX, noteY, staffLineHeight, displayedAccidental));
             elements.push((<SvgAccidental
                 key={ `accidental-${accidentalX}-${noteY}` }
                 x={ accidentalX }
                 y={ noteY }
                 staffLineHeight={ staffLineHeight }
                 accidental={ displayedAccidental }
+                color={ NOTE_COLOR }
                 ></SvgAccidental>));
         }
+    }
+
+    // -- Flag --
+
+    // The "closest note" is closest to the end of the stem. This is the note that gets the flag attached to it.
+    let closestNote = renderData.reduce((a, b) => {
+        // Returns the note which is closer to the end of the stem
+        return (a.noteY > a.stemY2)
+            ? (a.stemY2 > b.stemY2 ? b : a)  // Stem points upwards
+            : (a.stemY2 > b.stemY2 ? a : b); // Stem points downwards
+    });
+
+    if (closestNote.note.getRhythmicValue() === RhythmicValue.EIGHTH && stemTo === undefined) {
+        elements.push((<SvgNoteFlag
+            key={ `flag-${closestNote.stemX}-${closestNote.stemY2}` }
+            x={ closestNote.stemX }
+            y={ closestNote.stemY2 }
+            flipVertically={ closestNote.stemY2 > closestNote.stemY }
+            height={ 3*staffLineHeight }
+            color={ NOTE_COLOR }
+            ></SvgNoteFlag>))
     }
 
     return (
