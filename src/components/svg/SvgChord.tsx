@@ -10,8 +10,8 @@ import SvgNoteFlag from "./SvgNoteFlag";
 const NOTE_COLOR = 'var(--gray-light)';
 
 // Relative to the staffLineHeight
-const NOTE_WIDTH_RATIO  = 7/12;
-const NOTE_HEIGHT_RATIO = 5/12;
+export const NOTE_WIDTH_RATIO  = 7/12;
+export const NOTE_HEIGHT_RATIO = 5/12;
 
 type Params = {
     x: number;
@@ -102,21 +102,33 @@ export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteG
 
             const notesAreClose = closestPosition && closestPosition <= 1;
             const majorityBelow = aboveBelow.below > aboveBelow.above;
-            // Stem goes on the right side of the left-most note if either:
-            //   - Any two of the notes are within one position of each other (stem goes down middle)
-            //   - If majority of notes are below the middle line
-            // Otherwise, stem goes on left side.
-            let stemX = (notesAreClose || majorityBelow)
-                ? x + NOTE_WIDTH_RATIO * staffLineHeight
-                : x - NOTE_WIDTH_RATIO * staffLineHeight;
+            let stemX = undefined;
+            // If stemTo is set, that alone determines whether the stem goes on the left or the right.
+            if (stemTo !== undefined) {
+                stemX = (stemTo < noteY)
+                    ? x + NOTE_WIDTH_RATIO * staffLineHeight
+                    : x - NOTE_WIDTH_RATIO * staffLineHeight;
+            }
+            // Otherwise, we do other fancy logic:
+            else {
+                // Stem goes on the right side of the left-most note if either:
+                //   - Any two of the notes are within one position of each other (stem goes down middle)
+                //   - If majority of notes are below the middle line
+                // Otherwise, stem goes on left side.
+                stemX = (notesAreClose || majorityBelow)
+                    ? x + NOTE_WIDTH_RATIO * staffLineHeight
+                    : x - NOTE_WIDTH_RATIO * staffLineHeight;
+            }
 
             // -- Stem Y Position --
 
             let stemY = noteY;
-            let stemY2 = stemTo ??
-                (aboveBelow.above > aboveBelow.below)
+            let stemY2 = stemTo;
+            if (stemY2 === undefined) {
+                stemY2 = (aboveBelow.above > aboveBelow.below)
                     ? stemY + 3*staffLineHeight
                     : stemY - 3*staffLineHeight;
+            }
 
 
             // ===================

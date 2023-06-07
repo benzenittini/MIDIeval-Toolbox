@@ -243,6 +243,7 @@ export class MusicStream {
         const sounds = new GeneratedSounds(this.config.timeSignature);
 
         const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
+        // const rhythmicValue = RhythmicValue.EIGHTH;
 
         // Generate between 2 and 8 notes
         for (let i = 0; i < randInt(2, 4); i++) {
@@ -250,11 +251,10 @@ export class MusicStream {
             sounds.addSound(new Note(pitch, this.fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount), false));
         }
 
-        // TODO-ben : Delete
-        // const rhythmicValue = RhythmicValue.QUARTER;
-        // // Generate between 2 and 8 notes
+        // // TODO-ben : Delete
+        // const rhythmicValue = RhythmicValue.EIGHTH;
         // for (let currentPitch = bounds.lower; currentPitch < bounds.upper+1; currentPitch++) {
-        //     sounds.push(new Note(currentPitch, rhythmicValue, false));
+        //     sounds.addSound(new Note(currentPitch, rhythmicValue, false));
         // }
 
         return sounds;
@@ -295,7 +295,9 @@ function getValidTrebleStates(config: SightReadingConfiguration): TrebleState[] 
     let validStates: TrebleState[] = [];
 
     // TODO-ben : Switch this back
-    validStates.push(TrebleState.NoteFlurry, TrebleState.RepeatedChord);
+    validStates.push(TrebleState.NoteFlurry);
+    // validStates.push(TrebleState.RepeatedChord);
+
     // if (config.practiceSingleNotes) {
     //     validStates.push(TrebleState.NoteFlurry, TrebleState.MirroredNoteFlurry, TrebleState.RepeatedNoteFlurry);
     // }
