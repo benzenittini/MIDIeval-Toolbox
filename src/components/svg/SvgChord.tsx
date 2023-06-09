@@ -7,7 +7,7 @@ import SvgAccidental from "./SvgAccidental";
 import { getPositionByNote, positionToY } from "../../utilities/MusicUtils";
 import SvgNoteFlag from "./SvgNoteFlag";
 
-const NOTE_COLOR = 'var(--gray-light)';
+const NOTE_COLOR = 'var(--gray)';
 
 // Relative to the staffLineHeight
 export const NOTE_WIDTH_RATIO  = 7/12;
@@ -55,8 +55,8 @@ function createLedgerLine(noteX: number, noteY: number, staffLineHeight: number,
         x2={ noteX + staffLineHeight }
         y1={ noteY }
         y2={ noteY }
-        strokeWidth={ 2*strokeWidth }
-        stroke={ NOTE_COLOR }
+        strokeWidth={ strokeWidth }
+        stroke="var(--gray-dark)"
     ></line>)
 }
 
@@ -157,13 +157,13 @@ export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteG
     // Finally, convert all of that position data to actual SVG elements to display.
     let elements: ReactElement[] = [];
     for (let {note, noteX, noteY, stemX, stemY, stemY2, accidentalX, position} of renderData) {
-        // -- Note Head --
-        elements.push(createNoteHead(noteX, noteY, staffLineHeight, strokeWidth, note));
-
         // -- Ledger Line --
         if (position > 11 || position < 1) {
             elements.push(createLedgerLine(noteX, noteY, staffLineHeight, strokeWidth));
         }
+
+        // -- Note Head --
+        elements.push(createNoteHead(noteX, noteY, staffLineHeight, strokeWidth, note));
 
         // -- Note Stem --
         if (note.rhythmicValue !== RhythmicValue.WHOLE) {

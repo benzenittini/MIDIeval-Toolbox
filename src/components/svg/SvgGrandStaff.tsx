@@ -12,6 +12,7 @@ import { Key, Note } from "../../datatypes/ComplexTypes";
 import { TimeSignature, Clef, Accidental, Letter, RhythmicValue } from "../../datatypes/BasicTypes";
 import { average, averageSlope } from "../../utilities/NumberUtils";
 import { getPositionByNote, positionToY } from "../../utilities/MusicUtils";
+import SvgBrace from "./SvgBrace";
 
 
 // ==========================
@@ -226,6 +227,9 @@ const GAP_RATIO     = 20/100; // Gap between staffs
 // This is relative to the overall grand staff height. Determines gap between WHOLE notes.
 const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO;
 
+// This is relative to the overall grand staff height.
+const BRACE_WIDTH_RATIO = 0.05;
+
 type Params = {
     width: number;
     height: number;
@@ -278,10 +282,17 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
     return (
         <svg viewBox={ `0 0 ${width} ${height}` } style={{ width: `${width}px`, height: `${height}px` }}>
             {/* Brace (to connect the two staffs) */}
-            {/* TODO */}
+            <g transform={ `translate(0 ${height * PADDING_RATIO})` }>
+                <SvgBrace
+                x={ 0 }
+                y={ 0 }
+                height={ height * (2*STAFF_RATIO + GAP_RATIO) }
+                color="var(--gray-dark)"
+                ></SvgBrace>
+            </g>
 
             {/* Treble */}
-            <g transform={ `translate(0 ${height * PADDING_RATIO})` }>
+            <g transform={ `translate(${height * BRACE_WIDTH_RATIO} ${height * PADDING_RATIO})` }>
                 <SvgStaff width={ width } height={ height * STAFF_RATIO } strokeWidth={ sizes.staffThickness }></SvgStaff>
                 <SvgStaffDefinition
                     clef={ Clef.TREBLE }
@@ -296,7 +307,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             </g>
 
             {/* Bass */}
-            <g transform={ `translate(0 ${height * (PADDING_RATIO + STAFF_RATIO + GAP_RATIO)})` }>
+            <g transform={ `translate(${height * BRACE_WIDTH_RATIO} ${height * (PADDING_RATIO + STAFF_RATIO + GAP_RATIO)})` }>
                 <SvgStaff width={ width } height={ height * STAFF_RATIO } strokeWidth={ sizes.staffThickness }></SvgStaff>
                 <SvgStaffDefinition
                     clef={ Clef.BASS }
@@ -311,14 +322,16 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             </g>
 
             {/* Initial, left-most bar line */}
-            <SvgBarLine x={ 0 }
-                y={ height * PADDING_RATIO }
-                height={ height * (2*STAFF_RATIO + GAP_RATIO)}
-                strokeWidth={ sizes.staffThickness }></SvgBarLine>
+            <g transform={ `translate(${height * BRACE_WIDTH_RATIO} 0)` }>
+                <SvgBarLine x={ 0 }
+                    y={ height * PADDING_RATIO }
+                    height={ height * (2*STAFF_RATIO + GAP_RATIO)}
+                    strokeWidth={ sizes.staffThickness }></SvgBarLine>
 
-            {/* Bar lines to separate measures */}
-            <g style={{ transform: `translateX(${musicXShift}px)` }}>
-                { barLines }
+                {/* Bar lines to separate measures */}
+                <g style={{ transform: `translateX(${musicXShift}px)` }}>
+                    { barLines }
+                </g>
             </g>
         </svg>
     )
