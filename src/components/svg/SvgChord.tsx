@@ -48,6 +48,17 @@ function createNoteStem(stemX: number, stemY: number, stemY2: number, strokeWidt
         stroke={ NOTE_COLOR }
     ></line>)
 }
+function createLedgerLine(noteX: number, noteY: number, staffLineHeight: number, strokeWidth: number) {
+    return (<line
+        key={ `ledger-${noteX}-${noteY}` }
+        x1={ noteX - staffLineHeight }
+        x2={ noteX + staffLineHeight }
+        y1={ noteY }
+        y2={ noteY }
+        strokeWidth={ 2*strokeWidth }
+        stroke={ NOTE_COLOR }
+    ></line>)
+}
 
 
 export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteGroup, clef, stemTo, accidentals }: Params) {
@@ -145,9 +156,14 @@ export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteG
 
     // Finally, convert all of that position data to actual SVG elements to display.
     let elements: ReactElement[] = [];
-    for (let {note, noteX, noteY, stemX, stemY, stemY2, accidentalX} of renderData) {
+    for (let {note, noteX, noteY, stemX, stemY, stemY2, accidentalX, position} of renderData) {
         // -- Note Head --
         elements.push(createNoteHead(noteX, noteY, staffLineHeight, strokeWidth, note));
+
+        // -- Ledger Line --
+        if (position > 11 || position < 1) {
+            elements.push(createLedgerLine(noteX, noteY, staffLineHeight, strokeWidth));
+        }
 
         // -- Note Stem --
         if (note.rhythmicValue !== RhythmicValue.WHOLE) {
