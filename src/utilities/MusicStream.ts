@@ -66,9 +66,11 @@ export type Music = {
     trebleClef: Sound[],
     bassClef: Sound[],
 }
+
+export type LabeledChord = Note[];
 export type LabeledMusic = {
-    trebleClef: Note[][],
-    bassClef:   Note[][],
+    trebleClef: LabeledChord[],
+    bassClef:   LabeledChord[],
 }
 
 
