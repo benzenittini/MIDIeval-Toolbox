@@ -39,7 +39,7 @@ const LEVEL_1_DIFFICULTY: SightReadingConfiguration = {
     timeSignature: { top: 4, bottom: 4 },
 
     // Difficulty
-    tempo: 20,
+    tempo: 60,
     playMetronome: false,
     waitForCorrectNote: true,
     allowRhythmicValues: false,

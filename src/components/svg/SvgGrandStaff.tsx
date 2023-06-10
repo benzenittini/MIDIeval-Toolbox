@@ -158,7 +158,7 @@ function createSvgBeam(sizes: SizingData, beamLine: (x: number) => number, x1: n
             y1={ beamLine(x1) }
             y2={ beamLine(x2) }
             strokeWidth={ 7*sizes.staffThickness }
-            stroke={ 'var(--gray-light)' }
+            stroke={ 'var(--gray)' }
         />
     )
 }
@@ -224,8 +224,9 @@ const PADDING_RATIO = 20/100; // x2 because top and bottom
 const STAFF_RATIO   = 20/100; // x2 because 2 staffs
 const GAP_RATIO     = 20/100; // Gap between staffs
 
-// This is relative to the overall grand staff height. Determines gap between WHOLE notes.
-const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO;
+// These are relative to the overall grand staff height.
+export const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO;           // Determines the gap between WHOLE notes.
+export const MEASURE_GAP_RATIO   = 0.2 * BASE_NOTE_GAP_RATIO; // Determines the gap after bar lines.
 
 // This is relative to the overall grand staff height.
 const BRACE_WIDTH_RATIO = 0.05;
@@ -236,10 +237,10 @@ type Params = {
     musicKey: Key;
     timeSignature: TimeSignature;
     music: LabeledMusic[]; // Each element of the array is one measure
+    musicShift: number;
 };
 
-export default function GrandStaff({ width, height, musicKey, timeSignature, music }: Params) {
-    const [ musicXShift, setMusicXShift ] = useState(200);
+export default function GrandStaff({ width, height, musicKey, timeSignature, music, musicShift = 0 }: Params) {
 
     const sizes: SizingData = {
         staffHeight: height,
@@ -254,8 +255,8 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             return obj;
         }, {} as Record<Letter, Accidental>);
 
-    let trebleX = 40;
-    let bassX = 40;
+    let trebleX = 0;
+    let bassX = 0;
     const trebleMusic: ReactElement[] = [];
     const bassMusic: ReactElement[] = [];
     const barLines: ReactElement[] = [];
@@ -276,7 +277,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
         ></SvgBarLine>));
 
         // Increment trebleX/bassX to account for the bar line
-        trebleX = bassX = barX + 50;
+        trebleX = bassX = barX + MEASURE_GAP_RATIO * height;
     });
 
     return (
@@ -301,7 +302,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
                     staffLineHeight={ sizes.staffLineHeight }
                     ></SvgStaffDefinition>
 
-                <g style={{ transform: `translateX(${musicXShift}px)` }}>
+                <g style={{ transform: `translateX(${200+musicShift}px)` }}>
                     { trebleMusic }
                 </g>
             </g>
@@ -316,7 +317,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
                     staffLineHeight={ sizes.staffLineHeight }
                     ></SvgStaffDefinition>
 
-                <g style={{ transform: `translateX(${musicXShift}px)` }}>
+                <g style={{ transform: `translateX(${200+musicShift}px)` }}>
                     { bassMusic }
                 </g>
             </g>
@@ -329,7 +330,7 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
                     strokeWidth={ sizes.staffThickness }></SvgBarLine>
 
                 {/* Bar lines to separate measures */}
-                <g style={{ transform: `translateX(${musicXShift}px)` }}>
+                <g style={{ transform: `translateX(${200+musicShift}px)` }}>
                     { barLines }
                 </g>
             </g>

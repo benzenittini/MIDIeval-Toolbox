@@ -248,7 +248,7 @@ export class MusicStream {
         // const rhythmicValue = RhythmicValue.EIGHTH;
 
         // Generate between 2 and 8 notes
-        for (let i = 0; i < randInt(2, 4); i++) {
+        for (let i = 0; i < randInt(2, 8); i++) {
             const pitch = randInt(bounds.lower, bounds.upper+1);
             sounds.addSound(new Note(pitch, this.fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount), false));
         }
@@ -298,7 +298,7 @@ function getValidTrebleStates(config: SightReadingConfiguration): TrebleState[] 
 
     // TODO-ben : Switch this back
     validStates.push(TrebleState.NoteFlurry);
-    // validStates.push(TrebleState.RepeatedChord);
+    validStates.push(TrebleState.RepeatedChord);
 
     // if (config.practiceSingleNotes) {
     //     validStates.push(TrebleState.NoteFlurry, TrebleState.MirroredNoteFlurry, TrebleState.RepeatedNoteFlurry);
