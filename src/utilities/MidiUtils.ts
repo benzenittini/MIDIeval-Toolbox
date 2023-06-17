@@ -95,10 +95,7 @@ function processMidiEvent(event: Event) {
             velocity,
             timestampMillis: Date.now(),
         };
-        if (velocity > 0) {
-            // Note was pressed
-            pressedInputs.push(changedInput);
-        } else {
+        if (velocity === 0 || action === NOTE_RELEASED) {
             // Note was released
             let index = pressedInputs.findIndex(i => 
                 i.note.pitchClass === changedInput.note.pitchClass &&
@@ -106,6 +103,9 @@ function processMidiEvent(event: Event) {
             if (index !== -1) {
                 pressedInputs.splice(index, 1);
             }
+        } else {
+            // Note was pressed
+            pressedInputs.push(changedInput);
         }
         changeHandler(changedInput, pressedInputs);
     } else if (action === PEDAL_PRESSED_OR_RELEASED) {
