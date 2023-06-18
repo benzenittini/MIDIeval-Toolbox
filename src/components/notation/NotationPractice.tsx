@@ -15,7 +15,7 @@ import { Chord, Key, Note, Sound } from '../../datatypes/ComplexTypes';
  */
 function generateChordOrNote(key: Key | null, notationConfig: NotationConfiguration): Chord | Note | null {
     const chordOrNote = notationConfig.practiceChords
-        ? getRandomChord(key, getAllowedChordQualities(key, notationConfig))
+        ? getRandomChord(key, getAllowedChordQualities(key, notationConfig.chordSelection))
         : getRandomNote(key);
 
     return chordOrNote;

@@ -22,12 +22,7 @@ export function convertKeyConfigToKey(keyConfig: KeyConfigOpts): Key | null {
     }
 }
 
-export type NotationConfiguration = {
-    key: KeyConfigOpts;
-    progressSelector: { type: 'midi' | 'timed', timedDuration: number },
-    practiceSingleNotes: boolean;
-    practiceChords: boolean;
-
+export type ChordSelections = {
     // Triads
     includeTriads: boolean;
     includeMaj3: boolean;
@@ -44,6 +39,14 @@ export type NotationConfiguration = {
     includeDim7: boolean;
     includeMinMaj7: boolean;
     includeAugMaj7: boolean;
+}
+
+export type NotationConfiguration = {
+    key: KeyConfigOpts;
+    progressSelector: { type: 'midi' | 'timed', timedDuration: number },
+    practiceSingleNotes: boolean;
+    practiceChords: boolean;
+    chordSelection: ChordSelections;
 }
 
 export type SightReadingConfiguration = {
@@ -67,26 +70,10 @@ export type SightReadingConfiguration = {
     practiceChords: boolean;
     includeBrokenChords: boolean;
     includeInvertedChords: boolean;
-
-    // Triads
-    includeTriads: boolean;
-    includeMaj3: boolean;
-    includeMin3: boolean;
-    includeDim3: boolean;
-    includeAug3: boolean;
-
-    // Sevenths
-    includeSevenths: boolean;
-    includeMaj7: boolean;
-    includeMin7: boolean;
-    includeDom7: boolean;
-    includeHalfDim7: boolean;
-    includeDim7: boolean;
-    includeMinMaj7: boolean;
-    includeAugMaj7: boolean;
+    chordSelection: ChordSelections;
 }
 
-export function getAllowedChordQualities(key: Key | null, config: NotationConfiguration | SightReadingConfiguration): ChordQuality[] {
+export function getAllowedChordQualities(key: Key | null, config: ChordSelections): ChordQuality[] {
     const qualities: ChordQuality[] = [];
 
     // -- Triads --

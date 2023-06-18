@@ -1,20 +1,22 @@
 
-import { convertKeyConfigToKey, getAllowedChordQualities } from "../../datatypes/Configs";
+import { KeyConfigOpts, convertKeyConfigToKey, getAllowedChordQualities } from "../../datatypes/Configs";
+import KeySelection from "../common/KeySelection";
 import styles from './SightReadingConfig.module.css';
 import { useSightReadingConfig, useSightReadingConfigDispatch } from "./SightReadingConfigContext";
-
-// import ChordSelection from "./ChordSelection";
-// import KeySelection from "./KeySelection";
 
 export default function SightReadingConfig({ goBack, begin }: { goBack: () => void, begin: () => void }) {
     const sightReadingConfig = useSightReadingConfig();
     const sightReadingConfigDispatch = useSightReadingConfigDispatch();
 
     const chordsAvailable = (sightReadingConfig.practiceChords)
-        ? getAllowedChordQualities(convertKeyConfigToKey(sightReadingConfig.key), sightReadingConfig).length > 0
+        ? getAllowedChordQualities(convertKeyConfigToKey(sightReadingConfig.key), sightReadingConfig.chordSelection).length > 0
         : false;
 
     const notesOrChordsAvailable = sightReadingConfig.practiceSingleNotes || chordsAvailable;
+
+    function selectKey(newKey: KeyConfigOpts) {
+        sightReadingConfigDispatch({ type: 'setKey', data: newKey });
+    }
 
     return (
         <>
@@ -22,7 +24,10 @@ export default function SightReadingConfig({ goBack, begin }: { goBack: () => vo
 
             <div className={ styles.topRow }>
                 <div className={ styles.topLeft }>
-                    {/* <KeySelection></KeySelection> */}
+                    <KeySelection
+                        currentValue={ sightReadingConfig.key }
+                        selectKey={ selectKey }
+                        ></KeySelection>
 
                     <div className="formLine">
                         <input type="radio" name="practiceType"

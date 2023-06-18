@@ -35,21 +35,24 @@ const initialConfig: NotationConfiguration = {
     progressSelector: { type: 'timed', timedDuration: 5 },
     practiceSingleNotes: false,
     practiceChords: true,
-    // Triads
-    includeTriads: true,
-    includeMaj3: true,
-    includeMin3: true,
-    includeDim3: true,
-    includeAug3: false,
-    // Sevenths
-    includeSevenths: false,
-    includeMaj7: true,
-    includeMin7: true,
-    includeDom7: true,
-    includeHalfDim7: true,
-    includeDim7: false,
-    includeMinMaj7: false,
-    includeAugMaj7: false,
+
+    chordSelection: {
+        // Triads
+        includeTriads: true,
+        includeMaj3: true,
+        includeMin3: true,
+        includeDim3: true,
+        includeAug3: false,
+        // Sevenths
+        includeSevenths: false,
+        includeMaj7: true,
+        includeMin7: true,
+        includeDom7: true,
+        includeHalfDim7: true,
+        includeDim7: false,
+        includeMinMaj7: false,
+        includeAugMaj7: false,
+    }
 }
 
 
@@ -68,21 +71,21 @@ function notationConfigReducer(config: NotationConfiguration, action: DispatchAc
         case 'practiceChords':           return { ...config, practiceSingleNotes: false, practiceChords: true };
 
         // -- Triads --
-        case 'includeTriads': return { ...config, includeTriads: action.data };
-        case 'includeMaj3':   return { ...config, includeMaj3: action.data };
-        case 'includeMin3':   return { ...config, includeMin3: action.data };
-        case 'includeDim3':   return { ...config, includeDim3: action.data };
-        case 'includeAug3':   return { ...config, includeAug3: action.data };
+        case 'includeTriads': return { ...config, chordSelection: { ...config.chordSelection, includeTriads: action.data } };
+        case 'includeMaj3':   return { ...config, chordSelection: { ...config.chordSelection, includeMaj3: action.data } };
+        case 'includeMin3':   return { ...config, chordSelection: { ...config.chordSelection, includeMin3: action.data } };
+        case 'includeDim3':   return { ...config, chordSelection: { ...config.chordSelection, includeDim3: action.data } };
+        case 'includeAug3':   return { ...config, chordSelection: { ...config.chordSelection, includeAug3: action.data } };
 
         // -- Sevenths --
-        case 'includeSevenths': return { ...config, includeSevenths: action.data };
-        case 'includeMaj7':     return { ...config, includeMaj7: action.data };
-        case 'includeMin7':     return { ...config, includeMin7: action.data };
-        case 'includeDom7':     return { ...config, includeDom7: action.data };
-        case 'includeHalfDim7': return { ...config, includeHalfDim7: action.data };
-        case 'includeDim7':     return { ...config, includeDim7: action.data };
-        case 'includeMinMaj7':  return { ...config, includeMinMaj7: action.data };
-        case 'includeAugMaj7':  return { ...config, includeAugMaj7: action.data };
+        case 'includeSevenths': return { ...config, chordSelection: { ...config.chordSelection, includeSevenths: action.data } };
+        case 'includeMaj7':     return { ...config, chordSelection: { ...config.chordSelection, includeMaj7: action.data } };
+        case 'includeMin7':     return { ...config, chordSelection: { ...config.chordSelection, includeMin7: action.data } };
+        case 'includeDom7':     return { ...config, chordSelection: { ...config.chordSelection, includeDom7: action.data } };
+        case 'includeHalfDim7': return { ...config, chordSelection: { ...config.chordSelection, includeHalfDim7: action.data } };
+        case 'includeDim7':     return { ...config, chordSelection: { ...config.chordSelection, includeDim7: action.data } };
+        case 'includeMinMaj7':  return { ...config, chordSelection: { ...config.chordSelection, includeMinMaj7: action.data } };
+        case 'includeAugMaj7':  return { ...config, chordSelection: { ...config.chordSelection, includeAugMaj7: action.data } };
 
         default: throw new Error(`Unrecognized action type: ${action.type}`);
     }

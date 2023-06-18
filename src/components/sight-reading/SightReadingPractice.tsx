@@ -28,6 +28,8 @@ export default function SightReadingPractice({ goHome, goToConfig }: { goHome: (
         setDisplayedMusic(a => a.slice(1));
         // And push the next measure
         setDisplayedMusic(a => [...a, musicStream.labelMusic(musicStream.getNextMeasure())]);
+        // We get a nasty flicker without doing this.
+        setMusicXShift(0);
     }
 
     useEffect(() => {
