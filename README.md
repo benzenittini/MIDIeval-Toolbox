@@ -9,7 +9,7 @@ A haiku description:
 > Chord and sight-reading practice<br>
 > ...for MIDI keyboards<br>
 
-The app is accessible here: https://benzenittini.github.io/midieval-toolbox. It works best when using a MIDI keyboard as input, but it's not a requirement. Currently, only "notation practice" is available, but "sight-reading practice" is about half-way done and will (hopefully) be ready in the coming months.
+The app is accessible here: https://benzenittini.github.io/MIDIeval-Toolbox. It works best when using a MIDI keyboard as input, but it's not a requirement. Currently, only "notation practice" is available, but "sight-reading practice" is about half-way done and will (hopefully) be ready in the coming months.
 
 
 # Contributing
