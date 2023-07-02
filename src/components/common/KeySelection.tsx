@@ -4,14 +4,22 @@ import { KeyConfigOpts, MiscKeys } from "../../datatypes/Configs";
 
 type Props = {
     currentValue: KeyConfigOpts,
+    filterKeysById?: (id: string) => boolean,
     selectKey: (key: KeyConfigOpts) => void,
 };
 
-export default function KeySelection({ currentValue, selectKey }: Props) {
-    const getOption = ([key, val]: [string, string]) => (<option key={key} value={key}>{val}</option>);
+export default function KeySelection({ currentValue, filterKeysById = () => true, selectKey }: Props) {
+    const getOption = (id: string, display: string) => (<option key={id} value={id}>{display}</option>);
 
-    const miscKeyOpts  = Object.entries(MiscKeys)        .map(entry => getOption([entry[1], entry[1]]));
-    const majorKeyOpts = Object.entries(MAJOR_KEY_LOOKUP).map(entry => getOption([entry[0], entry[1].toString()]));
+    const miscKeyOpts  = Object.entries(MiscKeys)
+        .map(entry => ({ id: entry[1], display: entry[1] }))
+        .filter(({id}) => filterKeysById(id))
+        .map(entry => getOption(entry.id, entry.display));
+
+    const majorKeyOpts = Object.entries(MAJOR_KEY_LOOKUP)
+        .map(entry => ({ id: entry[0], display: entry[1].toString() }))
+        .filter(({id}) => filterKeysById(id))
+        .map(entry => getOption(entry.id, entry.display));
 
     function changeKey(event: any) {
         selectKey(event.target.value);

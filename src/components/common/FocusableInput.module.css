@@ -1,0 +1,21 @@
+
+
+.secondsSelector, .secondsDisplay {
+    text-align: center;
+    width: 150px;
+}
+
+.secondsDisplay:hover {
+    background: var(--blue-vdark);
+}
+
+.secondsDisplay {
+    display: inline-block;
+    background: var(--blue-dark);
+    border-radius: 8px;
+    padding: 10px;
+    color: var(--gray-vlight);
+    font-size: 16px;
+    cursor: text;
+    transition: background-color 0.2s;
+}

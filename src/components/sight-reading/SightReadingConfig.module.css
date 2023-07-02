@@ -3,21 +3,45 @@
     font-weight: normal;
 }
 
-.topRow {
+.settingsBox {
+    border: 1px solid var(--gray-dark);
+    border-radius: 16px;
+    padding: 10px 14px;
+    margin: 20px 0;
+    text-align: left;
+}
+.settingsBoxLabel {
+    color: var(--gray-dark);
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+}
+
+.quickSettingsSlider {
+    padding: 20px 40px;
+}
+
+.flexRow {
     display: flex;
     flex-direction: row;
     align-items: center;
+    margin: 0 20px;
     gap: 20px;
     justify-content: space-between;
-    width: 600px;
+    width: 850px;
 }
-.topLeft>* {
-    margin-top: 35px;
-    margin-bottom: 35px;
+
+.configGroup>* {
+    margin-top: 20px;
+    margin-bottom: 20px;
     text-align: left;
 }
 
 .navigation {
     text-align: right;
     margin-top: 40px;
+}
+
+.indented {
+    margin-left: 20px;
 }
