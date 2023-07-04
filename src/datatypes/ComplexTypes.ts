@@ -1,5 +1,6 @@
 
 import { randomItemFrom } from "../utilities/ArrayUtils";
+import { clamp } from "../utilities/NumberUtils";
 import { Accidental, BASE_LETTERS, BASE_LETTER_PCS, Letter, Octave, PITCH_CLASSES, Pitch, PitchClass, RhythmicValue, TimeSignature } from "./BasicTypes";
 
 
@@ -12,6 +13,20 @@ export abstract class Sound {
     abstract getNotes(): Note[];
     abstract toString(key?: Key | null): string;
     abstract getRhythmicValue(): RhythmicValue;
+
+    /** All notes must be in-key for this sound to be considered in-key. */
+    isInKey(key: Key): boolean {
+        return Sound.isInKey(key, this);
+    }
+    static isInKey(key: Key, sound: Sound): boolean {
+        const pitchClasses = key.getScale();
+        for (let note of sound.getNotes()) {
+            if (!pitchClasses.includes(note.getPitchClass())) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     getBeatCount(timeSignature: TimeSignature): number {
         return Sound.getBeatCount(timeSignature, this.getRhythmicValue());
@@ -79,6 +94,51 @@ export class Note extends Sound {
     // -- Manipulation --
     stepUp(halfSteps: number): Note {
         this.pitch += halfSteps;
+        return this;
+    }
+    stepUpInKey(pitchClasses: number, key: Key): Note {
+        const scale = [...key.getScale()].sort((a, b) => a - b);
+
+        let pcIndex = scale.indexOf(this.getPitchClass());
+        if (pcIndex !== -1) {
+            let newIndex = (pcIndex + pitchClasses);
+            let octaveChange = 0;
+            if (newIndex < 0) {
+                newIndex += scale.length;
+                octaveChange--;
+            } else {
+                octaveChange = Math.floor(newIndex / scale.length);
+            }
+            newIndex %= scale.length;
+            this.pitch += (octaveChange * 12) + (scale[newIndex] - this.getPitchClass());
+        }
+        return this;
+    }
+    clampIntoKey(key: Key, lowerBound?: number, upperBound?: number): Note {
+        // -- Step 1: Clamp it --
+        if (lowerBound !== undefined) this.pitch = Math.max(this.pitch, lowerBound);
+        if (upperBound !== undefined) this.pitch = Math.min(this.pitch, upperBound);
+
+        // Short circuit, if able.
+        if (this.isInKey(key)) return this;
+
+        // -- Step 2: Nudge it into key --
+        // Try going up
+        let upOneStep = this.clone().stepUp(1);
+        if (Sound.isInKey(key, upOneStep)) {
+            if (upperBound === undefined || upOneStep.getNotes().every(n => n.pitch <= upperBound)) {
+                return this.stepUp(1);
+            }
+        }
+        // Try going down
+        let downOneStep = this.clone().stepUp(-1);
+        if (Sound.isInKey(key, downOneStep)) {
+            if (lowerBound === undefined || downOneStep.getNotes().every(n => n.pitch <= lowerBound)) {
+                return this.stepUp(-1);
+            }
+        }
+
+        // Well, we tried... (this shouldn't come up)
         return this;
     }
 

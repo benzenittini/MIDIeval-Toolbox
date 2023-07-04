@@ -117,7 +117,7 @@ export default function SightReadingConfig({ goBack, begin }: { goBack: () => vo
                         {getCheckbox('Wait for correct note to be played before proceeding',         'waitForCorrectNote')}
                         {getCheckbox('Allow varying rhythmic values (whole, half, quarter, eighth)', 'allowRhythmicValues')}
                         <LabeledSlider
-                            label="Adjacent Note Distance:"
+                            label="Note Difficulty:"
                             min={ 1 }
                             max={ 10 }
                             value={ sightReadingConfig.adjacentNoteDistance }
@@ -126,7 +126,7 @@ export default function SightReadingConfig({ goBack, begin }: { goBack: () => vo
                     </div>
                 </div>
 
-                <div className={ styles.flexRow }>
+                <div className={ styles.flexRow } style={{ marginBottom: '20px' }}>
                     {/* Bottom Left */}
                     <div className={ styles.configGroup }>
                         {getCheckbox('Include Single Notes',  'practiceSingleNotes')}

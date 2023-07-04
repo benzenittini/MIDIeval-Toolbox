@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import * as TWEEN from '@tweenjs/tween.js';
 
-import { MusicStream } from '../../utilities/MusicStream';
+import { LabeledMusic, Music, MusicStream } from '../../utilities/MusicStream';
 import { useSightReadingConfig } from './SightReadingConfigContext';
 import { convertKeyConfigToKey } from '../../datatypes/Configs';
 import GrandStaff, { BASE_NOTE_GAP_RATIO, MEASURE_GAP_RATIO } from '../svg/SvgGrandStaff';
@@ -14,11 +14,11 @@ const MEASURE_WIDTH = GRAND_STAFF_HEIGHT * (BASE_NOTE_GAP_RATIO + MEASURE_GAP_RA
 
 export default function SightReadingPractice({ goHome, goToConfig }: { goHome: () => void, goToConfig: () => void }) {
     const sightReadingConfig = useSightReadingConfig();
-    const [ key ] = useState(convertKeyConfigToKey(sightReadingConfig.key)!);
+
+    const [ key ] = useState(() => convertKeyConfigToKey(sightReadingConfig.key)!);
     const [ musicStream ] = useState(new MusicStream(sightReadingConfig, key));
-    const [ displayedMusic, setDisplayedMusic ] = useState(
-        new Array(4).fill(1).map(() => musicStream.labelMusic(musicStream.getNextMeasure()))
-    );
+    const [ displayedMusic, setDisplayedMusic ] = useState(() => 
+        new Array(4).fill(1).map(() => musicStream.labelMusic(musicStream.getNextMeasure())));
     const [ musicXShift, setMusicXShift ] = useState(0);
 
     const singleMeasureTime = 1000 * 60 * sightReadingConfig.timeSignature.top / sightReadingConfig.tempo;

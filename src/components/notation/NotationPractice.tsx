@@ -38,13 +38,13 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
     const notationConfig = useNotationConfig();
 
     /** The key we're practicing, or "null" to indicate "anything goes" */
-    const [ key, _ ] = useState(convertKeyConfigToKey(notationConfig.key));
+    const [ key, _ ] = useState(() => convertKeyConfigToKey(notationConfig.key));
 
     /** The current chord or note being displayed. May be "null" if the allowed chord qualities rules out all available chords. */
-    const [ chordOrNote, setChordOrNote ] = useState(generateChordOrNote(key, notationConfig));
+    const [ chordOrNote, setChordOrNote ] = useState(() => generateChordOrNote(key, notationConfig));
 
     /** The currently displayed text. Most likely a string representation of the chordOrNote. */
-    const [ display, setDisplay ] = useState(getDisplayedText(key, chordOrNote));
+    const [ display, setDisplay ] = useState(() => getDisplayedText(key, chordOrNote));
 
     /** The width of the progress indicator. "Timed" mode goes from 100 to 0 as time progresses. "midi" mode goes from 0 to 100 as notes are played. */
     const [ progressWidth, setProgressWidth ] = useState(notationConfig.progressSelector.type === 'timed' ? 100 : 0);

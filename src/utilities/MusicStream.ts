@@ -1,48 +1,12 @@
 
-import { Pitch, RHYTHMIC_VALUES, RhythmicValue, TimeSignature } from "../datatypes/BasicTypes";
-import { Key, Sound, Note, NoteLabel, PITCH_CLASS_TO_LABELS, Chord, MAJOR_3 } from "../datatypes/ComplexTypes";
+import { Clef, Pitch, TimeSignature } from "../datatypes/BasicTypes";
+import { Key, Sound, Note, NoteLabel, PITCH_CLASS_TO_LABELS } from "../datatypes/ComplexTypes";
 import { SightReadingConfiguration } from "../datatypes/Configs";
 import { randomItemFrom } from "./ArrayUtils";
-import { getRandomChord, getRandomNote } from "./Generators";
-import { randInt } from "./NumberUtils";
+import { createNoteFlurry } from "./Generators";
 
 
-// // TODO-ben : delete this
-// function createSampleSounds(height: number, staffThickness: number, musicKey: Key, clef: Clef, baseOctave: Octave): ReactElement[] {
-//     let eles: ReactElement[] = [];
-
-//     // // Upward notes
-//     // let previousNote = createNote(0, RhythmicValue.QUARTER, baseOctave, false)
-//     // for (let x = 0; x < 22; x++) {
-//     //     eles.push((<SvgChord
-//     //         key={ x }
-//     //         musicKey={ musicKey }
-//     //         clef={ clef }
-//     //         x={ 40 + x * 50 }
-//     //         staffLineHeight={ STAFF_RATIO * height / 4 }
-//     //         strokeWidth={ staffThickness }
-//     //         sound={ previousNote }></SvgChord>));
-//     //         previousNote = stepUpNote(previousNote, 1);
-//     // }
-
-//     // Chords in a key
-//     let chords = getChordsInKey(musicKey);
-//     for (let x = 0; x < chords.length; x++ ) {
-//         chords[x].root.octave = baseOctave;
-//         eles.push((<SvgChord
-//             key={ x }
-//             musicKey={ musicKey }
-//             clef={ clef }
-//             x={ 40 + x * 50 }
-//             staffLineHeight={ STAFF_RATIO * height / 4 }
-//             strokeWidth={ staffThickness }
-//             sound={ chords[x] }></SvgChord>));
-//     }
-
-//     return eles;
-// }
-
-class GeneratedSounds {
+export class GeneratedSounds {
 
     private timeSignature: TimeSignature;
 
@@ -74,28 +38,8 @@ export type LabeledMusic = {
 }
 
 
-enum TrebleState {
-    // If "single-notes" is selected
-    NoteFlurry,
-    MirroredNoteFlurry,
-    RepeatedNoteFlurry,
-    // If "broken chords" is selected
-    ChordThenBroken,
-    BrokenThenChord,
-    // If "chords" is selected
-    RepeatedChord,
-}
-
-enum BassState {
-    SingleNote,
-    Octave,
-    OctaveWithFifth,
-    OctaveWithDelayedFifth,
-    RootWithDelayedFifthEighth,
-}
-
 // Limits the range of notes we generate. All bounds are inclusive.
-type Bounds = { upper: Pitch, lower: Pitch };
+export type Bounds = { upper: Pitch, lower: Pitch };
 const TREBLE_BOUNDS: Bounds = {
     upper: Note.convertToPitch(5, 9), // A5
     lower: Note.convertToPitch(4, 0), // C4, "middle C"
@@ -187,103 +131,51 @@ export class MusicStream {
     }
 
     private generateMoreTreble(): void {
-        // TODO-ben : Make sure our generation has clean cutoffs at measures
         const type = randomItemFrom(getValidTrebleStates(this.config));
+        const generationParams = {
+            key:            this.key,
+            config:         this.config,
+            generatedMusic: this.generatedMusic,
+            beatsSoFar:     this.trebleBeatCount,
+            bounds:         TREBLE_BOUNDS,
+            clef:           Clef.TREBLE,
+        }
         let sounds: GeneratedSounds;
         switch (type) {
             // TODO-ben : Update with other generation functions.
-            case TrebleState.NoteFlurry:         sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
-            case TrebleState.MirroredNoteFlurry: sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
-            case TrebleState.RepeatedNoteFlurry: sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
-            case TrebleState.ChordThenBroken:    sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
-            case TrebleState.BrokenThenChord:    sounds = this.createNoteFlurry(TREBLE_BOUNDS, this.trebleBeatCount); break;
-            case TrebleState.RepeatedChord:      sounds = this.createRepeatedChord(TREBLE_BOUNDS, this.trebleBeatCount); break;
+            case TrebleState.NoteFlurry:         sounds = createNoteFlurry(generationParams); break;
+            case TrebleState.MirroredNoteFlurry: sounds = createNoteFlurry(generationParams); break;
+            case TrebleState.RepeatedNoteFlurry: sounds = createNoteFlurry(generationParams); break;
+            case TrebleState.ChordThenBroken:    sounds = createNoteFlurry(generationParams); break;
+            case TrebleState.BrokenThenChord:    sounds = createNoteFlurry(generationParams); break;
+            case TrebleState.RepeatedChord:      sounds = createNoteFlurry(generationParams); break;
         }
         this.generatedMusic.trebleClef.push(...sounds.sounds);
         this.trebleBeatCount += sounds.beatCount;
     }
 
     private generateMoreBass(): void {
-        // TODO-ben : Make sure our generation has clean cutoffs at measures
         // TODO-ben : Match treble pitch classes (if applicable) down 1-2 octaves
         const type = randomItemFrom(getValidBassStates(this.config));
+        const generationParams = {
+            key:            this.key,
+            config:         this.config,
+            generatedMusic: this.generatedMusic,
+            beatsSoFar:     this.bassBeatCount,
+            bounds:         BASS_BOUNDS,
+            clef:           Clef.BASS,
+        }
         let sounds: GeneratedSounds;
         switch (type) {
             // TODO-ben : Update with other generation functions.
-            case BassState.SingleNote:                 sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
-            case BassState.Octave:                     sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
-            case BassState.OctaveWithFifth:            sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
-            case BassState.OctaveWithDelayedFifth:     sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
-            case BassState.RootWithDelayedFifthEighth: sounds = this.createNoteFlurry(BASS_BOUNDS, this.bassBeatCount); break;
+            case BassState.SingleNote:                 sounds = createNoteFlurry(generationParams); break;
+            case BassState.Octave:                     sounds = createNoteFlurry(generationParams); break;
+            case BassState.OctaveWithFifth:            sounds = createNoteFlurry(generationParams); break;
+            case BassState.OctaveWithDelayedFifth:     sounds = createNoteFlurry(generationParams); break;
+            case BassState.RootWithDelayedFifthEighth: sounds = createNoteFlurry(generationParams); break;
         }
         this.generatedMusic.bassClef.push(...sounds.sounds);
         this.bassBeatCount += sounds.beatCount;
-    }
-
-    /**
-     * Ensures the notes we generate have clean cutoffs between each measure by choosing the minimum value between:
-     *   - The number of beats left in the measure.
-     *   - The provided rhythmic value.
-     */
-    private fitRhythmicValue(desired: RhythmicValue, beatCount: number): RhythmicValue {
-        const beatsRemainingInMeasure = this.config.timeSignature.top - beatCount % this.config.timeSignature.top;
-
-        // If our desired rhythmic value fits, let's use that!
-        // Otherwise, we'll use the biggest one that fits.
-        for (let rv of [desired, RhythmicValue.WHOLE, RhythmicValue.HALF, RhythmicValue.QUARTER, RhythmicValue.EIGHTH]) {
-            if (Sound.getBeatCount(this.config.timeSignature, rv) <= beatsRemainingInMeasure) {
-                return rv;
-            }
-        }
-
-        // Should never get here, but in case we do...
-        return RhythmicValue.EIGHTH;
-    }
-
-    private createNoteFlurry(bounds: Bounds, beatsSoFar: number): GeneratedSounds {
-        // TODO-ben : Make this actually generate a "flurry" (mostly-)in-key instead of a random mess
-        const sounds = new GeneratedSounds(this.config.timeSignature);
-
-        const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
-        // const rhythmicValue = RhythmicValue.EIGHTH;
-
-        // Generate between 2 and 8 notes
-        for (let i = 0; i < randInt(2, 8); i++) {
-            const pitch = randInt(bounds.lower, bounds.upper+1);
-            sounds.addSound(new Note(pitch, this.fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount), false));
-        }
-
-        // // TODO-ben : Delete
-        // const rhythmicValue = RhythmicValue.EIGHTH;
-        // for (let currentPitch = bounds.lower; currentPitch < bounds.upper+1; currentPitch++) {
-        //     sounds.addSound(new Note(currentPitch, rhythmicValue, false));
-        // }
-
-        return sounds;
-    }
-
-    private createRepeatedChord(bounds: Bounds, beatsSoFar: number): GeneratedSounds {
-        // TODO-ben : Make this actually generate something (mostly-)in-key instead of a random mess
-        const sounds = new GeneratedSounds(this.config.timeSignature);
-
-        const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
-        // TODO-ben : Chords need ALL their notes to be within range... not just the root note. Inversion impacts this too.
-        const pitch = randInt(bounds.lower, bounds.upper+1);
-        const chordQuality = MAJOR_3;
-        const inversion = 0;
-
-        // Generate between 1 and 4 repeats
-        for (let i = 0; i < randInt(1, 4); i++) {
-            sounds.addSound(
-                new Chord(
-                    new Note(pitch, this.fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount), false),
-                    chordQuality,
-                    inversion,
-                )
-            );
-        }
-
-        return sounds;
     }
 
 }
@@ -293,22 +185,38 @@ export class MusicStream {
 // State Management
 // ----------------
 
+enum TrebleState {
+    // If "single-notes" is selected
+    NoteFlurry,
+    MirroredNoteFlurry,
+    RepeatedNoteFlurry,
+    // If "broken chords" is selected
+    ChordThenBroken,
+    BrokenThenChord,
+    // If "chords" is selected
+    RepeatedChord,
+}
+
+enum BassState {
+    SingleNote,
+    Octave,
+    OctaveWithFifth,
+    OctaveWithDelayedFifth,
+    RootWithDelayedFifthEighth,
+}
+
 function getValidTrebleStates(config: SightReadingConfiguration): TrebleState[] {
     let validStates: TrebleState[] = [];
 
-    // TODO-ben : Switch this back
-    validStates.push(TrebleState.NoteFlurry);
-    validStates.push(TrebleState.RepeatedChord);
-
-    // if (config.practiceSingleNotes) {
-    //     validStates.push(TrebleState.NoteFlurry, TrebleState.MirroredNoteFlurry, TrebleState.RepeatedNoteFlurry);
-    // }
-    // if (config.practiceChords) {
-    //     validStates.push(TrebleState.RepeatedChord);
-    //     if (config.includeBrokenChords) {
-    //         validStates.push(TrebleState.ChordThenBroken, TrebleState.BrokenThenChord);
-    //     }
-    // }
+    if (config.practiceSingleNotes) {
+        validStates.push(TrebleState.NoteFlurry, TrebleState.MirroredNoteFlurry, TrebleState.RepeatedNoteFlurry);
+    }
+    if (config.practiceChords) {
+        validStates.push(TrebleState.RepeatedChord);
+        if (config.includeBrokenChords) {
+            validStates.push(TrebleState.ChordThenBroken, TrebleState.BrokenThenChord);
+        }
+    }
 
     return validStates;
 }
@@ -338,7 +246,7 @@ function getValidBassStates(config: SightReadingConfiguration): BassState[] {
 function labelUnlabeled(notes: Note[][], labelFn: (note: Note) => Note): Note[][] {
     return notes.map(noteGroup => {
         return noteGroup.map(note => {
-            if ('pitchClass' in note) {
+            if (!note.hasLabel()) {
                 return labelFn(note);
             } else {
                 return note;

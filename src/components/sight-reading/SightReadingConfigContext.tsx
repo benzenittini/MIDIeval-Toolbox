@@ -2,7 +2,6 @@
 import { Dispatch, createContext, useContext, useReducer } from "react";
 
 import { MiscKeys, SightReadingConfiguration } from "../../datatypes/Configs";
-import { MAJOR_KEY_LOOKUP } from "../../datatypes/ComplexTypes";
 
 
 // ========
