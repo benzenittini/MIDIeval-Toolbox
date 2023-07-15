@@ -1,6 +1,5 @@
 
 import { randomItemFrom } from "../utilities/ArrayUtils";
-import { clamp } from "../utilities/NumberUtils";
 import { Accidental, BASE_LETTERS, BASE_LETTER_PCS, Letter, Octave, PITCH_CLASSES, Pitch, PitchClass, RhythmicValue, TimeSignature } from "./BasicTypes";
 
 
@@ -13,6 +12,8 @@ export abstract class Sound {
     abstract getNotes(): Note[];
     abstract toString(key?: Key | null): string;
     abstract getRhythmicValue(): RhythmicValue;
+    abstract setRhythmicValue(newRhythmicValue : RhythmicValue): void;
+    abstract clone(): Sound;
 
     /** All notes must be in-key for this sound to be considered in-key. */
     isInKey(key: Key): boolean {
@@ -65,6 +66,7 @@ export class Note extends Sound {
     toString(key?: Key | null): string { return this.getLabel(key).toString(); }
     getNotes(): Note[] { return [this]; }
     getRhythmicValue(): RhythmicValue { return this.rhythmicValue; }
+    setRhythmicValue(newRhythmicValue : RhythmicValue): void { this.rhythmicValue = newRhythmicValue; }
 
     // -- Object-related --
     clone(): Note { return new Note(this.pitch, this.rhythmicValue, this.isDotted, this.label); }
@@ -288,7 +290,9 @@ export class Chord extends Sound {
 
     // -- Parent Functions --
     toString(key?: Key | null): string { return this.root.toString(key) + this.quality.getNotation(); }
+    clone(): Sound { return new Chord(this.root.clone(), this.quality, this.inversion); }
     getRhythmicValue(): RhythmicValue { return this.root.rhythmicValue; }
+    setRhythmicValue(newRhythmicValue : RhythmicValue): void { this.root.rhythmicValue = newRhythmicValue; }
     getNotes(): Note[] {
         // Start with the base notes
         let notes: Note[] = this.quality.getNotes(this.root);
@@ -305,6 +309,25 @@ export class Chord extends Sound {
         }
 
         return notes;
+    }
+
+    // -- Manipulation --
+    shiftIntoBounds(lowerBound: number, upperBound: number, allowInversions: boolean) {
+        // Invert it upwards (higher pitch)
+        while (this.getNotes().some(n => n.pitch < lowerBound)) {
+            // If we can invert, go that route
+            if (allowInversions) this.inversion++;
+            // Otherwise, move the whole thing up one octave at a time.
+            else this.root.pitch += 12;
+        }
+
+        // Invert it downwards (higher pitch)
+        while (this.getNotes().some(n => n.pitch > upperBound)) {
+            // If we can invert, go that route
+            if (allowInversions) this.inversion--;
+            // Otherwise, move the whole thing up one octave at a time.
+            else this.root.pitch -= 12;
+        }
     }
 }
 

@@ -3,7 +3,7 @@ import { Clef, Pitch, TimeSignature } from "../datatypes/BasicTypes";
 import { Key, Sound, Note, NoteLabel, PITCH_CLASS_TO_LABELS } from "../datatypes/ComplexTypes";
 import { SightReadingConfiguration } from "../datatypes/Configs";
 import { randomItemFrom } from "./ArrayUtils";
-import { createNoteFlurry } from "./Generators";
+import { createBrokenThenChord, createChordThenBroken, createMirroredNoteFlurry, createNoteFlurry, createRepeatedChord, createRepeatedNoteFlurry } from "./Generators";
 
 
 export class GeneratedSounds {
@@ -142,13 +142,12 @@ export class MusicStream {
         }
         let sounds: GeneratedSounds;
         switch (type) {
-            // TODO-ben : Update with other generation functions.
             case TrebleState.NoteFlurry:         sounds = createNoteFlurry(generationParams); break;
-            case TrebleState.MirroredNoteFlurry: sounds = createNoteFlurry(generationParams); break;
-            case TrebleState.RepeatedNoteFlurry: sounds = createNoteFlurry(generationParams); break;
-            case TrebleState.ChordThenBroken:    sounds = createNoteFlurry(generationParams); break;
-            case TrebleState.BrokenThenChord:    sounds = createNoteFlurry(generationParams); break;
-            case TrebleState.RepeatedChord:      sounds = createNoteFlurry(generationParams); break;
+            case TrebleState.MirroredNoteFlurry: sounds = createMirroredNoteFlurry(generationParams); break;
+            case TrebleState.RepeatedNoteFlurry: sounds = createRepeatedNoteFlurry(generationParams); break;
+            case TrebleState.ChordThenBroken:    sounds = createChordThenBroken(generationParams); break;
+            case TrebleState.BrokenThenChord:    sounds = createBrokenThenChord(generationParams); break;
+            case TrebleState.RepeatedChord:      sounds = createRepeatedChord(generationParams); break;
         }
         this.generatedMusic.trebleClef.push(...sounds.sounds);
         this.trebleBeatCount += sounds.beatCount;

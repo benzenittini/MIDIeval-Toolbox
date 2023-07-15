@@ -1,10 +1,17 @@
 
 import { Clef, PITCH_CLASSES, RHYTHMIC_VALUES, RhythmicValue, TimeSignature } from "../datatypes/BasicTypes";
 import { Chord, ChordQuality, KEYS, Key, MAJOR_3, Note, SEVENTH_QUALITIES, Sound, TRIAD_QUALITIES } from "../datatypes/ComplexTypes";
-import { SightReadingConfiguration } from "../datatypes/Configs";
+import { SightReadingConfiguration, getAllowedChordQualities } from "../datatypes/Configs";
 import { randomItemFrom } from "./ArrayUtils";
 import { Bounds, GeneratedSounds, Music } from "./MusicStream";
-import { clamp, randInt } from "./NumberUtils";
+import { randInt, roundOutward } from "./NumberUtils";
+
+
+// ===================================================================================================
+// NOTICE: When writing or debugging generators, make sure to disable react strict mode in main.tsx by
+//         commenting out the <StrictMode> tags. Otherwise, notes will be double-consumed from the
+//         music stream, resulting in notes "missing" from what you'd expect to be generated.
+// ===================================================================================================
 
 
 export function getRandomKey(): Key {
@@ -71,7 +78,7 @@ export type GenerationParams = {
 }
 
 
-export function createNoteFlurry({ key, config, generatedMusic, beatsSoFar, bounds, clef }: GenerationParams): GeneratedSounds {
+export function createNoteFlurry({ key, config, generatedMusic, beatsSoFar, bounds, clef }: GenerationParams, maxNotes: number = 8): GeneratedSounds {
     const sounds = new GeneratedSounds(config.timeSignature);
     const rhythmicValue = config.allowRhythmicValues
         ? randomItemFrom(RHYTHMIC_VALUES)
@@ -85,45 +92,122 @@ export function createNoteFlurry({ key, config, generatedMusic, beatsSoFar, boun
     }
 
     // Generate between 2 and 8 notes, going either up or down.
-    let upperLimit = previousNote.pitch >= bounds.upper ? 0 : config.adjacentNoteDistance;
     let lowerLimit = previousNote.pitch <= bounds.lower ? 0 : -config.adjacentNoteDistance;
-    do { var pitchClassJump = Math.ceil(randInt(lowerLimit, upperLimit + 1) / 2); }
+    let upperLimit = previousNote.pitch >= bounds.upper ? 0 : config.adjacentNoteDistance;
+    do { var pitchClassJump = Math.min(5, (randInt(lowerLimit, upperLimit + 1))); }
     while (pitchClassJump === 0); // Staying where we are is boring.
 
-    for (let i = 0; i < randInt(2, 8); i++) {
-        let lastPitch = previousNote.pitch;
+    const numNotes = randInt(2, maxNotes);
+    for (let i = 0; i < numNotes; i++) {
         previousNote = previousNote.clone()
             .stepUpInKey(pitchClassJump, key)
             .clampIntoKey(key, bounds.lower, bounds.upper);
         previousNote.rhythmicValue = fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature);
-        // TODO-ben : debug render(?) issue, then remove this line:
-        console.log({diff: previousNote.pitch - lastPitch, prev: lastPitch, new: previousNote.pitch});
         sounds.addSound(previousNote);
     }
 
     return sounds;
 }
 
-export function createRepeatedChord({ key, config, generatedMusic, beatsSoFar, bounds, clef }: GenerationParams): GeneratedSounds {
-    // TODO-ben : Make this actually generate something (mostly-)in-key instead of a random mess
-    const sounds = new GeneratedSounds(config.timeSignature);
+export function createMirroredNoteFlurry(generationParams: GenerationParams): GeneratedSounds {
+    const { beatsSoFar, config } = generationParams;
+    const sounds = createNoteFlurry(generationParams, 4);
+    const rhythmicValue = sounds.sounds[0].getRhythmicValue();
 
-    const rhythmicValue = randomItemFrom(RHYTHMIC_VALUES);
-    // TODO-ben : Chords need ALL their notes to be within range... not just the root note. Inversion impacts this too.
-    const pitch = randInt(bounds.lower, bounds.upper+1);
-    const chordQuality = MAJOR_3;
-    const inversion = 0;
-
-    // Generate between 1 and 4 repeats
-    for (let i = 0; i < randInt(1, 4); i++) {
-        sounds.addSound(
-            new Chord(
-                new Note(pitch, fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature), false),
-                chordQuality,
-                inversion,
-            )
-        );
+    // Skip repeating the last note so the middle note isn't duplicated.
+    for (let i = sounds.sounds.length-2; i >= 0; i--) {
+        let newNote = sounds.sounds[i].clone();
+        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        sounds.addSound(newNote);
     }
+
+    return sounds;
+}
+
+export function createRepeatedNoteFlurry(generationParams: GenerationParams): GeneratedSounds {
+    const { beatsSoFar, config } = generationParams;
+    const sounds = createNoteFlurry(generationParams, 4);
+    const rhythmicValue = sounds.sounds[0].getRhythmicValue();
+
+    // Skip repeating the last note so the middle note isn't duplicated.
+    const numSounds = sounds.sounds.length;
+    for (let i = 0; i < numSounds; i++) {
+        let newNote = sounds.sounds[i].clone();
+        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        sounds.addSound(newNote);
+    }
+
+    return sounds;
+}
+
+export function createRepeatedChord({ key, config, generatedMusic, beatsSoFar, bounds, clef }: GenerationParams, maxRepeats: number = 4): GeneratedSounds {
+    const sounds = new GeneratedSounds(config.timeSignature);
+    const rhythmicValue = config.allowRhythmicValues
+        ? randomItemFrom(RHYTHMIC_VALUES)
+        : RhythmicValue.QUARTER;
+
+    const chord = getRandomChord(key, getAllowedChordQualities(key, config.chordSelection))
+    // If for some reason there are no valid chords that I'm looking for, move along.
+    if (chord === null) return sounds;
+    // Also, if we don't allow inversions, clear those out.
+    if (!config.includeInvertedChords) chord.inversion = 0;
+
+    // Set the pitch of the root note to something more reasonable by bumping up its octave.
+    const thisClef = (clef === Clef.TREBLE) ? generatedMusic.trebleClef : generatedMusic.bassClef;
+    const previousNote = thisClef.at(-1)?.getNotes()[0] ?? getRandomNote(key);
+    const targetOctave = previousNote.clampIntoKey(key, bounds.lower, bounds.upper).getOctave();
+    chord.root.pitch += (12 * targetOctave);
+
+    chord.shiftIntoBounds(bounds.lower, bounds.upper, config.includeInvertedChords);
+
+    // Repeat it a random number of times.
+    const repeats = randInt(1, maxRepeats + 1);
+    for (let i = 0; i < repeats; i++) {
+        const newChord = chord.clone();
+        newChord.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        sounds.addSound(newChord);
+    }
+
+    return sounds;
+}
+
+export function createChordThenBroken(generationParams: GenerationParams): GeneratedSounds {
+    const { beatsSoFar, config } = generationParams;
+
+    const sounds = new GeneratedSounds(config.timeSignature);
+    const rhythmicValue = config.allowRhythmicValues
+        ? randomItemFrom([RhythmicValue.QUARTER, RhythmicValue.EIGHTH]) // (whole/half are too slow for repeats.)
+        : RhythmicValue.QUARTER;
+
+    const chord = createRepeatedChord(generationParams, 1).sounds[0] as Chord;
+
+    sounds.addSound(chord);
+    chord.getNotes().forEach(n => {
+        const newNote = n.clone();
+        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        sounds.addSound(newNote);
+    });
+
+    return sounds;
+}
+
+export function createBrokenThenChord(generationParams: GenerationParams): GeneratedSounds {
+    const { beatsSoFar, config } = generationParams;
+
+    const sounds = new GeneratedSounds(config.timeSignature);
+    const rhythmicValue = config.allowRhythmicValues
+        ? randomItemFrom([RhythmicValue.QUARTER, RhythmicValue.EIGHTH]) // (whole/half are too slow for repeats.)
+        : RhythmicValue.QUARTER;
+
+    const chord = createRepeatedChord(generationParams, 1).sounds[0] as Chord;
+
+    chord.getNotes().forEach(n => {
+        const newNote = n.clone();
+        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        sounds.addSound(newNote);
+    });
+    chord.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+    sounds.addSound(chord);
 
     return sounds;
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import * as TWEEN from '@tweenjs/tween.js';
 
-import { LabeledMusic, Music, MusicStream } from '../../utilities/MusicStream';
+import { MusicStream } from '../../utilities/MusicStream';
 import { useSightReadingConfig } from './SightReadingConfigContext';
 import { convertKeyConfigToKey } from '../../datatypes/Configs';
 import GrandStaff, { BASE_NOTE_GAP_RATIO, MEASURE_GAP_RATIO } from '../svg/SvgGrandStaff';
