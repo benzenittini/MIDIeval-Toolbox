@@ -1,14 +1,11 @@
 
-import { ReactElement, useState } from "react";
-
-import { useSightReadingConfig } from "../sight-reading/SightReadingConfigContext";
+import { ReactElement, memo, useMemo } from "react";
 
 import SvgStaff from "./SvgStaff";
 import SvgBarLine from "./SvgBarLine";
 import SvgStaffDefinition from "./SvgStaffDefinition";
 import SvgChord, { NOTE_WIDTH_RATIO } from "./SvgChord";
-import { LabeledChord, LabeledMusic } from "../../utilities/MusicStream";
-import { Key, Note } from "../../datatypes/ComplexTypes";
+import { Key, Note, LabeledChord, LabeledMusic } from "../../datatypes/ComplexTypes";
 import { TimeSignature, Clef, Accidental, Letter, RhythmicValue } from "../../datatypes/BasicTypes";
 import { average, averageSlope } from "../../utilities/NumberUtils";
 import { getPositionByNote, positionToY } from "../../utilities/MusicUtils";
@@ -237,48 +234,55 @@ type Params = {
     musicKey: Key;
     timeSignature: TimeSignature;
     music: LabeledMusic[]; // Each element of the array is one measure
-    musicShift: number;
+    musicShift?: number;
 };
 
-export default function GrandStaff({ width, height, musicKey, timeSignature, music, musicShift = 0 }: Params) {
+export default memo(function GrandStaff({ width, height, musicKey, timeSignature, music, musicShift = 0 }: Params) {
 
-    const sizes: SizingData = {
+    const sizes: SizingData = useMemo(() => ({
         staffHeight: height,
         staffLineHeight: STAFF_RATIO * height / 4,    // The height of one line on the staff.
         staffThickness: 1/100 * STAFF_RATIO * height, // The base thickness of our lines.
-    }
+    }), [width, height]);
 
     /** Map of a letter to its accidental. */
-    const originalKeyLetters: Record<Letter, Accidental> = musicKey.getNoteLabelsInKey()
-        .reduce((obj, label) => {
-            if (label) obj[label.letter] = label.accidental;
-            return obj;
-        }, {} as Record<Letter, Accidental>);
+    const originalKeyLetters: Record<Letter, Accidental> = useMemo(() => {
+        return musicKey.getNoteLabelsInKey()
+            .reduce((obj, label) => {
+                if (label) obj[label.letter] = label.accidental;
+                return obj;
+            }, {} as Record<Letter, Accidental>);
+    }, [musicKey]);
 
-    let trebleX = 0;
-    let bassX = 0;
-    const trebleMusic: ReactElement[] = [];
-    const bassMusic: ReactElement[] = [];
-    const barLines: ReactElement[] = [];
-    music.forEach(measure => {
+    const { trebleMusic, bassMusic, barLines } = useMemo(() => {
+        let trebleX = 0;
+        let bassX = 0;
 
-        // -- Clefs w/ Notes --
-        trebleX = createClefNotes(sizes, Clef.TREBLE, measure.trebleClef, trebleMusic, trebleX, originalKeyLetters);
-        bassX   = createClefNotes(sizes, Clef.BASS,   measure.bassClef,   bassMusic,   bassX,   originalKeyLetters);
+        const trebleMusic: ReactElement[] = [];
+        const bassMusic: ReactElement[] = [];
+        const barLines: ReactElement[] = [];
 
-        // -- Bar Lines --
-        let barX = Math.max(trebleX, bassX); // treble/bass should be equal, but in case they're not...
-        barLines.push((<SvgBarLine
-            key={ `bar-${barX}` }
-            x={ barX }
-            y={ height * PADDING_RATIO }
-            height={ height * (2*STAFF_RATIO + GAP_RATIO)}
-            strokeWidth={ sizes.staffThickness }
-        ></SvgBarLine>));
+        music.forEach(measure => {
 
-        // Increment trebleX/bassX to account for the bar line
-        trebleX = bassX = barX + MEASURE_GAP_RATIO * height;
-    });
+            // -- Clefs w/ Notes --
+            trebleX = createClefNotes(sizes, Clef.TREBLE, measure.trebleClef, trebleMusic, trebleX, originalKeyLetters);
+            bassX   = createClefNotes(sizes, Clef.BASS,   measure.bassClef,   bassMusic,   bassX,   originalKeyLetters);
+
+            // -- Bar Lines --
+            let barX = Math.max(trebleX, bassX); // treble/bass should be equal, but in case they're not...
+            barLines.push((<SvgBarLine
+                key={ `bar-${barX}` }
+                x={ barX }
+                y={ height * PADDING_RATIO }
+                height={ height * (2*STAFF_RATIO + GAP_RATIO)}
+                strokeWidth={ sizes.staffThickness }
+            ></SvgBarLine>));
+
+            // Increment trebleX/bassX to account for the bar line
+            trebleX = bassX = barX + MEASURE_GAP_RATIO * height;
+        });
+        return { trebleMusic, bassMusic, barLines };
+    }, [height, music, originalKeyLetters, sizes]);
 
     return (
         <svg viewBox={ `0 0 ${width} ${height}` } style={{ width: `${width}px`, height: `${height}px` }}>
@@ -336,4 +340,4 @@ export default function GrandStaff({ width, height, musicKey, timeSignature, mus
             </g>
         </svg>
     )
-}
+});

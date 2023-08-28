@@ -1,6 +1,6 @@
 
 import { randomItemFrom } from "../utilities/ArrayUtils";
-import { Accidental, BASE_LETTERS, BASE_LETTER_PCS, Letter, Octave, PITCH_CLASSES, Pitch, PitchClass, RhythmicValue, TimeSignature } from "./BasicTypes";
+import { Accidental, BASE_LETTERS, BASE_LETTER_PCS, Clef, Letter, Octave, PITCH_CLASSES, Pitch, PitchClass, RhythmicValue, TimeSignature } from "./BasicTypes";
 
 
 // ===========
@@ -97,6 +97,9 @@ export class Note extends Sound {
     stepUp(halfSteps: number): Note {
         this.pitch += halfSteps;
         return this;
+    }
+    shiftOctaves(octaves: number): Note {
+        return this.stepUp(octaves * 12);
     }
     stepUpInKey(pitchClasses: number, key: Key): Note {
         const scale = [...key.getScale()].sort((a, b) => a - b);
@@ -252,12 +255,13 @@ export class ChordQuality {
     getDescription():    string { return this.description; }
 }
 
-// -- Chord Quality Instances --
+// -- Common Chord Qualities --
 export const MAJOR_3      = new ChordQuality([4, 7], ['maj', '', 'M', 'Δ'],                                       'Major Triad = major third with a perfect fifth.');
 export const MINOR_3      = new ChordQuality([3, 7], ['min', 'm', '-'],                                           'Minor Triad = minor third with a perfect fifth.');
 export const DIMINISHED_3 = new ChordQuality([3, 6], ['dim', '<sup>○</sup>', 'm<sup>♭5</sup>', 'm<sup>○5</sup>'], 'Diminished Triad = minor third with a diminished fifth.');
 export const AUGMENTED_3  = new ChordQuality([4, 8], ['aug', '+', 'maj<sup>♯5</sup>', 'maj<sup>+5</sup>'],        'Augmented Triad = major third with an augmented fifth.');
 
+// -- Uncommon Chord Qualities --
 export const DIMINISHED_7  = new ChordQuality([3, 6, 9],  ['<sup>○</sup>7'],                        'Fully-Diminished Seventh = minor third, diminished fifth, and a diminished seventh.');
 export const HALF_DIM_7    = new ChordQuality([3, 6, 10], ['<sup>∅</sup>7', '-7<sup>♭5</sup>'],     'Half-Diminished Seventh = minor third, diminished fifth, and a minor seventh.');
 export const MINOR_7       = new ChordQuality([3, 7, 10], ['m<sup>7</sup>', '-7'],                  'Minor 7 = minor third, perfect fifth, and a minor seventh.');
@@ -265,6 +269,10 @@ export const MINOR_MAJOR_7 = new ChordQuality([3, 7, 11], ['min<sup>Maj7</sup>',
 export const DOMINANT_7    = new ChordQuality([4, 7, 10], ['<sup>7</sup>'],                         'Dominant 7 = major third, perfect fifth, and a minor seventh.');
 export const MAJOR_7       = new ChordQuality([4, 7, 11], ['<sup>Maj7</sup>'],                      'Major 7 = major third, perfect fifth, and a major seventh.');
 export const AUG_MAJOR_7   = new ChordQuality([4, 8, 11], ['aug<sup>Maj7</sup>'],                   'Augmented Major 7 = major third, augmented fifth, and a major seventh.');
+
+// -- Miscellaneous "Chord" Qualities --
+export const OCTAVE            = new ChordQuality([12],    [], 'Two successive root notes.');
+export const OCTAVE_WITH_FIFTH = new ChordQuality([7, 12], [], 'Two successive root notes with a fifth in-between.');
 
 // -- Chord Quality Arrays --
 export const TRIAD_QUALITIES   = [ MAJOR_3, MINOR_3, DIMINISHED_3, AUGMENTED_3 ];
@@ -440,3 +448,76 @@ export const MAJOR_KEY_LOOKUP = {
 };
 
 export const KEYS = Object.values(MAJOR_KEY_LOOKUP);
+
+
+// ======
+// Music!
+// ------
+
+export type Music = {
+    trebleClef: Sound[],
+    bassClef: Sound[],
+}
+
+export type LabeledChord = Note[];
+export type LabeledMusic = {
+    trebleClef: LabeledChord[],
+    bassClef:   LabeledChord[],
+}
+
+export type GeneratedMusic = {
+    treble: GeneratedSounds,
+    bass: GeneratedSounds,
+}
+
+export class GeneratedSounds {
+
+    private timeSignature: TimeSignature;
+
+    sounds: Sound[];
+    beatCount: number;
+
+    constructor(timeSignature: TimeSignature) {
+        this.timeSignature = timeSignature;
+        this.sounds = [];
+        this.beatCount = 0;
+    }
+
+    addSound(sound: Sound) { this.addSounds([sound]); }
+    addSounds(sounds: Sound[]) {
+        sounds.forEach(s => {
+            this.sounds.push(s);
+            this.beatCount += s.getBeatCount(this.timeSignature);
+        });
+    }
+
+    getSoundAtBeat(beatCount: number) {
+        let elapsedBeats = 0;
+        for (let i = 0; i < this.sounds.length; i++) {
+            elapsedBeats += this.sounds[i].getBeatCount(this.timeSignature);
+            if (elapsedBeats > beatCount) {
+                return this.sounds[i];
+            }
+        }
+
+        // If we still didn't find anything, then the user might've requested more beats
+        // than the requested clef has.
+        return null;
+    }
+
+    pullOffMeasure() {
+        let measure: Sound[] = [];
+
+        let beatsRemaining = this.timeSignature.top;
+        while (beatsRemaining > 0) {
+            let sound = this.sounds.shift();
+            if (!sound) break; // Shouldn't happen... but you never know.
+            measure.push(sound);
+            let removedBeats = sound.getBeatCount(this.timeSignature);
+            beatsRemaining -= removedBeats;
+            this.beatCount -= removedBeats;
+        }
+
+        return measure;
+    }
+}

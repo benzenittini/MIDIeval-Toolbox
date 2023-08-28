@@ -1,5 +1,5 @@
 
-import { ReactElement } from "react";
+import { ReactElement, memo } from "react";
 import { Accidental, Clef, Letter, RhythmicValue } from "../../datatypes/BasicTypes";
 import { Note } from "../../datatypes/ComplexTypes";
 import { getPairCombinations } from "../../utilities/ArrayUtils";
@@ -61,7 +61,7 @@ function createLedgerLine(noteX: number, noteY: number, staffLineHeight: number,
 }
 
 
-export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteGroup, clef, stemTo, accidentals }: Params) {
+export default memo(function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteGroup, clef, stemTo, accidentals }: Params) {
 
     // First, determine which lines/gaps the notes are on, sorted so the highest notes come first.
     let notePositions = labeledNoteGroup
@@ -210,4 +210,4 @@ export default function SvgChord({ x, staffLineHeight, strokeWidth, labeledNoteG
             { elements }
         </>
     )
-}
+});

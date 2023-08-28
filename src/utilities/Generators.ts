@@ -1,10 +1,10 @@
 
 import { Clef, PITCH_CLASSES, RHYTHMIC_VALUES, RhythmicValue, TimeSignature } from "../datatypes/BasicTypes";
-import { Chord, ChordQuality, KEYS, Key, MAJOR_3, Note, SEVENTH_QUALITIES, Sound, TRIAD_QUALITIES } from "../datatypes/ComplexTypes";
+import { Chord, ChordQuality, OCTAVE, GeneratedMusic, GeneratedSounds, KEYS, Key, MAJOR_3, Music, Note, SEVENTH_QUALITIES, Sound, TRIAD_QUALITIES, OCTAVE_WITH_FIFTH } from "../datatypes/ComplexTypes";
 import { SightReadingConfiguration, getAllowedChordQualities } from "../datatypes/Configs";
 import { randomItemFrom } from "./ArrayUtils";
-import { Bounds, GeneratedSounds, Music } from "./MusicStream";
-import { randInt, roundOutward } from "./NumberUtils";
+import { Bounds } from "./MusicStream";
+import { randInt } from "./NumberUtils";
 
 
 // ===================================================================================================
@@ -71,22 +71,25 @@ function fitRhythmicValue(desired: RhythmicValue, beatCount: number, timeSignatu
 export type GenerationParams = {
     key: Key;
     config: SightReadingConfiguration;
-    generatedMusic: Music;
-    beatsSoFar: number;
+    generatedMusic: GeneratedMusic;
     bounds: Bounds;
     clef: Clef;
 }
 
 
-export function createNoteFlurry({ key, config, generatedMusic, beatsSoFar, bounds, clef }: GenerationParams, maxNotes: number = 8): GeneratedSounds {
+// ==============================
+// Treble-Clef-Specific Functions
+// ------------------------------
+
+export function createNoteFlurry({ key, config, generatedMusic, bounds, clef }: GenerationParams, maxNotes: number = 8): GeneratedSounds {
     const sounds = new GeneratedSounds(config.timeSignature);
     const rhythmicValue = config.allowRhythmicValues
         ? randomItemFrom(RHYTHMIC_VALUES)
         : RhythmicValue.QUARTER;
 
     // Continue where we left off
-    let thisClef = (clef === Clef.TREBLE) ? generatedMusic.trebleClef : generatedMusic.bassClef;
-    let previousNote = thisClef.at(-1)?.getNotes()[0] ?? getRandomNote(key);
+    const thisClef = (clef === Clef.TREBLE) ? generatedMusic.treble : generatedMusic.bass;
+    let previousNote = thisClef.sounds.at(-1)?.getNotes()[0] ?? getRandomNote(key);
     if (!previousNote.isInKey(key)) {
         previousNote = getRandomNote(key);
     }
@@ -102,7 +105,7 @@ export function createNoteFlurry({ key, config, generatedMusic, beatsSoFar, boun
         previousNote = previousNote.clone()
             .stepUpInKey(pitchClassJump, key)
             .clampIntoKey(key, bounds.lower, bounds.upper);
-        previousNote.rhythmicValue = fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature);
+        previousNote.rhythmicValue = fitRhythmicValue(rhythmicValue, thisClef.beatCount + sounds.beatCount, config.timeSignature);
         sounds.addSound(previousNote);
     }
 
@@ -110,14 +113,16 @@ export function createNoteFlurry({ key, config, generatedMusic, beatsSoFar, boun
 }
 
 export function createMirroredNoteFlurry(generationParams: GenerationParams): GeneratedSounds {
-    const { beatsSoFar, config } = generationParams;
+    const { config, generatedMusic, clef } = generationParams;
+    const thisClef = (clef === Clef.TREBLE) ? generatedMusic.treble : generatedMusic.bass;
+
     const sounds = createNoteFlurry(generationParams, 4);
     const rhythmicValue = sounds.sounds[0].getRhythmicValue();
 
     // Skip repeating the last note so the middle note isn't duplicated.
     for (let i = sounds.sounds.length-2; i >= 0; i--) {
         let newNote = sounds.sounds[i].clone();
-        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, thisClef.beatCount + sounds.beatCount, config.timeSignature));
         sounds.addSound(newNote);
     }
 
@@ -125,7 +130,9 @@ export function createMirroredNoteFlurry(generationParams: GenerationParams): Ge
 }
 
 export function createRepeatedNoteFlurry(generationParams: GenerationParams): GeneratedSounds {
-    const { beatsSoFar, config } = generationParams;
+    const { config, generatedMusic, clef } = generationParams;
+    const thisClef = (clef === Clef.TREBLE) ? generatedMusic.treble : generatedMusic.bass;
+
     const sounds = createNoteFlurry(generationParams, 4);
     const rhythmicValue = sounds.sounds[0].getRhythmicValue();
 
@@ -133,14 +140,14 @@ export function createRepeatedNoteFlurry(generationParams: GenerationParams): Ge
     const numSounds = sounds.sounds.length;
     for (let i = 0; i < numSounds; i++) {
         let newNote = sounds.sounds[i].clone();
-        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, thisClef.beatCount + sounds.beatCount, config.timeSignature));
         sounds.addSound(newNote);
     }
 
     return sounds;
 }
 
-export function createRepeatedChord({ key, config, generatedMusic, beatsSoFar, bounds, clef }: GenerationParams, maxRepeats: number = 4): GeneratedSounds {
+export function createRepeatedChord({ key, config, generatedMusic, bounds, clef }: GenerationParams, maxRepeats: number = 4): GeneratedSounds {
     const sounds = new GeneratedSounds(config.timeSignature);
     const rhythmicValue = config.allowRhythmicValues
         ? randomItemFrom(RHYTHMIC_VALUES)
@@ -153,8 +160,8 @@ export function createRepeatedChord({ key, config, generatedMusic, beatsSoFar, b
     if (!config.includeInvertedChords) chord.inversion = 0;
 
     // Set the pitch of the root note to something more reasonable by bumping up its octave.
-    const thisClef = (clef === Clef.TREBLE) ? generatedMusic.trebleClef : generatedMusic.bassClef;
-    const previousNote = thisClef.at(-1)?.getNotes()[0] ?? getRandomNote(key);
+    const thisClef = (clef === Clef.TREBLE) ? generatedMusic.treble : generatedMusic.bass;
+    const previousNote = thisClef.sounds.at(-1)?.getNotes()[0] ?? getRandomNote(key);
     const targetOctave = previousNote.clampIntoKey(key, bounds.lower, bounds.upper).getOctave();
     chord.root.pitch += (12 * targetOctave);
 
@@ -164,7 +171,7 @@ export function createRepeatedChord({ key, config, generatedMusic, beatsSoFar, b
     const repeats = randInt(1, maxRepeats + 1);
     for (let i = 0; i < repeats; i++) {
         const newChord = chord.clone();
-        newChord.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        newChord.setRhythmicValue(fitRhythmicValue(rhythmicValue, thisClef.beatCount + sounds.beatCount, config.timeSignature));
         sounds.addSound(newChord);
     }
 
@@ -172,7 +179,8 @@ export function createRepeatedChord({ key, config, generatedMusic, beatsSoFar, b
 }
 
 export function createChordThenBroken(generationParams: GenerationParams): GeneratedSounds {
-    const { beatsSoFar, config } = generationParams;
+    const { config, generatedMusic, clef } = generationParams;
+    const thisClef = (clef === Clef.TREBLE) ? generatedMusic.treble : generatedMusic.bass;
 
     const sounds = new GeneratedSounds(config.timeSignature);
     const rhythmicValue = config.allowRhythmicValues
@@ -181,10 +189,11 @@ export function createChordThenBroken(generationParams: GenerationParams): Gener
 
     const chord = createRepeatedChord(generationParams, 1).sounds[0] as Chord;
 
+    chord.setRhythmicValue(fitRhythmicValue(rhythmicValue, thisClef.beatCount + sounds.beatCount, config.timeSignature));
     sounds.addSound(chord);
     chord.getNotes().forEach(n => {
         const newNote = n.clone();
-        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, thisClef.beatCount + sounds.beatCount, config.timeSignature));
         sounds.addSound(newNote);
     });
 
@@ -192,7 +201,8 @@ export function createChordThenBroken(generationParams: GenerationParams): Gener
 }
 
 export function createBrokenThenChord(generationParams: GenerationParams): GeneratedSounds {
-    const { beatsSoFar, config } = generationParams;
+    const { config, generatedMusic, clef } = generationParams;
+    const thisClef = (clef === Clef.TREBLE) ? generatedMusic.treble : generatedMusic.bass;
 
     const sounds = new GeneratedSounds(config.timeSignature);
     const rhythmicValue = config.allowRhythmicValues
@@ -203,11 +213,144 @@ export function createBrokenThenChord(generationParams: GenerationParams): Gener
 
     chord.getNotes().forEach(n => {
         const newNote = n.clone();
-        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+        newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, thisClef.beatCount + sounds.beatCount, config.timeSignature));
         sounds.addSound(newNote);
     });
-    chord.setRhythmicValue(fitRhythmicValue(rhythmicValue, beatsSoFar + sounds.beatCount, config.timeSignature));
+    chord.setRhythmicValue(fitRhythmicValue(rhythmicValue, thisClef.beatCount + sounds.beatCount, config.timeSignature));
     sounds.addSound(chord);
+
+    return sounds;
+}
+
+
+// ============================
+// Bass-Clef-Specific Functions
+// ----------------------------
+
+export function createSingleNote({ key, config, generatedMusic, bounds }: GenerationParams): GeneratedSounds {
+    const sounds = new GeneratedSounds(config.timeSignature);
+    const rhythmicValue = config.allowRhythmicValues
+        ? randomItemFrom([RhythmicValue.WHOLE, RhythmicValue.HALF])
+        : RhythmicValue.WHOLE;
+
+    // Make this note based on the treble clef.
+    const trebleClefSound = generatedMusic.treble.getSoundAtBeat(generatedMusic.bass.beatCount);
+    const newNote = trebleClefSound
+        ? new Note(trebleClefSound?.getNotes()[0].pitch, rhythmicValue)
+        : getRandomNote(key);
+
+    while (newNote.pitch > bounds.upper) { newNote.shiftOctaves(-1); }
+    newNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, generatedMusic.bass.beatCount + sounds.beatCount, config.timeSignature));
+
+    sounds.addSound(newNote);
+
+    return sounds;
+}
+
+export function createOctave({ key, config, generatedMusic, bounds }: GenerationParams): GeneratedSounds {
+    const sounds = new GeneratedSounds(config.timeSignature);
+    const rhythmicValue = config.allowRhythmicValues
+        ? randomItemFrom([RhythmicValue.WHOLE, RhythmicValue.HALF])
+        : RhythmicValue.WHOLE;
+
+    // Make this note based on the treble clef.
+    const trebleClefSound = generatedMusic.treble.getSoundAtBeat(generatedMusic.bass.beatCount);
+    const highNote = trebleClefSound
+        ? new Note(trebleClefSound?.getNotes()[0].pitch, rhythmicValue)
+        : getRandomNote(key);
+
+    while (highNote.pitch > bounds.upper) { highNote.shiftOctaves(-1); }
+    highNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, generatedMusic.bass.beatCount + sounds.beatCount, config.timeSignature));
+
+    const lowNote = highNote.clone().shiftOctaves(-1);
+
+    // Can only generate this type if we can fit both notes in the bounds, but include a sensible fallback.
+    sounds.addSound(lowNote.pitch < bounds.lower
+        ? highNote
+        : new Chord(lowNote, OCTAVE, 0));
+
+    return sounds;
+}
+
+export function createOctaveWithFifth({ key, config, generatedMusic, bounds }: GenerationParams): GeneratedSounds {
+    const sounds = new GeneratedSounds(config.timeSignature);
+    const rhythmicValue = config.allowRhythmicValues
+        ? randomItemFrom([RhythmicValue.WHOLE, RhythmicValue.HALF])
+        : RhythmicValue.WHOLE;
+
+    // Make this note based on the treble clef.
+    const trebleClefSound = generatedMusic.treble.getSoundAtBeat(generatedMusic.bass.beatCount);
+    const highNote = trebleClefSound
+        ? new Note(trebleClefSound?.getNotes()[0].pitch, rhythmicValue)
+        : getRandomNote(key);
+
+    while (highNote.pitch > bounds.upper) { highNote.shiftOctaves(-1); }
+    highNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, generatedMusic.bass.beatCount + sounds.beatCount, config.timeSignature));
+
+    const lowNote = highNote.clone().shiftOctaves(-1);
+
+    // Can only generate this type if we can fit both notes in the bounds, but include a sensible fallback.
+    sounds.addSound(lowNote.pitch < bounds.lower
+        ? highNote
+        : new Chord(lowNote, OCTAVE_WITH_FIFTH, 0));
+
+    return sounds;
+}
+
+export function createOctaveWithDelayedFifth({ key, config, generatedMusic, bounds }: GenerationParams): GeneratedSounds {
+    const sounds = new GeneratedSounds(config.timeSignature);
+    const rhythmicValue = RhythmicValue.HALF;
+
+    // Make this note based on the treble clef.
+    const trebleClefSound = generatedMusic.treble.getSoundAtBeat(generatedMusic.bass.beatCount);
+    const highNote = trebleClefSound
+        ? new Note(trebleClefSound?.getNotes()[0].pitch, rhythmicValue)
+        : getRandomNote(key);
+
+    while (highNote.pitch > bounds.upper) { highNote.shiftOctaves(-1); }
+    highNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, generatedMusic.bass.beatCount + sounds.beatCount, config.timeSignature));
+
+    const lowNote = highNote.clone().shiftOctaves(-1);
+
+    // Can only generate this type if we can fit both notes in the bounds, but include a sensible fallback.
+    if (lowNote.pitch < bounds.lower) {
+        sounds.addSound(highNote);
+    } else {
+        sounds.addSound(new Chord(lowNote, OCTAVE, 0));
+    }
+    sounds.addSound(lowNote.clone().stepUp(7));
+
+    return sounds;
+}
+
+export function createRootWithDelayedFifthEighth({ key, config, generatedMusic, bounds }: GenerationParams): GeneratedSounds {
+    const sounds = new GeneratedSounds(config.timeSignature);
+    const rhythmicValue = RhythmicValue.QUARTER;
+
+    // Make this note based on the treble clef.
+    const trebleClefSound = generatedMusic.treble.getSoundAtBeat(generatedMusic.bass.beatCount);
+    const highNote = trebleClefSound
+        ? new Note(trebleClefSound?.getNotes()[0].pitch, rhythmicValue)
+        : getRandomNote(key);
+
+    while (highNote.pitch > bounds.upper) { highNote.shiftOctaves(-1); }
+    highNote.setRhythmicValue(fitRhythmicValue(rhythmicValue, generatedMusic.bass.beatCount + sounds.beatCount, config.timeSignature));
+
+    const lowNote = highNote.clone().shiftOctaves(-1);
+    const fifthNote = lowNote.clone().stepUp(7);
+
+    // Can only generate this type if we can fit both notes in the bounds, but include a sensible fallback.
+    if (lowNote.pitch < bounds.lower) {
+        sounds.addSound(highNote.clone());
+        sounds.addSound(fifthNote.clone());
+        sounds.addSound(highNote.clone());
+        sounds.addSound(fifthNote.clone());
+    } else {
+        sounds.addSound(highNote);
+        sounds.addSound(fifthNote.clone());
+        sounds.addSound(lowNote);
+        sounds.addSound(fifthNote.clone());
+    }
 
     return sounds;
 }

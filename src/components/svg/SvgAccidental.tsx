@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Accidental } from "../../datatypes/BasicTypes"
 
 type Props = {
@@ -8,7 +9,7 @@ type Props = {
     color?: string,
 }
 
-export default function SvgAccidental({ x, y, staffLineHeight, accidental, color = "var(--gray-light)" }: Props) {
+export default memo(function SvgAccidental({ x, y, staffLineHeight, accidental, color = "var(--gray-light)" }: Props) {
     // Each symbol needs to be moved up or down slightly to properly center them.
     let budge = 0;
     switch (accidental) {
@@ -25,4 +26,4 @@ export default function SvgAccidental({ x, y, staffLineHeight, accidental, color
         dominantBaseline="middle"
         textAnchor="end"
     >{ accidental }</text>);
-}
+});

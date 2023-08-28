@@ -1,5 +1,5 @@
 
-import { ReactElement } from "react";
+import { ReactElement, memo } from "react";
 
 type Params = {
     width: number;
@@ -10,7 +10,7 @@ type Params = {
 
 const GAP_RATIO = 1/4; // 4 gaps make a staff
 
-export default function SvgStaff({ width, height, strokeWidth, stroke = "var(--gray-dark)" }: Params) {
+export default memo(function SvgStaff({ width, height, strokeWidth, stroke = "var(--gray-dark)" }: Params) {
     const lines: ReactElement[] = [];
     let currentY = 0;
     for (let x = 0; x < 5; x++) {
@@ -30,4 +30,4 @@ export default function SvgStaff({ width, height, strokeWidth, stroke = "var(--g
             { lines }
         </>
     )
-}
+});

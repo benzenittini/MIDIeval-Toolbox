@@ -1,41 +1,9 @@
 
-import { Clef, Pitch, TimeSignature } from "../datatypes/BasicTypes";
-import { Key, Sound, Note, NoteLabel, PITCH_CLASS_TO_LABELS } from "../datatypes/ComplexTypes";
+import { Clef, Pitch } from "../datatypes/BasicTypes";
+import { Key, Note, NoteLabel, PITCH_CLASS_TO_LABELS, Music, LabeledMusic, GeneratedSounds, GeneratedMusic } from "../datatypes/ComplexTypes";
 import { SightReadingConfiguration } from "../datatypes/Configs";
 import { randomItemFrom } from "./ArrayUtils";
-import { createBrokenThenChord, createChordThenBroken, createMirroredNoteFlurry, createNoteFlurry, createRepeatedChord, createRepeatedNoteFlurry } from "./Generators";
-
-
-export class GeneratedSounds {
-
-    private timeSignature: TimeSignature;
-
-    sounds: Sound[];
-    beatCount: number;
-
-    constructor(timeSignature: TimeSignature) {
-        this.timeSignature = timeSignature;
-        this.sounds = [];
-        this.beatCount = 0;
-    }
-
-    addSound(sound: Sound) {
-        this.sounds.push(sound);
-        this.beatCount += sound.getBeatCount(this.timeSignature);
-    }
-}
-
-// TODO-ben : Move these to "Complex Types"?
-export type Music = {
-    trebleClef: Sound[],
-    bassClef: Sound[],
-}
-
-export type LabeledChord = Note[];
-export type LabeledMusic = {
-    trebleClef: LabeledChord[],
-    bassClef:   LabeledChord[],
-}
+import { createBrokenThenChord, createChordThenBroken, createMirroredNoteFlurry, createNoteFlurry, createOctave, createOctaveWithDelayedFifth, createOctaveWithFifth, createRepeatedChord, createRepeatedNoteFlurry, createRootWithDelayedFifthEighth, createSingleNote } from "./Generators";
 
 
 // Limits the range of notes we generate. All bounds are inclusive.
@@ -45,7 +13,7 @@ const TREBLE_BOUNDS: Bounds = {
     lower: Note.convertToPitch(4, 0), // C4, "middle C"
 }
 const BASS_BOUNDS: Bounds = {
-    upper: Note.convertToPitch(4, 0), // C4, "middle C"
+    upper: Note.convertToPitch(3, 11), // B3, "just below middle C"
     lower: Note.convertToPitch(2, 4), // E2
 }
 
@@ -54,37 +22,34 @@ export class MusicStream {
     private config: SightReadingConfiguration;
     private key: Key;
 
-    private generatedMusic: Music;
-    private trebleBeatCount: number;
-    private bassBeatCount: number;
+    private generatedMusic: GeneratedMusic;
 
     constructor(config: SightReadingConfiguration, key: Key) {
         this.config = config;
         this.key = key;
-        this.generatedMusic = { trebleClef: [], bassClef: [] };
-        this.trebleBeatCount = 0;
-        this.bassBeatCount = 0;
+        this.generatedMusic = {
+            treble: new GeneratedSounds(config.timeSignature),
+            bass:   new GeneratedSounds(config.timeSignature),
+        }
     }
 
     public getNextMeasure(): Music {
         // Always keep at least 2 measures generated so we can use the last measure to improve future generation.
         if (this.config.includeTrebleClef) {
-            while (this.trebleBeatCount < 2 * this.config.timeSignature.top) {
+            while (this.generatedMusic.treble.beatCount < 2 * this.config.timeSignature.top) {
                 this.generateMoreTreble();
             }
         }
         if (this.config.includeBassClef) {
-            while (this.bassBeatCount < 2 * this.config.timeSignature.top) {
+            while (this.generatedMusic.bass.beatCount < 2 * this.config.timeSignature.top) {
                 this.generateMoreBass();
             }
         }
 
         let retVal = {
-            trebleClef: this.pullOffMeasure(this.generatedMusic.trebleClef),
-            bassClef:   this.pullOffMeasure(this.generatedMusic.bassClef),
+            trebleClef: this.generatedMusic.treble.pullOffMeasure(),
+            bassClef:   this.generatedMusic.bass.pullOffMeasure(),
         };
-        this.trebleBeatCount -= this.config.timeSignature.top;
-        this.bassBeatCount   -= this.config.timeSignature.top;
 
         return retVal;
     }
@@ -116,27 +81,12 @@ export class MusicStream {
         };
     }
 
-    private pullOffMeasure(musicClef: Sound[]): Sound[] {
-        let measure: Sound[] = [];
-
-        let beatsRemaining = this.config.timeSignature.top;
-        while (beatsRemaining > 0) {
-            let sound = musicClef.shift();
-            if (!sound) break; // Shouldn't happen... but you never know.
-            measure.push(sound);
-            beatsRemaining -= sound.getBeatCount(this.config.timeSignature);
-        }
-
-        return measure;
-    }
-
     private generateMoreTreble(): void {
         const type = randomItemFrom(getValidTrebleStates(this.config));
         const generationParams = {
             key:            this.key,
             config:         this.config,
             generatedMusic: this.generatedMusic,
-            beatsSoFar:     this.trebleBeatCount,
             bounds:         TREBLE_BOUNDS,
             clef:           Clef.TREBLE,
         }
@@ -149,32 +99,27 @@ export class MusicStream {
             case TrebleState.BrokenThenChord:    sounds = createBrokenThenChord(generationParams); break;
             case TrebleState.RepeatedChord:      sounds = createRepeatedChord(generationParams); break;
         }
-        this.generatedMusic.trebleClef.push(...sounds.sounds);
-        this.trebleBeatCount += sounds.beatCount;
+        this.generatedMusic.treble.addSounds(sounds.sounds);
     }
 
     private generateMoreBass(): void {
-        // TODO-ben : Match treble pitch classes (if applicable) down 1-2 octaves
         const type = randomItemFrom(getValidBassStates(this.config));
         const generationParams = {
             key:            this.key,
             config:         this.config,
             generatedMusic: this.generatedMusic,
-            beatsSoFar:     this.bassBeatCount,
             bounds:         BASS_BOUNDS,
             clef:           Clef.BASS,
         }
         let sounds: GeneratedSounds;
         switch (type) {
-            // TODO-ben : Update with other generation functions.
-            case BassState.SingleNote:                 sounds = createNoteFlurry(generationParams); break;
-            case BassState.Octave:                     sounds = createNoteFlurry(generationParams); break;
-            case BassState.OctaveWithFifth:            sounds = createNoteFlurry(generationParams); break;
-            case BassState.OctaveWithDelayedFifth:     sounds = createNoteFlurry(generationParams); break;
-            case BassState.RootWithDelayedFifthEighth: sounds = createNoteFlurry(generationParams); break;
+            case BassState.SingleNote:                 sounds = createSingleNote(generationParams); break;
+            case BassState.Octave:                     sounds = createOctave(generationParams); break;
+            case BassState.OctaveWithFifth:            sounds = createOctaveWithFifth(generationParams); break;
+            case BassState.OctaveWithDelayedFifth:     sounds = createOctaveWithDelayedFifth(generationParams); break;
+            case BassState.RootWithDelayedFifthEighth: sounds = createRootWithDelayedFifthEighth(generationParams); break;
         }
-        this.generatedMusic.bassClef.push(...sounds.sounds);
-        this.bassBeatCount += sounds.beatCount;
+        this.generatedMusic.bass.addSounds(sounds.sounds);
     }
 
 }

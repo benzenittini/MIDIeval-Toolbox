@@ -1,3 +1,4 @@
+import { memo } from "react";
 
 type Params = {
     x: number;
@@ -7,7 +8,7 @@ type Params = {
     stroke?: string;
 };
 
-export default function SvgBarLine({ x, y, height, strokeWidth, stroke = "var(--gray-dark)" }: Params) {
+export default memo(function SvgBarLine({ x, y, height, strokeWidth, stroke = "var(--gray-dark)" }: Params) {
     return (
         <line
             x1={ x }
@@ -18,4 +19,4 @@ export default function SvgBarLine({ x, y, height, strokeWidth, stroke = "var(--
             stroke={ stroke }
         />
     )
-}
+});

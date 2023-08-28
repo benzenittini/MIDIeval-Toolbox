@@ -1,3 +1,4 @@
+import { memo } from "react";
 
 
 type Params = {
@@ -9,7 +10,7 @@ type Params = {
 
 const WIDTH_RATIO = 25/330;
 
-export default function SvgNoteFlag({ x, y, height, color = "var(--gray-light)" }: Params) {
+export default memo(function SvgNoteFlag({ x, y, height, color = "var(--gray-light)" }: Params) {
     return (
         <g transform={ `translate(${x} ${y})` }>
             <svg width={ WIDTH_RATIO * height } height={ height } viewBox="0 0 25 330" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -17,4 +18,4 @@ export default function SvgNoteFlag({ x, y, height, color = "var(--gray-light)" 
             </svg>
         </g>
     );
-}
+});

@@ -1,5 +1,5 @@
 
-import { ReactElement } from "react";
+import { ReactElement, memo } from "react";
 import { Accidental, Clef, Octave, TimeSignature } from "../../datatypes/BasicTypes";
 import { F_FLAT, G_FLAT, Key, NoteLabel } from "../../datatypes/ComplexTypes";
 import SvgAccidental from "./SvgAccidental";
@@ -16,7 +16,7 @@ type Props = {
 
 const MAIN_COLOR = 'var(--gray-dark)';
 
-export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staffLineHeight }: Props) {
+export default memo(function SvgStaffDefinition({ clef, musicKey, timeSignature, staffLineHeight }: Props) {
 
     let currentX = 10;
 
@@ -94,4 +94,4 @@ export default function SvgStaffDefinition({ clef, musicKey, timeSignature, staf
             { timeSig }
         </>
     );
-}
+});

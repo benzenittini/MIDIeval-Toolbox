@@ -42,7 +42,7 @@ function getLevel1Difficulty(): SightReadingConfiguration {
         timeSignature: { top: 4, bottom: 4 },
 
         // Difficulty
-        tempo: 60,
+        tempo: 40,
         playMetronome: false,
         waitForCorrectNote: true,
         allowRhythmicValues: false,
