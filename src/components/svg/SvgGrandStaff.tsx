@@ -222,8 +222,7 @@ const STAFF_RATIO   = 20/100; // x2 because 2 staffs
 const GAP_RATIO     = 20/100; // Gap between staffs
 
 // These are relative to the overall grand staff height.
-export const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO;           // Determines the gap between WHOLE notes.
-export const MEASURE_GAP_RATIO   = 0.2 * BASE_NOTE_GAP_RATIO; // Determines the gap after bar lines.
+export const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO; // Determines the gap between WHOLE notes.
 
 // This is relative to the overall grand staff height.
 const BRACE_WIDTH_RATIO = 0.05;
@@ -268,8 +267,11 @@ export default memo(function GrandStaff({ width, height, musicKey, timeSignature
             trebleX = createClefNotes(sizes, Clef.TREBLE, measure.trebleClef, trebleMusic, trebleX, originalKeyLetters);
             bassX   = createClefNotes(sizes, Clef.BASS,   measure.bassClef,   bassMusic,   bassX,   originalKeyLetters);
 
+            // Treble/bass should be equal, but in case they're not...
+            trebleX = bassX = Math.max(trebleX, bassX);
+
             // -- Bar Lines --
-            let barX = Math.max(trebleX, bassX); // treble/bass should be equal, but in case they're not...
+            let barX = trebleX - height*BASE_NOTE_GAP_RATIO/16;
             barLines.push((<SvgBarLine
                 key={ `bar-${barX}` }
                 x={ barX }
@@ -278,66 +280,115 @@ export default memo(function GrandStaff({ width, height, musicKey, timeSignature
                 strokeWidth={ sizes.staffThickness }
             ></SvgBarLine>));
 
-            // Increment trebleX/bassX to account for the bar line
-            trebleX = bassX = barX + MEASURE_GAP_RATIO * height;
         });
         return { trebleMusic, bassMusic, barLines };
     }, [height, music, originalKeyLetters, sizes]);
 
+    const MUSIC_START  = 250;
+    const staffXShift  = useMemo(() => height * BRACE_WIDTH_RATIO, [height]);
+    const trebleYShift = useMemo(() => height * PADDING_RATIO, [height]);
+    const bassYShift   = useMemo(() => height * (PADDING_RATIO + STAFF_RATIO + GAP_RATIO), [height]);
+
+
     return (
         <svg viewBox={ `0 0 ${width} ${height}` } style={{ width: `${width}px`, height: `${height}px` }}>
-            {/* Brace (to connect the two staffs) */}
-            <g transform={ `translate(0 ${height * PADDING_RATIO})` }>
-                <SvgBrace
-                x={ 0 }
-                y={ 0 }
-                height={ height * (2*STAFF_RATIO + GAP_RATIO) }
-                color="var(--gray-dark)"
-                ></SvgBrace>
-            </g>
+            <defs>
+                <linearGradient id="FadeAway" x1="0" x2="1" y1="0" y2="0">
+                    <stop offset="0%"   stopColor="var(--gray-vvdark)" stopOpacity="0" />
+                    <stop offset="40%"  stopColor="var(--gray-vvdark)" />
+                    <stop offset="60%"  stopColor="var(--gray-vvdark)" />
+                    <stop offset="100%" stopColor="var(--gray-vvdark)" stopOpacity="0" />
+                </linearGradient>
+                <clipPath id="NoteClip">
+                    <rect x="0" y="0" width={width} height={height} />
+                </clipPath>
+            </defs>
 
-            {/* Treble */}
-            <g transform={ `translate(${height * BRACE_WIDTH_RATIO} ${height * PADDING_RATIO})` }>
-                <SvgStaff width={ width } height={ height * STAFF_RATIO } strokeWidth={ sizes.staffThickness }></SvgStaff>
-                <SvgStaffDefinition
-                    clef={ Clef.TREBLE }
-                    musicKey={ musicKey }
-                    timeSignature={ timeSignature }
-                    staffLineHeight={ sizes.staffLineHeight }
-                    ></SvgStaffDefinition>
-
-                <g style={{ transform: `translateX(${200+musicShift}px)` }}>
-                    { trebleMusic }
+            {/* Staff Definition */}
+            <g>
+                {/* Brace (to connect the two staffs) */}
+                <g transform={ `translate(0 ${height * PADDING_RATIO})` }>
+                    <SvgBrace
+                    x={ 0 }
+                    y={ 0 }
+                    height={ height * (2*STAFF_RATIO + GAP_RATIO) }
+                    color="var(--gray-dark)"
+                    ></SvgBrace>
                 </g>
-            </g>
 
-            {/* Bass */}
-            <g transform={ `translate(${height * BRACE_WIDTH_RATIO} ${height * (PADDING_RATIO + STAFF_RATIO + GAP_RATIO)})` }>
-                <SvgStaff width={ width } height={ height * STAFF_RATIO } strokeWidth={ sizes.staffThickness }></SvgStaff>
-                <SvgStaffDefinition
-                    clef={ Clef.BASS }
-                    musicKey={ musicKey }
-                    timeSignature={ timeSignature }
-                    staffLineHeight={ sizes.staffLineHeight }
-                    ></SvgStaffDefinition>
-
-                <g style={{ transform: `translateX(${200+musicShift}px)` }}>
-                    { bassMusic }
-                </g>
-            </g>
-
-            {/* Initial, left-most bar line */}
-            <g transform={ `translate(${height * BRACE_WIDTH_RATIO} 0)` }>
-                <SvgBarLine x={ 0 }
+                {/* Initial, left-most bar line */}
+                <SvgBarLine x={ height * BRACE_WIDTH_RATIO }
                     y={ height * PADDING_RATIO }
                     height={ height * (2*STAFF_RATIO + GAP_RATIO)}
                     strokeWidth={ sizes.staffThickness }></SvgBarLine>
 
-                {/* Bar lines to separate measures */}
-                <g style={{ transform: `translateX(${200+musicShift}px)` }}>
-                    { barLines }
+                {/* Treble Definition */}
+                <g transform={ `translate(${staffXShift} ${trebleYShift})` }>
+                    <SvgStaff width={ MUSIC_START-staffXShift } height={ height * STAFF_RATIO } strokeWidth={ sizes.staffThickness }></SvgStaff>
+                    <SvgStaffDefinition
+                        clef={ Clef.TREBLE }
+                        musicKey={ musicKey }
+                        timeSignature={ timeSignature }
+                        staffLineHeight={ sizes.staffLineHeight }
+                        ></SvgStaffDefinition>
+                </g>
+
+                {/* Bass Definition */}
+                <g transform={ `translate(${staffXShift} ${bassYShift})` }>
+                    <SvgStaff width={ MUSIC_START-staffXShift } height={ height * STAFF_RATIO } strokeWidth={ sizes.staffThickness }></SvgStaff>
+                    <SvgStaffDefinition
+                        clef={ Clef.BASS }
+                        musicKey={ musicKey }
+                        timeSignature={ timeSignature }
+                        staffLineHeight={ sizes.staffLineHeight }
+                        ></SvgStaffDefinition>
                 </g>
             </g>
+
+            {/* The "push the button here" rectangle */}
+            <rect x={ MUSIC_START + 100 - 15 } // 100 - (half the width)
+                y={ 5 }
+                rx={ 8 }
+                width={ 30 }
+                height={ height-10 }
+                style={{ stroke: 'var(--blue-light)', fill: 'rgba(18, 19, 23, 0.3)' }}></rect>
+
+            {/* Scrolling Music! */}
+            <g transform={ `translate(${MUSIC_START} 0)`} style={{ clipPath: 'url(#NoteClip)' }}>
+                {/* Bar lines to separate measures */}
+                <g transform={ `translate(${musicShift} 0)` }>
+                    { barLines }
+                </g>
+
+                {/* Treble */}
+                <g transform={ `translate(0 ${trebleYShift})` }>
+                    <SvgStaff width={ width } height={ height * STAFF_RATIO } strokeWidth={ sizes.staffThickness }></SvgStaff>
+                    <g transform={`translate(${musicShift} 0)`}>
+                        { trebleMusic }
+                    </g>
+                </g>
+
+                {/* Bass */}
+                <g transform={ `translate(0 ${bassYShift})` }>
+                    <SvgStaff width={ width } height={ height * STAFF_RATIO } strokeWidth={ sizes.staffThickness }></SvgStaff>
+                    <g transform={`translate(${musicShift} 0)`}>
+                        { bassMusic }
+                    </g>
+                </g>
+            </g>
+
+            {/* The "fade-away" regions */}
+            <rect x={ MUSIC_START-40 }
+                y={ 0 }
+                width={ 80 }
+                height={ height }
+                style={{ fill: 'url(#FadeAway)' }}></rect>
+            <rect x={ width-40 }
+                y={ 0 }
+                width={ 80 }
+                height={ height }
+                style={{ fill: 'url(#FadeAway)' }}></rect>
+
         </svg>
     )
 });
