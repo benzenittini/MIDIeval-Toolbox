@@ -1,6 +1,6 @@
 
 import { randomItemFrom } from "../utilities/ArrayUtils";
-import { Accidental, BASE_LETTERS, BASE_LETTER_PCS, Clef, Letter, Octave, PITCH_CLASSES, Pitch, PitchClass, RhythmicValue, TimeSignature } from "./BasicTypes";
+import { Accidental, BASE_LETTERS, BASE_LETTER_PCS, Letter, Octave, PITCH_CLASSES, Pitch, PitchClass, RhythmicValue, TimeSignature } from "./BasicTypes";
 
 
 // ===========
