@@ -1,6 +1,6 @@
 
 import { Clef, PITCH_CLASSES, RHYTHMIC_VALUES, RhythmicValue, TimeSignature } from "../datatypes/BasicTypes";
-import { Chord, ChordQuality, OCTAVE, GeneratedMusic, GeneratedSounds, KEYS, Key, MAJOR_3, Music, Note, SEVENTH_QUALITIES, Sound, TRIAD_QUALITIES, OCTAVE_WITH_FIFTH } from "../datatypes/ComplexTypes";
+import { Chord, ChordQuality, OCTAVE, GeneratedMusic, GeneratedSounds, KEYS, Key, Note, SEVENTH_QUALITIES, Sound, TRIAD_QUALITIES, OCTAVE_WITH_FIFTH } from "../datatypes/ComplexTypes";
 import { SightReadingConfiguration, getAllowedChordQualities } from "../datatypes/Configs";
 import { randomItemFrom } from "./ArrayUtils";
 import { Bounds } from "./MusicStream";
