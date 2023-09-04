@@ -7,7 +7,7 @@ type Params = {
     color?: string;
 };
 
-const WIDTH_RATIO = 68/176;
+export const WIDTH_RATIO = 68/176;
 
 export default memo(function SvgTrebleClef({ height, x = 0, y = 0, color = "var(--gray-dark)" }: Params) {
     return (

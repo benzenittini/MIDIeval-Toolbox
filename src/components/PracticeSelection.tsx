@@ -1,7 +1,8 @@
 
 import { Page } from '../datatypes/Miscellaneous';
-import SvgStaff from './svg/SvgStaff';
 import styles from './PracticeSelection.module.css';
+import { C_MAJOR } from '../datatypes/ComplexTypes';
+import GrandStaff from './svg/SvgGrandStaff';
 
 
 export default function PracticeSelection({ setPractice }: { setPractice: (practice: Page) => void }) {
@@ -11,15 +12,18 @@ export default function PracticeSelection({ setPractice }: { setPractice: (pract
             <h1>Practice</h1>
 
             <div className={styles.practiceBox} onClick={ () => setPractice('notation-config') }>
-                <div className={styles.notationIcon}>F#</div>
-                <h2 className={styles.heading}>Notation</h2>
+                <div className={styles.notationIcon}><span>F♯m<sup>7</sup></span></div>
+                <h2 className={styles.heading} style={{ marginTop: '0px' }}>Notation</h2>
             </div>
 
             <div className={styles.practiceBox} onClick={ () => setPractice('sight-reading-config') }>
-                <svg viewBox="0 0 150 125" preserveAspectRatio="none" style={{ width: "150px", height: "125px" }}>
-                    <SvgStaff width={ 150 } height={ 125 } strokeWidth={ 2 } stroke="var(--gray-vlight)"></SvgStaff>
-                </svg>
-                <h2 className={styles.heading}>Sight-Reading</h2>
+                <GrandStaff width={ 130 } height={ 195 }
+                    musicKey={ C_MAJOR }
+                    musicShift={ 0 }
+                    timeSignature={{ top: 4, bottom: 4 }}
+                    music={ [] }
+                    ></GrandStaff>
+                <h2 className={styles.heading} style={{ marginTop: '0px' }}>Sight-Reading</h2>
             </div>
         </>
     );

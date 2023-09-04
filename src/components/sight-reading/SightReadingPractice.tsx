@@ -7,10 +7,12 @@ import { MusicStream } from '../../utilities/MusicStream';
 import { useSightReadingConfig } from './SightReadingConfigContext';
 import { convertKeyConfigToKey } from '../../datatypes/Configs';
 import GrandStaff, { BASE_NOTE_GAP_RATIO } from '../svg/SvgGrandStaff';
+import { metronome } from '../../utilities/Metronome';
 
 
 const GRAND_STAFF_HEIGHT = 350;
 const MEASURE_WIDTH = GRAND_STAFF_HEIGHT * BASE_NOTE_GAP_RATIO;
+const METRONOME_OFFSET = GRAND_STAFF_HEIGHT * 0.05;
 
 export default function SightReadingPractice({ goHome, goToConfig }: { goHome: () => void, goToConfig: () => void }) {
     const sightReadingConfig = useSightReadingConfig();
@@ -28,15 +30,27 @@ export default function SightReadingPractice({ goHome, goToConfig }: { goHome: (
         setDisplayedMusic(a => a.slice(1));
         // And push the next measure
         setDisplayedMusic(a => [...a, musicStream.labelMusic(musicStream.getNextMeasure())]);
-        // We get a nasty flicker without doing this.
+        // This is already done by the tween, but we get a nasty flicker without doing this again here.
         setMusicXShift(0);
     }
 
     useEffect(() => {
+        let lastProgress = 0;
         const tween = new TWEEN.Tween({ xShift: 0 }, false)
             .to({xShift: -MEASURE_WIDTH}, singleMeasureTime)
             .repeat(Infinity)
-            .onUpdate((obj) => setMusicXShift(obj.xShift))
+            .onUpdate(({xShift}) => {
+                if (sightReadingConfig.playMetronome) {
+                    // Make a "tick" every time xShift crosses a quarter of a measure threshold
+                    let newProgress = (-xShift + METRONOME_OFFSET) % (MEASURE_WIDTH/4);
+                    if (newProgress < lastProgress) {
+                        metronome.play();
+                    }
+                    lastProgress = newProgress;
+                }
+
+                setMusicXShift(xShift);
+            })
             .onRepeat(shiftMeasures)
             .start();
 

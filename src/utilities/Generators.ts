@@ -67,7 +67,7 @@ function fitRhythmicValue(desired: RhythmicValue, beatCount: number, timeSignatu
     return RhythmicValue.EIGHTH;
 }
 
-// TODO-ben : Move this to one of our "*Types.ts" files.
+// TODO-ben : Move this to one of our "*Types.ts" files..?
 export type GenerationParams = {
     key: Key;
     config: SightReadingConfiguration;
@@ -95,8 +95,8 @@ export function createNoteFlurry({ key, config, generatedMusic, bounds, clef }: 
     }
 
     // Generate between 2 and 8 notes, going either up or down.
-    let lowerLimit = previousNote.pitch <= bounds.lower ? 0 : -config.adjacentNoteDistance;
-    let upperLimit = previousNote.pitch >= bounds.upper ? 0 : config.adjacentNoteDistance;
+    const lowerLimit = Math.max(-config.adjacentNoteDistance, bounds.lower - previousNote.pitch);
+    const upperLimit = Math.min(config.adjacentNoteDistance, bounds.upper - previousNote.pitch);
     do { var pitchClassJump = Math.min(5, (randInt(lowerLimit, upperLimit + 1))); }
     while (pitchClassJump === 0); // Staying where we are is boring.
 

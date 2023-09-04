@@ -1,18 +1,15 @@
 
-import { useState } from "react";
 import { ChordSelections, KeyConfigOpts, MiscKeys, SightReadingConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from "../../datatypes/Configs";
 import FocusableInput, { InputType } from "../common/FocusableInput";
 import KeySelection from "../common/KeySelection";
 import LabeledSlider from "../common/LabeledSlider";
 import styles from './SightReadingConfig.module.css';
-import { START_DIFFICULTY, useSightReadingConfig, useSightReadingConfigDispatch } from "./SightReadingConfigContext";
+import { useSightReadingConfig, useSightReadingConfigDispatch } from "./SightReadingConfigContext";
 import ChordSelection from "../common/ChordSelection";
 
 export default function SightReadingConfig({ goBack, begin }: { goBack: () => void, begin: () => void }) {
     const sightReadingConfig = useSightReadingConfig();
     const sightReadingConfigDispatch = useSightReadingConfigDispatch();
-
-    const [difficulty, setDifficulty] = useState(START_DIFFICULTY);
 
     const chordsAvailable = (sightReadingConfig.practiceChords)
         ? getAllowedChordQualities(convertKeyConfigToKey(sightReadingConfig.key), sightReadingConfig.chordSelection).length > 0
@@ -20,10 +17,11 @@ export default function SightReadingConfig({ goBack, begin }: { goBack: () => vo
 
     const notesOrChordsAvailable = sightReadingConfig.practiceSingleNotes || chordsAvailable;
 
+    const noClefEnabled = !sightReadingConfig.includeBassClef && !sightReadingConfig.includeTrebleClef;
+
     function setDifficultySlider(newDifficulty: string) {
         let parsed = parseInt(newDifficulty, 10);
         if (isNaN(parsed)) parsed = 0;
-        setDifficulty(parsed);
         sightReadingConfigDispatch({ type: 'quickDifficulty', data: parsed });
     }
 
@@ -76,7 +74,7 @@ export default function SightReadingConfig({ goBack, begin }: { goBack: () => vo
                         label="Difficulty:"
                         min={ 1 }
                         max={ 10 }
-                        value={ difficulty }
+                        value={ sightReadingConfig.quickDifficulty }
                         onChange={ setDifficultySlider }
                         ></LabeledSlider>
                 </div>
@@ -114,7 +112,8 @@ export default function SightReadingConfig({ goBack, begin }: { goBack: () => vo
                                 {getCheckbox('Play Metronome', 'playMetronome')}
                             </div>
                         </div>
-                        {getCheckbox('Wait for correct note to be played before proceeding',         'waitForCorrectNote')}
+                        {/* TODO-ben : Re-add this */}
+                        {/* {getCheckbox('Wait for correct note to be played before proceeding',         'waitForCorrectNote')} */}
                         {getCheckbox('Allow varying rhythmic values (whole, half, quarter, eighth)', 'allowRhythmicValues')}
                         <LabeledSlider
                             label="Note Difficulty:"
@@ -141,6 +140,7 @@ export default function SightReadingConfig({ goBack, begin }: { goBack: () => vo
                             currentKey={ sightReadingConfig.key }
                             practiceChords={ sightReadingConfig.practiceChords }
                             currentSelections={ sightReadingConfig.chordSelection }
+                            allowAccidentals={ sightReadingConfig.allowAccidentals }
                             changeChordSelection={ changeChordSelection }
                             ></ChordSelection>
                     </div>
@@ -149,7 +149,7 @@ export default function SightReadingConfig({ goBack, begin }: { goBack: () => vo
 
             <div className={ styles.navigation }>
                 <button className="btn-link" onClick={ goBack }>Go Back</button>
-                <button onClick={ begin } disabled={ !notesOrChordsAvailable }>Begin</button>
+                <button onClick={ begin } disabled={ !notesOrChordsAvailable || noClefEnabled }>Begin</button>
             </div>
         </>
     );

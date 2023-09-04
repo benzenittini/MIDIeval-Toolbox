@@ -34,6 +34,8 @@ export function SightReadingConfigProvider({ children }: any) {
 
 function getLevel1Difficulty(): SightReadingConfiguration {
     return {
+        quickDifficulty: START_DIFFICULTY,
+
         // Basics
         key: "C_MAJOR",
         allowAccidentals: false,
@@ -42,7 +44,7 @@ function getLevel1Difficulty(): SightReadingConfiguration {
         timeSignature: { top: 4, bottom: 4 },
 
         // Difficulty
-        tempo: 40,
+        tempo: 60,
         playMetronome: false,
         waitForCorrectNote: true,
         allowRhythmicValues: false,
@@ -78,6 +80,7 @@ function getLevel1Difficulty(): SightReadingConfiguration {
 /** Difficult is in the inclusive range: [1, 10] */
 function getConfigByDifficulty(difficulty: number) {
     let config = getLevel1Difficulty();
+    config.quickDifficulty = difficulty;
     config.adjacentNoteDistance = difficulty;
 
     if (difficulty >= 2) {

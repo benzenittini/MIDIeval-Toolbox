@@ -109,8 +109,10 @@ export class Note extends Sound {
             let newIndex = (pcIndex + pitchClasses);
             let octaveChange = 0;
             if (newIndex < 0) {
-                newIndex += scale.length;
-                octaveChange--;
+                while (newIndex < 0) {
+                    newIndex += scale.length;
+                    octaveChange--;
+                }
             } else {
                 octaveChange = Math.floor(newIndex / scale.length);
             }
@@ -307,13 +309,19 @@ export class Chord extends Sound {
 
         // Now adjust based on the inversion
         if (this.inversion < 0) {
-            throw new Error("Inversion cannot be negative");
-        }
-        let noteToInvert = 0; // First inversion moves the root note
-        for (let i = this.inversion; i > 0; i--) {
-            // Move the bottom-most note up one octave
-            notes[noteToInvert].pitch += 12;
-            noteToInvert = (noteToInvert + 1) % notes.length; // Prep for the next iteration
+            let noteToInvert = notes.length-1; // First inversion moves the final note
+            for (let i = this.inversion; i > 0; i--) {
+                // Move the top-most note down one octave
+                notes[noteToInvert].pitch -= 12;
+                noteToInvert = (noteToInvert + notes.length-1) % notes.length; // Prep for the next iteration
+            }
+        } else {
+            let noteToInvert = 0; // First inversion moves the root note
+            for (let i = this.inversion; i > 0; i--) {
+                // Move the bottom-most note up one octave
+                notes[noteToInvert].pitch += 12;
+                noteToInvert = (noteToInvert + 1) % notes.length; // Prep for the next iteration
+            }
         }
 
         return notes;

@@ -6,10 +6,11 @@ type Props = {
     currentKey: KeyConfigOpts;
     practiceChords: boolean;
     currentSelections: ChordSelections;
+    allowAccidentals?: boolean;
     changeChordSelection: (optionName: keyof ChordSelections, value: boolean) => void;
 }
 
-export default function ChordSelection({ currentKey, practiceChords, currentSelections, changeChordSelection }: Props) {
+export default function ChordSelection({ currentKey, practiceChords, currentSelections, changeChordSelection, allowAccidentals = false }: Props) {
 
     function getCheckbox(label: string, configOpt: keyof ChordSelections, disabled: boolean) {
         return (
@@ -26,7 +27,7 @@ export default function ChordSelection({ currentKey, practiceChords, currentSele
 
     const disableTriads   = !practiceChords || !currentSelections.includeTriads;
     const disableSevenths = !practiceChords || !currentSelections.includeSevenths;
-    const disableNotInKey = currentKey !== MiscKeys.ANYTHING_GOES;
+    const disableNotInKey = currentKey !== MiscKeys.ANYTHING_GOES && !allowAccidentals;
 
     return (
         <div className={styles.mainFlex}>

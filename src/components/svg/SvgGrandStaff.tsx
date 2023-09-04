@@ -217,15 +217,18 @@ function createClefNotes(sizes: SizingData, clef: Clef, measureClef: Note[][], e
 // -------------------
 
 // These need to add up to 100
-const PADDING_RATIO = 20/100; // x2 because top and bottom
-const STAFF_RATIO   = 20/100; // x2 because 2 staffs
-const GAP_RATIO     = 20/100; // Gap between staffs
+export const PADDING_RATIO = 20/100; // x2 because top and bottom
+export const STAFF_RATIO   = 20/100; // x2 because 2 staffs
+export const GAP_RATIO     = 20/100; // Gap between staffs
 
 // These are relative to the overall grand staff height.
 export const BASE_NOTE_GAP_RATIO = 5 * STAFF_RATIO; // Determines the gap between WHOLE notes.
-
-// This is relative to the overall grand staff height.
 const BRACE_WIDTH_RATIO = 0.05;
+
+// The "hit the key here" indicator
+export const ACTIVATION_INDICATOR_X = 100;
+const ACTIVATION_INDICATOR_WIDTH = 30;
+
 
 type Params = {
     width: number;
@@ -346,10 +349,10 @@ export default memo(function GrandStaff({ width, height, musicKey, timeSignature
             </g>
 
             {/* The "push the button here" rectangle */}
-            <rect x={ MUSIC_START + 100 - 15 } // 100 - (half the width)
+            <rect x={ MUSIC_START + ACTIVATION_INDICATOR_X - ACTIVATION_INDICATOR_WIDTH/2 }
                 y={ 5 }
                 rx={ 8 }
-                width={ 30 }
+                width={ ACTIVATION_INDICATOR_WIDTH }
                 height={ height-10 }
                 style={{ stroke: 'var(--blue-light)', fill: 'rgba(18, 19, 23, 0.3)' }}></rect>
 

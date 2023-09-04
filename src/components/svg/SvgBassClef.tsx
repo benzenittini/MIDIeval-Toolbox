@@ -7,7 +7,7 @@ type Params = {
     color?: string;
 };
 
-const WIDTH_RATIO = 79/90;
+export const WIDTH_RATIO = 79/90;
 
 export default memo(function SvgBassClef({ height, x = 0, y = 0, color = "var(--gray-dark)" }: Params) {
     return (

@@ -50,6 +50,8 @@ export type NotationConfiguration = {
 }
 
 export type SightReadingConfiguration = {
+    quickDifficulty: number;
+
     // Basics
     key: KeyConfigOpts;
     allowAccidentals: boolean;

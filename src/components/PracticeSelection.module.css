@@ -25,16 +25,13 @@
     transition: box-shadow 0.1s;
 }
 
-/* TODO-ben : Uncomment once sign-reading-config is added */
-.practiceBox.comingSoon { cursor: not-allowed; }
-
-.heading {
-    margin: 40px 0 0 0;
-}
-
 .notationIcon {
     width: 150px;
-    height: 125px;
-    font-size: 96px;
-    color: var(--gray-vlight);
+    height: 195px;
+    font-size: 72px;
+    color: var(--gray-dark);
+
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
 }

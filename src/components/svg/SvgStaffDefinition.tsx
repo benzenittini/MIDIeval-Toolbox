@@ -3,8 +3,8 @@ import { ReactElement, memo } from "react";
 import { Accidental, Clef, Octave, TimeSignature } from "../../datatypes/BasicTypes";
 import { F_FLAT, G_FLAT, Key, NoteLabel } from "../../datatypes/ComplexTypes";
 import SvgAccidental from "./SvgAccidental";
-import SvgBassClef from "./SvgBassClef";
-import SvgTrebleClef from "./SvgTrebleClef";
+import SvgBassClef, { WIDTH_RATIO as BASS_WIDTH } from "./SvgBassClef";
+import SvgTrebleClef, { WIDTH_RATIO as TREBLE_WIDTH } from "./SvgTrebleClef";
 import { getPositionByOctave, positionToY } from "../../utilities/MusicUtils";
 
 type Props = {
@@ -27,7 +27,7 @@ export default memo(function SvgStaffDefinition({ clef, musicKey, timeSignature,
     const clefIcon = (clef === Clef.TREBLE)
         ? (<SvgTrebleClef color={ MAIN_COLOR } height={ staffLineHeight * 7.0 } x={ currentX } y={ -1.25*staffLineHeight }></SvgTrebleClef>)
         : (<SvgBassClef   color={ MAIN_COLOR } height={ staffLineHeight * 3.5 } x={ currentX } y={ 0 }></SvgBassClef>);
-    currentX += 80;
+    currentX += Math.max(TREBLE_WIDTH * 7.0, BASS_WIDTH * 3.5) * staffLineHeight + 1.5*staffLineHeight;
 
 
     // =============
