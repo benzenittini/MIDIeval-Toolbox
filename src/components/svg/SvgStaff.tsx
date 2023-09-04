@@ -1,19 +1,33 @@
 
+import { ReactElement, memo } from "react";
+
 type Params = {
-    width: string;
-    height: string;
-    strokeWidth?: string;
+    width: number;
+    height: number;
+    strokeWidth: number;
     stroke?: string;
 };
 
-export default function SvgStaff({ width, height, strokeWidth = "1px", stroke = "var(--gray-light)" }: Params) {
+const GAP_RATIO = 1/4; // 4 gaps make a staff
+
+export default memo(function SvgStaff({ width, height, strokeWidth, stroke = "var(--gray-dark)" }: Params) {
+    const lines: ReactElement[] = [];
+    let currentY = 0;
+    for (let x = 0; x < 5; x++) {
+        lines.push((<line
+            key={ `line-${x}` }
+            x1="0"
+            x2={ width }
+            y1={ currentY }
+            y2={ currentY }
+            strokeWidth={ strokeWidth }
+            stroke={ stroke }
+        />));
+        currentY += (GAP_RATIO * height);
+    }
     return (
-        <svg viewBox="0 0 90 90" preserveAspectRatio="none" style={{ width, height, strokeWidth, stroke }}>
-            <line x1="0" x2="90" y1="5" y2="5" />
-            <line x1="0" x2="90" y1="25" y2="25" />
-            <line x1="0" x2="90" y1="45" y2="45" />
-            <line x1="0" x2="90" y1="65" y2="65" />
-            <line x1="0" x2="90" y1="85" y2="85" />
-        </svg>
+        <>
+            { lines }
+        </>
     )
-}
+});

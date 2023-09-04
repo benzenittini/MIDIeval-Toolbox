@@ -1,0 +1,12 @@
+
+.labeledSlider {
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+.labeledSlider>input {
+    flex: 1;
+}
+.labeledSlider>.valueDisplay {
+    margin-left: 20px;
+}

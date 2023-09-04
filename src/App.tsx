@@ -3,10 +3,13 @@ import { useState } from 'react';
 
 import './App.css'
 import { Page } from './datatypes/Miscellaneous';
-import PracticeSelection from './components/setup/PracticeSelection';
-import { NotationConfigProvider } from './components/setup/notation/NotationConfigContext';
-import NotationConfig from './components/setup/notation/NotationConfig';
-import NotationPractice from './components/setup/notation/NotationPractice';
+import PracticeSelection from './components/PracticeSelection';
+import { NotationConfigProvider } from './components/notation/NotationConfigContext';
+import NotationConfig from './components/notation/NotationConfig';
+import NotationPractice from './components/notation/NotationPractice';
+import SightReadingConfig from './components/sight-reading/SightReadingConfig';
+import SightReadingPractice from './components/sight-reading/SightReadingPractice';
+import { SightReadingConfigProvider } from './components/sight-reading/SightReadingConfigContext';
 
 
 export default function App() {
@@ -32,7 +35,15 @@ export default function App() {
 
             // -- Sight-Reading Practice
             case "sight-reading-config":
-                // TODO-ben : Add component for sight-reading-config
+                return (<SightReadingConfig
+                    goBack={() => setCurrentScreen('practice-selection')}
+                    begin={() => setCurrentScreen('sight-reading-practice')}
+                />);
+            case "sight-reading-practice":
+                return (<SightReadingPractice
+                    goToConfig={() => setCurrentScreen('sight-reading-config')}
+                    goHome={() => setCurrentScreen('practice-selection')}
+                />);
 
             default:
                 throw new Error("Unrecognized content type.");
@@ -41,7 +52,9 @@ export default function App() {
 
     return (
         <NotationConfigProvider>
-            { getDisplayedContent() }
+            <SightReadingConfigProvider>
+                { getDisplayedContent() }
+            </SightReadingConfigProvider>
         </NotationConfigProvider>
     )
 }

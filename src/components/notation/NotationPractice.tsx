@@ -4,12 +4,10 @@ import * as TWEEN from '@tweenjs/tween.js';
 
 import styles from './NotationPractice.module.css';
 import { useNotationConfig } from './NotationConfigContext';
-import { getRandomChord, getRandomNote } from '../../../utilities/Generators';
-import { NotationConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from '../../../datatypes/Configs';
-import { Chord, Key, Note } from '../../../datatypes/Musics';
-import { getStringNotation } from '../../../utilities/NotationUtils';
-import { clearChangeHandler, setChangeHandler } from '../../../utilities/MidiUtils';
-import { describeChordQuality, getChordNotes } from '../../../utilities/MusicUtils';
+import { getRandomChord, getRandomNote } from '../../utilities/Generators';
+import { NotationConfiguration, convertKeyConfigToKey, getAllowedChordQualities } from '../../datatypes/Configs';
+import { clearChangeHandler, setChangeHandler } from '../../utilities/MidiUtils';
+import { Chord, Key, Note, Sound } from '../../datatypes/ComplexTypes';
 
 
 /**
@@ -17,7 +15,7 @@ import { describeChordQuality, getChordNotes } from '../../../utilities/MusicUti
  */
 function generateChordOrNote(key: Key | null, notationConfig: NotationConfiguration): Chord | Note | null {
     const chordOrNote = notationConfig.practiceChords
-        ? getRandomChord(key, getAllowedChordQualities(key, notationConfig))
+        ? getRandomChord(key, getAllowedChordQualities(key, notationConfig.chordSelection))
         : getRandomNote(key);
 
     return chordOrNote;
@@ -28,10 +26,10 @@ function generateChordOrNote(key: Key | null, notationConfig: NotationConfigurat
  * Converts the given key and chord/note into a human-readable string. If the chordOrNote is null,
  * returns "No chords available", as all valid chords must have been ruled out from selection.
  */
-function getDisplayedText(key: Key | null, chordOrNote: Chord | Note | null): string {
-    return (chordOrNote === null)
+function getDisplayedText(key: Key | null, sound: Sound | null): string {
+    return (sound === null)
         ? "No chords available."
-        : getStringNotation(key, chordOrNote);
+        : sound.toString(key);
 }
 
 
@@ -40,13 +38,13 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
     const notationConfig = useNotationConfig();
 
     /** The key we're practicing, or "null" to indicate "anything goes" */
-    const [ key, _ ] = useState(convertKeyConfigToKey(notationConfig.key));
+    const [ key, _ ] = useState(() => convertKeyConfigToKey(notationConfig.key));
 
     /** The current chord or note being displayed. May be "null" if the allowed chord qualities rules out all available chords. */
-    const [ chordOrNote, setChordOrNote ] = useState(generateChordOrNote(key, notationConfig));
+    const [ chordOrNote, setChordOrNote ] = useState(() => generateChordOrNote(key, notationConfig));
 
     /** The currently displayed text. Most likely a string representation of the chordOrNote. */
-    const [ display, setDisplay ] = useState(getDisplayedText(key, chordOrNote));
+    const [ display, setDisplay ] = useState(() => getDisplayedText(key, chordOrNote));
 
     /** The width of the progress indicator. "Timed" mode goes from 100 to 0 as time progresses. "midi" mode goes from 0 to 100 as notes are played. */
     const [ progressWidth, setProgressWidth ] = useState(notationConfig.progressSelector.type === 'timed' ? 100 : 0);
@@ -103,12 +101,12 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
             setChangeHandler((changedInput, pressedInputs) => {
                 if (chordOrNote !== null) {
                     const necessaryNotes = ('root' in chordOrNote)
-                        ? getChordNotes(chordOrNote) // It's a chord!
-                        : [chordOrNote];             // It's a note!
+                        ? chordOrNote.getNotes() // It's a chord!
+                        : [chordOrNote];         // It's a note!
 
                     // Determine how many of the necessary notes the user is pressing.
-                    const numValidInputs    = pressedInputs.filter(pi => necessaryNotes.find(nn => nn.pitchClass === pi.note.pitchClass)).length;
-                    const numNecessaryNotes = necessaryNotes.filter(nn => pressedInputs.find(pi => nn.pitchClass === pi.note.pitchClass)).length;
+                    const numValidInputs    = pressedInputs.filter(pi => necessaryNotes.find(nn => nn.getPitchClass() === pi.note.getPitchClass())).length;
+                    const numNecessaryNotes = necessaryNotes.filter(nn => pressedInputs.find(pi => nn.getPitchClass() === pi.note.getPitchClass())).length;
                     // ...and whether they've gotten all the correct notes without any wrong ones.
                     const allInputsAreValid    = numValidInputs === pressedInputs.length;
                     const hasAllNecessaryNotes = numNecessaryNotes === necessaryNotes.length;
@@ -147,10 +145,10 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
     return (
         <>
             {/* Breadcrumb Navigation */}
-            <nav className={ styles.breadcrumbs }>
-                <button className={ styles.breadcrumb } onClick={ goHome }>Home</button>&gt;
-                <button className={ styles.breadcrumb } onClick={ goToConfig }>Configuration</button>&gt;
-                <span className={ styles.breadcrumb }>Practice</span>
+            <nav className="breadcrumbs">
+                <button className="breadcrumb" onClick={ goHome }>Home</button>&gt;
+                <button className="breadcrumb" onClick={ goToConfig }>Configuration</button>&gt;
+                <span className="breadcrumb">Practice</span>
             </nav>
 
             {/* Chord / Note Display */}
@@ -169,7 +167,7 @@ export default function NotationPractice({ goHome, goToConfig }: { goHome: () =>
 
             {/* Chord Description */}
             {(notationConfig.practiceChords) ? (
-                <p className={ styles.chordDescription }>{ describeChordQuality((chordOrNote as Chord).quality) }</p>
+                <p className={ styles.chordDescription }>{ (chordOrNote as Chord).quality.getDescription() }</p>
             ) : ''}
         </>
     );

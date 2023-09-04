@@ -1,7 +1,6 @@
 
+import { Note } from "../datatypes/ComplexTypes";
 import { MidiInput } from "../datatypes/Midi";
-import { Note, Octave, PitchClass, RhythmicValue } from "../datatypes/Musics";
-import { createNote } from "./MusicUtils";
 
 // -- Some MIDI action IDs --
 const NOTE_PRESSED_OR_RELEASED = 144; // My keyboard sends 144 for both presses and releases...
@@ -91,15 +90,13 @@ function processMidiEvent(event: Event) {
     let [action, pitch, velocity] = (event as MIDIMessageEvent).data;
     if (action === NOTE_PRESSED_OR_RELEASED || action === NOTE_RELEASED) {
         let changedInput = {
-            note: convertToNote(pitch),
+            note: new Note(pitch),
             velocity,
             timestampMillis: Date.now(),
         };
         if (velocity === 0 || action === NOTE_RELEASED) {
             // Note was released
-            let index = pressedInputs.findIndex(i => 
-                i.note.pitchClass === changedInput.note.pitchClass &&
-                i.note.octave     === changedInput.note.octave);
+            let index = pressedInputs.findIndex(i => i.note.equals(changedInput.note));
             if (index !== -1) {
                 pressedInputs.splice(index, 1);
             }
@@ -114,14 +111,4 @@ function processMidiEvent(event: Event) {
     } else {
         console.log({ action, pitch, velocity });
     }
-}
-
-/**
- * Converts the given MIDI "pitch" to a note. Only the note's pitchClass and octave will have meaning.
- */
-function convertToNote(pitch: number): Note {
-    // Middle c gives pitch 60, which has pitchClass 0 and is octave 4.
-    const pitchClass = pitch % 12 as PitchClass;
-    const octave = Math.floor(pitch / 12) - 1 as Octave;
-    return createNote(pitchClass, RhythmicValue.QUARTER, octave);
 }

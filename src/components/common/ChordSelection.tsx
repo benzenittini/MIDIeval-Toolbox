@@ -1,30 +1,33 @@
 
-import { MiscKeys, NotationConfiguration } from '../../../datatypes/Configs';
+import { ChordSelections, KeyConfigOpts, MiscKeys } from '../../datatypes/Configs';
 import styles from './ChordSelection.module.css';
-import { useNotationConfig, useNotationConfigDispatch } from './NotationConfigContext';
 
-export default function ChordSelection() {
+type Props = {
+    currentKey: KeyConfigOpts;
+    practiceChords: boolean;
+    currentSelections: ChordSelections;
+    allowAccidentals?: boolean;
+    changeChordSelection: (optionName: keyof ChordSelections, value: boolean) => void;
+}
 
-    const notationConfig = useNotationConfig();
-    const notationConfigDispatch = useNotationConfigDispatch();
+export default function ChordSelection({ currentKey, practiceChords, currentSelections, changeChordSelection, allowAccidentals = false }: Props) {
 
-
-    function getCheckbox(label: string, configOpt: keyof NotationConfiguration, disabled: boolean) {
+    function getCheckbox(label: string, configOpt: keyof ChordSelections, disabled: boolean) {
         return (
             <div className={`formLine ${styles.checkbox}`}>
                 <input type="checkbox"
                     id={ configOpt }
                     disabled={ disabled }
-                    checked={ notationConfig[configOpt] as boolean }
-                    onChange={(e) => notationConfigDispatch({ type: configOpt, data: e.target.checked})}/>
+                    checked={ currentSelections[configOpt] as boolean }
+                    onChange={(e) => changeChordSelection(configOpt, e.target.checked)}/>
                 <label htmlFor={ configOpt }>{ label }</label>
             </div>
         );
     }
 
-    const disableTriads   = !notationConfig.practiceChords || !notationConfig.includeTriads;
-    const disableSevenths = !notationConfig.practiceChords || !notationConfig.includeSevenths;
-    const disableNotInKey = notationConfig.key !== MiscKeys.ANYTHING_GOES;
+    const disableTriads   = !practiceChords || !currentSelections.includeTriads;
+    const disableSevenths = !practiceChords || !currentSelections.includeSevenths;
+    const disableNotInKey = currentKey !== MiscKeys.ANYTHING_GOES && !allowAccidentals;
 
     return (
         <div className={styles.mainFlex}>
@@ -32,7 +35,7 @@ export default function ChordSelection() {
             {/* Triads */}
             <div>
                 <div className={ styles.titleCheckbox }>
-                    {getCheckbox('Triads', 'includeTriads', !notationConfig.practiceChords)}
+                    {getCheckbox('Triads', 'includeTriads', !practiceChords)}
                 </div>
 
                 <div className={ styles.checkboxGroups }>
@@ -48,7 +51,7 @@ export default function ChordSelection() {
             {/* Sevenths */}
             <div>
                 <div className={ styles.titleCheckbox }>
-                    {getCheckbox('Sevenths', 'includeSevenths', !notationConfig.practiceChords)}
+                    {getCheckbox('Sevenths', 'includeSevenths', !practiceChords)}
                 </div>
 
                 <div className={ styles.checkboxGroups }>

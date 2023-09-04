@@ -5,4 +5,5 @@ export type Page =
     'notation-config' |
     'notation-practice' |
     // -- Sight-Reading Practice --
-    'sight-reading-config';
+    'sight-reading-config' |
+    'sight-reading-practice';
