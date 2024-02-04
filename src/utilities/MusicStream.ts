@@ -17,6 +17,16 @@ const BASS_BOUNDS: Bounds = {
     lower: Note.convertToPitch(2, 4), // E2
 }
 
+type GeneratedMusicDebugInfo = {
+    type: TrebleState | BassState;
+    sounds: GeneratedSounds;
+}
+
+const DEBUG_INFO: {
+    treble: GeneratedMusicDebugInfo[],
+    bass: GeneratedMusicDebugInfo[],
+ } = { treble: [], bass: [] };
+
 export class MusicStream {
 
     private config: SightReadingConfiguration;
@@ -100,6 +110,8 @@ export class MusicStream {
             case TrebleState.RepeatedChord:      sounds = createRepeatedChord(generationParams); break;
         }
         this.generatedMusic.treble.addSounds(sounds.sounds);
+        DEBUG_INFO.treble.unshift({ sounds, type });
+        if (DEBUG_INFO.treble.length > 20) DEBUG_INFO.treble.pop();
     }
 
     private generateMoreBass(): void {
@@ -120,6 +132,8 @@ export class MusicStream {
             case BassState.RootWithDelayedFifthEighth: sounds = createRootWithDelayedFifthEighth(generationParams); break;
         }
         this.generatedMusic.bass.addSounds(sounds.sounds);
+        DEBUG_INFO.bass.unshift({ sounds, type });
+        if (DEBUG_INFO.bass.length > 20) DEBUG_INFO.bass.pop();
     }
 
 }

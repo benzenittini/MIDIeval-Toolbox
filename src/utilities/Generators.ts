@@ -99,6 +99,7 @@ export function createNoteFlurry({ key, config, generatedMusic, bounds, clef }: 
     const upperLimit = Math.min(config.adjacentNoteDistance, bounds.upper - previousNote.pitch);
     do { var pitchClassJump = Math.min(5, (randInt(lowerLimit, upperLimit + 1))); }
     while (pitchClassJump === 0); // Staying where we are is boring.
+    console.log({ lowerLimit, upperLimit, pitchClassJump });
 
     const numNotes = randInt(2, maxNotes);
     for (let i = 0; i < numNotes; i++) {
